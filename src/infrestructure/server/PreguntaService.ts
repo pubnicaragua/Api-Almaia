@@ -45,6 +45,12 @@ export const PreguntaService = {
             console.error("Error al eliminar la pregunta:", error);
              res.status(500).json({ message: "Error interno del servidor" });
         }
+    },
+    motor_pregunta(){
+        // Aquí puedes implementar la lógica para el motor de preguntas
+        // Por ejemplo, podrías usar un cron job para ejecutar esta función periódicamente
+        console.log("Ejecutando motor de preguntas...");
+        // Lógica del motor de preguntas aquí
     }
 
 }
