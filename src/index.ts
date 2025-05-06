@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import './infrestructure/config/cronjobs';
 
 dotenv.config();
-//import PreguntasRoutes from './routes/preguntas.routes';
+import AuthRoutes from './routes/auth.routes';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
@@ -59,7 +59,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.get('/', (req: Request, res: Response) => {
   res.send('¡Hola mundo con CORS y seguridad mejorada!');
 });
-//app.use('api/v1/preguntas', PreguntasRoutes);
+app.use('api/v1/auth', AuthRoutes);
 // Manejador de errores
 app.use((err: Error, req: Request, res: Response) => {
   console.error(err.stack);
