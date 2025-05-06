@@ -1,4 +1,4 @@
-import { BaseModel } from "./BaseModel";
+import { BaseModel } from "../BaseModel";
 
 export class DocenteCurso extends BaseModel {
     docente_curso_id: number;

@@ -1,4 +1,4 @@
-import { BaseModel } from "./BaseModel";
+import { BaseModel } from "../BaseModel";
 
 export class Usuario extends BaseModel {
     usuario_id: number;

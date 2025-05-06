@@ -1,4 +1,4 @@
-import { BaseModel } from "./BaseModel";
+import { BaseModel } from "../BaseModel";
 
 export class CalendarioEscolar extends BaseModel {
     calendario_escolar_id: number;

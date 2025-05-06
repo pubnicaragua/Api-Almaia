@@ -1,5 +1,4 @@
 import { Server } from 'socket.io';
-import { supabase } from '../../core/services/supabaseClient';
 
 const io = new Server(3000, {
   cors: {
@@ -13,14 +12,14 @@ io.on('connection', (socket) => {
   // Escuchar eventos y usar Supabase
   socket.on('get_messages', async () => {
     try {
-      const { data, error } = await supabase
+     /* const { data, error } = await SupabaseClient
         .from('messages')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false });*/
 
-      if (error) throw error;
+   //   if (error) throw error;
 
-      socket.emit('messages', data);
+      //socket.emit('messages', data);
     } catch (error) {
       console.error('Error al obtener mensajes:', error);
       socket.emit('error', { message: 'Error al obtener mensajes' });
