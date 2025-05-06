@@ -6,6 +6,7 @@ const ruta_paises = '/paises';
 const ruta_regiones = '/regiones';
 const ruta_comunas = '/comunas';
 const ruta_configuraciones_divisiones_paises = '/configuraciones_divisiones_paises';
+const ruta_configuraciones_comunas = '/configuraciones_comunas';
 
 
 //Paises
@@ -30,7 +31,11 @@ router.get(ruta_configuraciones_divisiones_paises+'/', sessionAuth, PaisService.
 router.post(ruta_configuraciones_divisiones_paises+'/', sessionAuth, PaisService.guardar);
 router.put(ruta_configuraciones_divisiones_paises+'/:id', sessionAuth, PaisService.actualizar);
 router.delete(ruta_configuraciones_divisiones_paises+'/:id', sessionAuth, PaisService.eliminar);
-
+// configuraciones_comunas
+router.get(ruta_configuraciones_comunas+'/', sessionAuth, PaisService.obtener);
+router.post(ruta_configuraciones_comunas+'/', sessionAuth, PaisService.guardar);
+router.put(ruta_configuraciones_comunas+'/:id', sessionAuth, PaisService.actualizar);
+router.delete(ruta_configuraciones_comunas+'/:id', sessionAuth, PaisService.eliminar);
 
 
 export default router;
