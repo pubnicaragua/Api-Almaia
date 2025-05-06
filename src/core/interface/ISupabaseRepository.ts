@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface ISupabaseRepository <T>{
     saveData(entity: T, userId?: string): Promise<void>;
     getData(id: number): Promise<any>;

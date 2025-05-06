@@ -17,6 +17,7 @@ export class DataService<T> {
       return entity; // Puede ser sobrescrito en servicios específicos
     }
   
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async getAll(columns: string[], where: Record<string, any> = {}): Promise<T[]> {
       return await this.repository.getAll(columns, where);
     }

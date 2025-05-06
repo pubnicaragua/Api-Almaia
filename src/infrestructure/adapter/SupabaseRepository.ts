@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { ISupabaseRepository } from "../../core/interface/ISupabaseRepository";
 import { SupabaseClientService } from "../../core/services/supabaseClient";
 import { getSecret, loginToVault } from "../../core/services/valutClient";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 interface ClientSupabase {
   host: string;
@@ -49,7 +50,7 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     }
   }
 
-  async saveData( entity: T, userId?: string): Promise<void> {
+  async saveData( entity: T): Promise<void> {
     await this.ensureClientInitialized();
     const { data, error } = await this.client
       .from(this.table)
