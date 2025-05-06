@@ -6,6 +6,7 @@ import './infrestructure/config/cronjobs';
 
 dotenv.config();
 import AuthRoutes from './routes/auth.routes';
+import AvisosRoutes from './routes/aviso.routes';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
@@ -60,6 +61,7 @@ app.get('/', (req: Request, res: Response) => {
   res.send('¡Hola mundo con CORS y seguridad mejorada!');
 });
 app.use('api/v1/auth', AuthRoutes);
+app.use('api/v1/avisos', AvisosRoutes);
 // Manejador de errores
 app.use((err: Error, req: Request, res: Response) => {
   console.error(err.stack);
