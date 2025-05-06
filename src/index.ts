@@ -3,13 +3,41 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import './infrestructure/config/cronjobs';
-
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 dotenv.config();
 import AuthRoutes from './routes/auth.routes';
 import AvisosRoutes from './routes/aviso.routes';
 import LocalidadesRoutes from './routes/localidades.routes';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
+
+const options = {
+  definition: {
+    openapi: "3.1.0",
+    info: {
+      title: "Alma IA API",
+      version: "1.0",
+      description:
+        "Esta es una APIpara gestionar la información de Alma IA.",
+      license: {
+        name: "MIT",
+        url: "https://spdx.org/licenses/MIT.html",
+      },
+      contact: {
+        name: "Soporte AlmaIA",
+        url: "https://almaia.cl",
+        email: "soporte@almaia.cl",
+      },
+    },
+    servers: [
+      {
+        url: "https://api-almaia.onrender.com/",
+      },
+    ],
+  },
+  apis: ["./src/routes/*.ts"],
+};
 
 // Middleware básico
 app.use(express.json());
@@ -61,6 +89,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.get('/', (req: Request, res: Response) => {
   res.send('¡Hola mundo con CORS y seguridad mejorada!');
 });
+const specs = swaggerJsdoc(options);
+app.use("/documentacion", swaggerUi.serve, swaggerUi.setup(specs));
 app.use('api/v1/auth', AuthRoutes);
 app.use('api/v1/avisos', AvisosRoutes);
 app.use('api/v1/localidades', LocalidadesRoutes);
