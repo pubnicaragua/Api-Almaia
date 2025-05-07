@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { Pregunta } from "../../core/modelo/preguntasRespuestas/Pregunta";
-import { DataService } from "./DataService";
+import { Pregunta } from "../../../core/modelo/preguntasRespuestas/Pregunta";
+import { DataService } from "../DataService";
+
 
 const dataService:DataService<Pregunta> = new DataService("preguntas");
 export const PreguntaService = {

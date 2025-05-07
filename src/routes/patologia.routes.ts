@@ -3,7 +3,7 @@ import { sessionAuth } from '../middleware/supabaseMidleware';
 import { PatologiaService } from '../infrestructure/server/patologia/PatologiaService';
 
 const router = express.Router();
-const basePath = '/api/v1/patologias';
+const basePath = 'patologias';
 
 /**
  * @swagger
