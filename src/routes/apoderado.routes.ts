@@ -8,19 +8,461 @@ import { ApoderadoDireccionService } from '../infrestructure/server/apoderado/Ap
 const ruta_apoderados = '/apoderados';
 const ruta_alumnos_apoderados = '/alumnos_apoderados';
 const ruta_apoderados_direcciones = '/apoderados_direcciones';
+/**
+ * @swagger
+ * tags:
+ *   - name: Apoderados
+ *     description: Gestión de datos de apoderados
+ *   - name: Relaciones Alumno-Apoderado
+ *     description: Gestión de relaciones entre alumnos y apoderados
+ *   - name: Direcciones de Apoderados
+ *     description: Gestión de direcciones de apoderados
+ */
+
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados:
+ *   get:
+ *     summary: Obtener lista de apoderados
+ *     description: Retorna todos los apoderados registrados en el sistema
+ *     tags: [Apoderados]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de apoderados obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Apoderado'
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.get(ruta_apoderados+'/', sessionAuth, ApoderadoService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados:
+ *   post:
+ *     summary: Crear un nuevo apoderado
+ *     description: Registra un nuevo apoderado en el sistema
+ *     tags: [Apoderados]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Apoderado'
+ *     responses:
+ *       201:
+ *         description: Apoderado creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Apoderado'
+ *       400:
+ *         description: Datos inválidos para crear el apoderado
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.post(ruta_apoderados+'/', sessionAuth, ApoderadoService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados/{id}:
+ *   put:
+ *     summary: Actualizar datos de apoderado
+ *     description: Actualiza la información de un apoderado existente
+ *     tags: [Apoderados]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del apoderado a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Apoderado'
+ *     responses:
+ *       200:
+ *         description: Apoderado actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Apoderado'
+ *       404:
+ *         description: Apoderado no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.put(ruta_apoderados+'/:id', sessionAuth, ApoderadoService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados/{id}:
+ *   delete:
+ *     summary: Eliminar apoderado
+ *     description: Elimina un apoderado del sistema
+ *     tags: [Apoderados]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del apoderado a eliminar
+ *     responses:
+ *       204:
+ *         description: Apoderado eliminado exitosamente
+ *       404:
+ *         description: Apoderado no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.delete(ruta_apoderados+'/:id', sessionAuth, ApoderadoService.eliminar);
 
+/**
+ * @swagger
+ * /api/v1/apoderados/alumnos_apoderados:
+ *   get:
+ *     summary: Obtener relaciones alumno-apoderado
+ *     description: Retorna todas las relaciones entre alumnos y apoderados registradas
+ *     tags: [Relaciones Alumno-Apoderado]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de relaciones obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AlumnoApoderado'
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.get(ruta_alumnos_apoderados+'/', sessionAuth, AlumnoApoderadoService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/alumnos_apoderados:
+ *   post:
+ *     summary: Crear nueva relación alumno-apoderado
+ *     description: Registra una nueva relación entre un alumno y un apoderado
+ *     tags: [Relaciones Alumno-Apoderado]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlumnoApoderado'
+ *     responses:
+ *       201:
+ *         description: Relación creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoApoderado'
+ *       400:
+ *         description: Datos inválidos para crear la relación
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.post(ruta_alumnos_apoderados+'/', sessionAuth, AlumnoApoderadoService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/alumnos_apoderados/{id}:
+ *   put:
+ *     summary: Actualizar relación alumno-apoderado
+ *     description: Actualiza una relación alumno-apoderado existente
+ *     tags: [Relaciones Alumno-Apoderado]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la relación a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlumnoApoderado'
+ *     responses:
+ *       200:
+ *         description: Relación actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoApoderado'
+ *       404:
+ *         description: Relación no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.put(ruta_alumnos_apoderados+'/:id', sessionAuth, AlumnoApoderadoService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/alumnos_apoderados/{id}:
+ *   delete:
+ *     summary: Eliminar relación alumno-apoderado
+ *     description: Elimina una relación alumno-apoderado del sistema
+ *     tags: [Relaciones Alumno-Apoderado]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la relación a eliminar
+ *     responses:
+ *       204:
+ *         description: Relación eliminada exitosamente
+ *       404:
+ *         description: Relación no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.delete(ruta_alumnos_apoderados+'/:id', sessionAuth, AlumnoApoderadoService.eliminar);
 
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados_direcciones:
+ *   get:
+ *     summary: Obtener direcciones de apoderados
+ *     description: Retorna todas las direcciones registradas para apoderados
+ *     tags: [Direcciones de Apoderados]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de direcciones obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ApoderadoDireccion'
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.get(ruta_apoderados_direcciones+'/', sessionAuth, ApoderadoDireccionService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados_direcciones:
+ *   post:
+ *     summary: Crear dirección de apoderado
+ *     description: Registra una nueva dirección para un apoderado
+ *     tags: [Direcciones de Apoderados]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ApoderadoDireccion'
+ *     responses:
+ *       201:
+ *         description: Dirección creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApoderadoDireccion'
+ *       400:
+ *         description: Datos inválidos para crear la dirección
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.post(ruta_apoderados_direcciones+'/', sessionAuth, ApoderadoDireccionService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados_direcciones/{id}:
+ *   put:
+ *     summary: Actualizar dirección de apoderado
+ *     description: Actualiza una dirección existente de un apoderado
+ *     tags: [Direcciones de Apoderados]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la dirección a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ApoderadoDireccion'
+ *     responses:
+ *       200:
+ *         description: Dirección actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApoderadoDireccion'
+ *       404:
+ *         description: Dirección no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.put(ruta_apoderados_direcciones+'/:id', sessionAuth, ApoderadoDireccionService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados_direcciones/{id}:
+ *   delete:
+ *     summary: Eliminar dirección de apoderado
+ *     description: Elimina una dirección de apoderado del sistema
+ *     tags: [Direcciones de Apoderados]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la dirección a eliminar
+ *     responses:
+ *       204:
+ *         description: Dirección eliminada exitosamente
+ *       404:
+ *         description: Dirección no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.delete(ruta_apoderados_direcciones+'/:id', sessionAuth, ApoderadoDireccionService.eliminar);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Apoderado:
+ *       type: object
+ *       properties:
+ *         apoderado_id:
+ *           type: integer
+ *           description: ID único del apoderado
+ *         persona_id:
+ *           type: integer
+ *           description: ID de la persona asociada
+ *         colegio_id:
+ *           type: integer
+ *           description: ID del colegio asociado
+ *         telefono_contacto1:
+ *           type: string
+ *           description: Teléfono de contacto principal
+ *         telefono_contacto2:
+ *           type: string
+ *           description: Teléfono de contacto secundario
+ *         email_contacto1:
+ *           type: string
+ *           description: Email de contacto principal
+ *         email_contacto2:
+ *           type: string
+ *           description: Email de contacto secundario
+ *         profesion_id:
+ *           type: integer
+ *           description: ID de la profesión del apoderado
+ *         tipo_oficio_id:
+ *           type: integer
+ *           description: ID del tipo de oficio del apoderado
+ *       required:
+ *         - persona_id
+ *         - colegio_id
+ *         - telefono_contacto1
+ *         - email_contacto1
+ * 
+ *     AlumnoApoderado:
+ *       type: object
+ *       properties:
+ *         alumno_apoderado_id:
+ *           type: integer
+ *           description: ID único de la relación
+ *         alumno_id:
+ *           type: integer
+ *           description: ID del alumno
+ *         apoderado_id:
+ *           type: integer
+ *           description: ID del apoderado
+ *         tipo_apoderado:
+ *           type: string
+ *           description: Tipo de apoderado (padre, madre, tutor, etc.)
+ *         observaciones:
+ *           type: string
+ *           description: Observaciones sobre la relación
+ *         estado_usuario:
+ *           type: string
+ *           description: Estado del usuario en el sistema
+ *       required:
+ *         - alumno_id
+ *         - apoderado_id
+ *         - tipo_apoderado
+ * 
+ *     ApoderadoDireccion:
+ *       type: object
+ *       properties:
+ *         apoderado_direccion_id:
+ *           type: integer
+ *           description: ID único de la dirección
+ *         apoderado_id:
+ *           type: integer
+ *           description: ID del apoderado asociado
+ *         descripcion:
+ *           type: string
+ *           description: Descripción de la dirección
+ *         ubicaciones_mapa:
+ *           type: string
+ *           description: Coordenadas o ubicación en mapa
+ *         comuna_id:
+ *           type: integer
+ *           description: ID de la comuna
+ *         region_id:
+ *           type: integer
+ *           description: ID de la región
+ *         pais_id:
+ *           type: integer
+ *           description: ID del país
+ *       required:
+ *         - apoderado_id
+ *         - descripcion
+ *         - comuna_id
+ *         - region_id
+ *         - pais_id
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: session
+ */
 
 export default router;
