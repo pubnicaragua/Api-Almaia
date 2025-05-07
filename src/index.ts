@@ -9,6 +9,7 @@ dotenv.config();
 import AuthRoutes from './routes/auth.routes';
 import AvisosRoutes from './routes/aviso.routes';
 import LocalidadesRoutes from './routes/localidades.routes';
+import DashboardRoutes from './routes/dashboard.routes';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
@@ -94,6 +95,7 @@ app.use("/documentacion", swaggerUi.serve, swaggerUi.setup(specs));
 app.use('api/v1/auth', AuthRoutes);
 app.use('api/v1/avisos', AvisosRoutes);
 app.use('api/v1/localidades', LocalidadesRoutes);
+app.use('api/v1/dashboard', DashboardRoutes);
 // Manejador de errores
 app.use((err: Error, req: Request, res: Response) => {
   console.error(err.stack);
