@@ -11,6 +11,7 @@ import AvisosRoutes from './routes/aviso.routes';
 import LocalidadesRoutes from './routes/localidades.routes';
 import DashboardRoutes from './routes/dashboard.routes';
 import PatologiaRoutes from './routes/patologia.routes';
+import AlumnosRouters from './routes/alumno.routes';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
@@ -98,6 +99,7 @@ app.use('api/v1/avisos', AvisosRoutes);
 app.use('api/v1/localidades', LocalidadesRoutes);
 app.use('api/v1/dashboard', DashboardRoutes);
 app.use('api/v1/patologias', PatologiaRoutes);
+app.use('api/v1/alumnos', AlumnosRouters);
 // Manejador de errores
 app.use((err: Error, req: Request, res: Response) => {
   console.error(err.stack);
