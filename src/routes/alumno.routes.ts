@@ -436,14 +436,57 @@ const ruta_alumnos_notificaciones = '/notificaciones';
  * @swagger
  * /api/v1/alumnos:
  *   get:
- *     summary: Obtener lista de alumnos con sus relaciones completas
- *     description: Retorna todos los alumnos registrados en el sistema con sus objetos relacionados incluyendo ubicación geográfica completa
+ *     summary: Obtener lista de alumnos con filtros avanzados
+ *     description: Retorna alumnos registrados en el sistema con posibilidad de filtrar por diversos criterios (sin paginación)
  *     tags: [Alumnos]
  *     security:
  *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: alumno_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID específico de alumno
+ *         example: 101
+ *       - in: query
+ *         name: colegio_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de colegio
+ *         example: 1
+ *       - in: query
+ *         name: comuna_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de comuna
+ *         example: 125
+ *       - in: query
+ *         name: region_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de región
+ *         example: 13
+ *       - in: query
+ *         name: pais_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de país
+ *         example: 1
+ *       - in: query
+ *         name: tipo_colegio
+ *         schema:
+ *           type: string
+ *         description: Filtrar por tipo de colegio (Particular/Subvencionado/Público)
+ *         example: "Particular"
+ *       - in: query
+ *         name: activo
+ *         schema:
+ *           type: boolean
+ *         description: Filtrar por estado activo/inactivo
+ *         example: true
  *     responses:
  *       200:
- *         description: Lista de alumnos obtenida correctamente con toda su jerarquía de relaciones
+ *         description: Lista de alumnos obtenida correctamente
  *         content:
  *           application/json:
  *             schema:
@@ -457,67 +500,321 @@ const ruta_alumnos_notificaciones = '/notificaciones';
  *                 telefono_contacto1: "+56912345678"
  *                 email: "alumno101@ejemplo.com"
  *                 telefono_contacto2: "+56987654321"
+ *                 activo: true
  *                 colegio:
  *                   colegio_id: 1
  *                   nombre: "Colegio Ejemplo"
- *                   nombre_fantasia: "Ejemplo School"
  *                   tipo_colegio: "Particular"
- *                   direccion: "Av. Principal 1234"
- *                   telefono_contacto: "+56223456789"
- *                   correo_electronico: "contacto@colegioejemplo.cl"
- *                   comuna:
- *                     comuna_id: 125
- *                     nombre: "Santiago"
- *                     region:
- *                       region_id: 13
- *                       nombre: "Metropolitana de Santiago"
- *                       pais:
- *                         pais_id: 1
- *                         nombre: "Chile"
- *                   region:
- *                     region_id: 13
- *                     nombre: "Metropolitana de Santiago"
- *                   pais:
- *                     pais_id: 1
- *                     nombre: "Chile"
+ *                   comuna_id: 125
+ *                   region_id: 13
+ *                   pais_id: 1
  *               - alumno_id: 102
  *                 colegio_id: 1
  *                 url_foto_perfil: "https://ejemplo.com/fotos/alumno102.jpg"
  *                 telefono_contacto1: "+56923456789"
  *                 email: "alumno102@ejemplo.com"
  *                 telefono_contacto2: "+56911223344"
+ *                 activo: true
  *                 colegio:
  *                   colegio_id: 1
  *                   nombre: "Colegio Ejemplo"
- *                   nombre_fantasia: "Ejemplo School"
  *                   tipo_colegio: "Particular"
- *                   direccion: "Av. Principal 1234"
- *                   telefono_contacto: "+56223456789"
- *                   correo_electronico: "contacto@colegioejemplo.cl"
- *                   comuna:
- *                     comuna_id: 125
- *                     nombre: "Santiago"
- *                     region:
- *                       region_id: 13
- *                       nombre: "Metropolitana de Santiago"
- *                       pais:
- *                         pais_id: 1
- *                         nombre: "Chile"
- *                   region:
- *                     region_id: 13
- *                     nombre: "Metropolitana de Santiago"
- *                   pais:
- *                     pais_id: 1
- *                     nombre: "Chile"
+ *                   comuna_id: 125
+ *                   region_id: 13
+ *                   pais_id: 1
+ *       400:
+ *         description: Parámetros de consulta inválidos
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Parámetro 'tipo_colegio' debe ser uno de: Particular, Subvencionado, Público"
+ *       401:
+ *         description: No autorizado - Sesión no válida
  *       500:
  *         description: Error interno del servidor
  *         content:
  *           application/json:
  *             example:
- *               error: "Error al obtener los alumnos"
- *               detalles: "Mensaje detallado del error"
+ *               error: "Error al consultar la base de datos"
  */
 router.get('/', sessionAuth, AlumnosService.obtener);
+/**
+ * @swagger
+ * /alumno/{alumnoId}:
+ *   get:
+ *     summary: Obtener información detallada de un alumno
+ *     description: Retorna todos los datos asociados a un alumno específico, incluyendo información personal, ficha clínica, alertas, informes, emociones y apoderados
+ *     tags: [Alumnos]
+ *     parameters:
+ *       - in: path
+ *         name: alumnoId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del alumno a consultar
+ *         example: 123
+ *     responses:
+ *       200:
+ *         description: Detalle completo del alumno obtenido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 alumno:
+ *                   $ref: '#/components/schemas/Alumno'
+ *                 ficha:
+ *                   $ref: '#/components/schemas/FichaClinica'
+ *                 alertas:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Alerta'
+ *                 informes:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Informe'
+ *                 emociones:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Emocion'
+ *                 apoderados:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Apoderado'
+ *             example:
+ *               alumno:
+ *                 alumno_id: 123
+ *                 colegio_id: 101
+ *                 url_foto_perfil: "https://example.com/foto.jpg"
+ *                 telefono_contacto1: "+56 9 1234 5678"
+ *                 telefono_contacto2: "+56 9 8765 4321"
+ *                 email: "alumno.demo@colegio.cl"
+ *               ficha:
+ *                 alumno_ant_clinico_id: 1
+ *                 alumno_id: 123
+ *                 historial_medico: "Historial general sin eventos graves."
+ *                 alergias: "Ninguna conocida"
+ *                 enfermedades_cronicas: "Asma leve"
+ *                 condiciones_medicas_relevantes: "Controlado por pediatra"
+ *                 medicamentos_actuales: "Salbutamol"
+ *                 diagnosticos_previos: "Asma infantil"
+ *                 terapias_tratamiento_curso: "Inhalador según necesidad"
+ *               alertas:
+ *                 - alumno_alerta_id: 1
+ *                   alumno_id: 123
+ *                   alerta_regla_id: 12
+ *                   fecha_generada: "2024-05-20T12:00:00.000Z"
+ *                   fecha_resolucion: null
+ *                   alerta_origen_id: 3
+ *                   prioridad_id: 2
+ *                   severidad_id: 1
+ *                   accion_tomada: "Conversación con apoderado"
+ *                   leida: false
+ *                   responsable_actual_id: 7
+ *                   estado: "pendiente"
+ *                   alertas_tipo_alerta_tipo_id: 4
+ *               informes:
+ *                 - alumno_informe_id: 1
+ *                   alumno_id: 123
+ *                   fecha: "2024-12-01T00:00:00.000Z"
+ *                   url_reporte: "https://example.com/informe1.pdf"
+ *                 - alumno_informe_id: 2
+ *                   alumno_id: 123
+ *                   fecha: "2025-03-15T00:00:00.000Z"
+ *                   url_reporte: "https://example.com/informe2.pdf"
+ *               emociones:
+ *                 - nombre: "Felicidad"
+ *                   valor: 3100
+ *                 - nombre: "Tristeza"
+ *                   valor: 1500
+ *                 - nombre: "Estrés"
+ *                   valor: 950
+ *                 - nombre: "Ansiedad"
+ *                   valor: 2600
+ *                 - nombre: "Enojo"
+ *                   valor: 750
+ *                 - nombre: "Otros"
+ *                   valor: 1900
+ *               apoderados:
+ *                 - alumno_apoderado_id: 1
+ *                   alumno_id: 123
+ *                   apoderado_id: 1001
+ *                   tipo_apoderado: "Padre"
+ *                   observaciones: "Siempre disponible"
+ *                   estado_usuario: "activo"
+ *                 - alumno_apoderado_id: 2
+ *                   alumno_id: 123
+ *                   apoderado_id: 1002
+ *                   tipo_apoderado: "Madre"
+ *                   observaciones: "Vive con el alumno"
+ *                   estado_usuario: "activo"
+ *       404:
+ *         description: Alumno no encontrado
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Alumno no encontrado"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Error al obtener datos del alumno"
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Alumno:
+ *       type: object
+ *       properties:
+ *         alumno_id:
+ *           type: integer
+ *           example: 123
+ *         colegio_id:
+ *           type: integer
+ *           example: 101
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://example.com/foto.jpg"
+ *         telefono_contacto1:
+ *           type: string
+ *           example: "+56 9 1234 5678"
+ *         telefono_contacto2:
+ *           type: string
+ *           example: "+56 9 8765 4321"
+ *         email:
+ *           type: string
+ *           example: "alumno.demo@colegio.cl"
+ * 
+ *     FichaClinica:
+ *       type: object
+ *       properties:
+ *         alumno_ant_clinico_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 123
+ *         historial_medico:
+ *           type: string
+ *           example: "Historial general sin eventos graves."
+ *         alergias:
+ *           type: string
+ *           example: "Ninguna conocida"
+ *         enfermedades_cronicas:
+ *           type: string
+ *           example: "Asma leve"
+ *         condiciones_medicas_relevantes:
+ *           type: string
+ *           example: "Controlado por pediatra"
+ *         medicamentos_actuales:
+ *           type: string
+ *           example: "Salbutamol"
+ *         diagnosticos_previos:
+ *           type: string
+ *           example: "Asma infantil"
+ *         terapias_tratamiento_curso:
+ *           type: string
+ *           example: "Inhalador según necesidad"
+ * 
+ *     Alerta:
+ *       type: object
+ *       properties:
+ *         alumno_alerta_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 123
+ *         alerta_regla_id:
+ *           type: integer
+ *           example: 12
+ *         fecha_generada:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-05-20T12:00:00.000Z"
+ *         fecha_resolucion:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: null
+ *         alerta_origen_id:
+ *           type: integer
+ *           example: 3
+ *         prioridad_id:
+ *           type: integer
+ *           example: 2
+ *         severidad_id:
+ *           type: integer
+ *           example: 1
+ *         accion_tomada:
+ *           type: string
+ *           example: "Conversación con apoderado"
+ *         leida:
+ *           type: boolean
+ *           example: false
+ *         responsable_actual_id:
+ *           type: integer
+ *           example: 7
+ *         estado:
+ *           type: string
+ *           example: "pendiente"
+ *         alertas_tipo_alerta_tipo_id:
+ *           type: integer
+ *           example: 4
+ * 
+ *     Informe:
+ *       type: object
+ *       properties:
+ *         alumno_informe_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 123
+ *         fecha:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-12-01T00:00:00.000Z"
+ *         url_reporte:
+ *           type: string
+ *           example: "https://example.com/informe1.pdf"
+ * 
+ *     Emocion:
+ *       type: object
+ *       properties:
+ *         nombre:
+ *           type: string
+ *           example: "Felicidad"
+ *         valor:
+ *           type: integer
+ *           example: 3100
+ * 
+ *     Apoderado:
+ *       type: object
+ *       properties:
+ *         alumno_apoderado_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 123
+ *         apoderado_id:
+ *           type: integer
+ *           example: 1001
+ *         tipo_apoderado:
+ *           type: string
+ *           example: "Padre"
+ *         observaciones:
+ *           type: string
+ *           example: "Siempre disponible"
+ *         estado_usuario:
+ *           type: string
+ *           example: "activo"
+ */
+router.get('/alumno/:alumnoId', AlumnosService.getAlumnoDetalle);
 
 /**
  * @swagger

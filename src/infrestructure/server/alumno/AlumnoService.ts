@@ -14,6 +14,107 @@ export const AlumnosService = {
         res.status(500).json({ message: "Error interno del servidor" });
         }
     },
+    
+    async getAlumnoDetalle(req: Request, res: Response)  {
+        const { alumnoId } = req.params;
+
+        // Alumno simulado
+        const alumno = {
+          alumno_id: parseInt(alumnoId),
+          colegio_id: 101,
+          url_foto_perfil: "https://example.com/foto.jpg",
+          telefono_contacto1: "+56 9 1234 5678",
+          telefono_contacto2: "+56 9 8765 4321",
+          email: "alumno.demo@colegio.cl"
+        };
+      
+        // Ficha clínica simulada
+        const ficha = {
+          alumno_ant_clinico_id: 1,
+          alumno_id: parseInt(alumnoId),
+          historial_medico: "Historial general sin eventos graves.",
+          alergias: "Ninguna conocida",
+          enfermedades_cronicas: "Asma leve",
+          condiciones_medicas_relevantes: "Controlado por pediatra",
+          medicamentos_actuales: "Salbutamol",
+          diagnosticos_previos: "Asma infantil",
+          terapias_tratamiento_curso: "Inhalador según necesidad"
+        };
+      
+        // Alertas simuladas
+        const alertas = [
+          {
+            alumno_alerta_id: 1,
+            alumno_id: parseInt(alumnoId),
+            alerta_regla_id: 12,
+            fecha_generada: new Date(),
+            fecha_resolucion: null,
+            alerta_origen_id: 3,
+            prioridad_id: 2,
+            severidad_id: 1,
+            accion_tomada: "Conversación con apoderado",
+            leida: false,
+            responsable_actual_id: 7,
+            estado: "pendiente",
+            alertas_tipo_alerta_tipo_id: 4
+          }
+        ];
+      
+        // Informes simulados
+        const informes = [
+          {
+            alumno_informe_id: 1,
+            alumno_id: parseInt(alumnoId),
+            fecha: new Date("2024-12-01"),
+            url_reporte: "https://example.com/informe1.pdf"
+          },
+          {
+            alumno_informe_id: 2,
+            alumno_id: parseInt(alumnoId),
+            fecha: new Date("2025-03-15"),
+            url_reporte: "https://example.com/informe2.pdf"
+          }
+        ];
+      
+        // Apoderados simulados
+        const apoderados = [
+          {
+            alumno_apoderado_id: 1,
+            alumno_id: parseInt(alumnoId),
+            apoderado_id: 1001,
+            tipo_apoderado: "Padre",
+            observaciones: "Siempre disponible",
+            estado_usuario: "activo"
+          },
+          {
+            alumno_apoderado_id: 2,
+            alumno_id: parseInt(alumnoId),
+            apoderado_id: 1002,
+            tipo_apoderado: "Madre",
+            observaciones: "Vive con el alumno",
+            estado_usuario: "activo"
+          }
+        ];
+      
+        // Emociones simuladas
+        const emociones = [
+          { nombre: "Felicidad", valor: 3100 },
+          { nombre: "Tristeza", valor: 1500 },
+          { nombre: "Estrés", valor: 950 },
+          { nombre: "Ansiedad", valor: 2600 },
+          { nombre: "Enojo", valor: 750 },
+          { nombre: "Otros", valor: 1900 }
+        ];
+      
+        res.json({
+          alumno,
+          ficha,
+          alertas,
+          informes,
+          emociones,
+          apoderados
+        });
+      },
     guardar: async (req: Request, res: Response) => {
         try {
         const alumno: Alumno = req.body;
