@@ -65,6 +65,18 @@ async getEmotionData (req: Request, res: Response) {
     ];
     res.json(data);
   },
+  getEmotionsData  (req: Request, res: Response) {
+    const emotions = [
+      { name: "Tristeza", value: 1500, color: "#29B6F6" },
+      { name: "Felicidad", value: 3100, color: "#FFCA28" },
+      { name: "Estrés", value: 950, color: "#757575" },
+      { name: "Ansiedad", value: 2600, color: "#FFA726" },
+      { name: "Enojo", value: 750, color: "#F44336" },
+      { name: "Otros", value: 1900, color: "#BA68C8" }
+    ];
+  
+    res.json({ emotions });
+  },
   
   // Función para obtener emociones generales
   async getEmotionDataGeneral  (req: Request, res: Response)  {

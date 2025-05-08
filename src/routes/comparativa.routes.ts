@@ -1,146 +1,22 @@
 import express from "express";
 import { sessionAuth } from "../middleware/supabaseMidleware";
-import { DashboardHomeService } from "../infrestructure/server/dashboard/DashboardHomeService";
 import { DashboardComparativaService } from "../infrestructure/server/dashboard/DashboardComparativaService";
 
 const router = express.Router();
-const rutasComparativas = '/comparativa';
 
 /**
  * @swagger
  * tags:
- *   - name: Dashboard
+ *   - name: Comparativo
  *     description: Endpoints para datos del panel de control
- *   - name: Dashboard Comparativo
- *     description: Endpoints para datos comparativos del dashboard
  */
-
 /**
  * @swagger
- * /api/v1/dashboard/emotions:
- *   get:
- *     summary: Obtener datos de emociones (detallado)
- *     description: Retorna datos estadísticos sobre las emociones registradas en el sistema
- *     tags: [Dashboard]
- *     security:
- *       - sessionAuth: []
- *     responses:
- *       200:
- *         description: Datos de emociones obtenidos correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Emotion'
- *       500:
- *         description: Error interno del servidor
- */
-router.get("/emotions", sessionAuth, DashboardHomeService.getEmotionData);
-
-/**
- * @swagger
- * /api/v1/dashboard/emotions/general:
- *   get:
- *     summary: Obtener datos generales de emociones
- *     description: Retorna datos estadísticos generales sobre las emociones registradas
- *     tags: [Dashboard]
- *     security:
- *       - sessionAuth: []
- *     responses:
- *       200:
- *         description: Datos generales de emociones obtenidos correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Emotion'
- *       500:
- *         description: Error interno del servidor
- */
-router.get(
-  "/emotions/general",
-  sessionAuth,
-  DashboardHomeService.getEmotionDataGeneral
-);
-
-/**
- * @swagger
- * /api/v1/dashboard/donut:
- *   get:
- *     summary: Obtener datos para gráfico de donut
- *     description: Retorna datos para visualización en gráfico circular (donut chart)
- *     tags: [Dashboard]
- *     security:
- *       - sessionAuth: []
- *     responses:
- *       200:
- *         description: Datos para gráfico donut obtenidos correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/DonutData'
- *       500:
- *         description: Error interno del servidor
- */
-router.get("/donut", sessionAuth, DashboardHomeService.getDonutData);
-
-/**
- * @swagger
- * /api/v1/dashboard/dates:
- *   get:
- *     summary: Obtener fechas importantes
- *     description: Retorna un listado de fechas relevantes para el dashboard
- *     tags: [Dashboard]
- *     security:
- *       - sessionAuth: []
- *     responses:
- *       200:
- *         description: Lista de fechas importantes obtenida correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/ImportantDate'
- *       500:
- *         description: Error interno del servidor
- */
-router.get("/dates", sessionAuth, DashboardHomeService.getImportantDates);
-
-/**
- * @swagger
- * /api/v1/dashboard/alerts:
- *   get:
- *     summary: Obtener alertas recientes
- *     description: Retorna las alertas más recientes registradas en el sistema
- *     tags: [Dashboard]
- *     security:
- *       - sessionAuth: []
- *     responses:
- *       200:
- *         description: Lista de alertas recientes obtenida correctamente
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/RecentAlert'
- *       500:
- *         description: Error interno del servidor
- */
-router.get("/alerts", sessionAuth, DashboardHomeService.getRecentAlerts);
-
-/**
- * @swagger
- * /api/v1/dashboard/comparativa/emotions/course:
+ * /api/v1/comparativa/emotions/course:
  *   get:
  *     summary: Obtener datos comparativos de emociones por curso
  *     description: Retorna datos estadísticos de emociones comparando diferentes cursos
- *     tags: [Dashboard Comparativo]
+ *     tags: [Comparativo]
  *     security:
  *       - sessionAuth: []
  *     responses:
@@ -155,15 +31,15 @@ router.get("/alerts", sessionAuth, DashboardHomeService.getRecentAlerts);
  *       500:
  *         description: Error interno del servidor
  */
-router.get(rutasComparativas+'/emotions/course', sessionAuth, DashboardComparativaService.getEmotionsDataCourse);
+router.get('/emotions/course', sessionAuth, DashboardComparativaService.getEmotionsDataCourse);
 
 /**
  * @swagger
- * /api/v1/dashboard/comparativa/alerts/line-chart:
+ * /api/v1/home/comparativa/alerts/totales:
  *   get:
  *     summary: Obtener datos comparativos de alertas para gráfico de líneas
  *     description: Retorna datos estadísticos de alertas comparando diferentes cursos por mes
- *     tags: [Dashboard Comparativo]
+ *     tags: [Comparativo]
  *     security:
  *       - sessionAuth: []
  *     responses:
@@ -178,7 +54,7 @@ router.get(rutasComparativas+'/emotions/course', sessionAuth, DashboardComparati
  *       500:
  *         description: Error interno del servidor
  */
-router.get(rutasComparativas+'/alerts/line-chart', sessionAuth, DashboardComparativaService.getAlertsLineChartData);
+router.get('/alerts/totales', sessionAuth, DashboardComparativaService.getAlertsLineChartData);
 
 /**
  * @swagger
