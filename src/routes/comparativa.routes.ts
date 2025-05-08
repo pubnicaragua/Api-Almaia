@@ -15,21 +15,109 @@ const router = express.Router();
  * /api/v1/comparativa/emotions/course:
  *   get:
  *     summary: Obtener datos comparativos de emociones por curso
- *     description: Retorna datos estadísticos de emociones comparando diferentes cursos
+ *     description: Retorna datos estadísticos de emociones filtrados por nivel, curso, año y mes
  *     tags: [Comparativo]
  *     security:
  *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: nivel_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del nivel educativo a filtrar
+ *         example: 1
+ *       - in: query
+ *         name: curso_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del curso específico a filtrar
+ *         example: 5
+ *       - in: query
+ *         name: año
+ *         schema:
+ *           type: integer
+ *           format: int32
+ *           minimum: 2020
+ *           maximum: 2030
+ *         required: false
+ *         description: Año de los datos a consultar (formato YYYY)
+ *         example: 2023
+ *       - in: query
+ *         name: mes
+ *         schema:
+ *           type: integer
+ *           format: int32
+ *           minimum: 1
+ *           maximum: 12
+ *         required: false
+ *         description: Mes de los datos a consultar (1-12)
+ *         example: 10
  *     responses:
  *       200:
  *         description: Datos comparativos de emociones obtenidos correctamente
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Emotion'
+ *               type: object
+ *               properties:
+ *                 curso:
+ *                   type: string
+ *                   example: "4° Básico A"
+ *                 nivel:
+ *                   type: string
+ *                   example: "Básica"
+ *                 periodo:
+ *                   type: string
+ *                   example: "Octubre 2023"
+ *                 emociones:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       name:
+ *                         type: string
+ *                         example: "Tristeza"
+ *                       value:
+ *                         type: integer
+ *                         example: 150
+ *                       color:
+ *                         type: string
+ *                         example: "#29B6F6"
+ *                       porcentaje:
+ *                         type: number
+ *                         format: float
+ *                         example: 25.5
+ *                   example:
+ *                     - name: "Tristeza"
+ *                       value: 150
+ *                       color: "#29B6F6"
+ *                       porcentaje: 25.5
+ *                     - name: "Felicidad"
+ *                       value: 200
+ *                       color: "#FFCA28"
+ *                       porcentaje: 34.0
+ *                     - name: "Estrés"
+ *                       value: 80
+ *                       color: "#757575"
+ *                       porcentaje: 13.6
+ *       400:
+ *         description: Parámetros inválidos o faltantes
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Faltan parámetros requeridos (nivel_id, curso_id, año, mes)"
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: No se encontraron datos para los parámetros proporcionados
  *       500:
  *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Error al procesar la solicitud"
  */
 router.get('/emotions/course', sessionAuth, DashboardComparativaService.getEmotionsDataCourse);
 
