@@ -6,9 +6,50 @@ const dataService: DataService<AlertaTipo> = new DataService("alertas_origenes")
 export const AlertaTiposService = {
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+           /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const alertaTipo = await dataService.getAll(["*"], where);
-            res.json(alertaTipo);
+            res.json(alertaTipo);*/
+           
+            const tiposAlertas = [
+                {
+                  "alerta_tipo_id": 1,
+                  "nombre": "Académica",
+                  "tiempo_atencion": 48,    // horas
+                  "tiempo_resolucion": 168   // horas (7 días)
+                },
+                {
+                  "alerta_tipo_id": 2,
+                  "nombre": "Conductual",
+                  "tiempo_atencion": 24,
+                  "tiempo_resolucion": 72
+                },
+                {
+                  "alerta_tipo_id": 3,
+                  "nombre": "Asistencia",
+                  "tiempo_atencion": 12,
+                  "tiempo_resolucion": 24
+                },
+                {
+                  "alerta_tipo_id": 4,
+                  "nombre": "Psicoemocional",
+                  "tiempo_atencion": 6,
+                  "tiempo_resolucion": 48
+                },
+                {
+                  "alerta_tipo_id": 5,
+                  "nombre": "Tecnológica",
+                  "tiempo_atencion": 4,
+                  "tiempo_resolucion": 24
+                },
+                {
+                  "alerta_tipo_id": 6,
+                  "nombre": "Urgente",
+                  "tiempo_atencion": 1,
+                  "tiempo_resolucion": 6
+                }
+              ];
+            res.json(tiposAlertas);
+
         } catch (error) {
             console.error("Error al obtener la alerta tipo:", error);
             res.status(500).json({ message: "Error interno del servidor" });

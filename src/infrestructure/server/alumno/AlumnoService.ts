@@ -6,9 +6,46 @@ const dataService: DataService<Alumno> = new DataService("alumnos");
 export const AlumnosService = {
     async obtener(req: Request, res: Response) {
         try {
-        const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+        /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
         const alumno = await dataService.getAll(["*"], where);
-        res.json(alumno);
+        res.json(alumno);*/
+      const alumnos=  [
+          {
+            "alumno_id": 101,
+            "colegio_id": 1,
+            "url_foto_perfil": "https://ejemplo.com/fotos/alumno101.jpg",
+            "telefono_contacto1": "+56912345678",
+            "email": "alumno101@ejemplo.com",
+            "telefono_contacto2": "+56987654321",
+            "activo": true,
+            "colegio": {
+              "colegio_id": 1,
+              "nombre": "Colegio Ejemplo",
+              "tipo_colegio": "Particular",
+              "comuna_id": 125,
+              "region_id": 13,
+              "pais_id": 1
+            }
+          },
+          {
+            "alumno_id": 102,
+            "colegio_id": 1,
+            "url_foto_perfil": "https://ejemplo.com/fotos/alumno102.jpg",
+            "telefono_contacto1": "+56923456789",
+            "email": "alumno102@ejemplo.com",
+            "telefono_contacto2": "+56911223344",
+            "activo": true,
+            "colegio": {
+              "colegio_id": 1,
+              "nombre": "Colegio Ejemplo",
+              "tipo_colegio": "Particular",
+              "comuna_id": 125,
+              "region_id": 13,
+              "pais_id": 1
+            }
+          }
+        ]
+        res.json(alumnos);
         } catch (error) {
         console.error("Error al obtener el alumno:", error);
         res.status(500).json({ message: "Error interno del servidor" });

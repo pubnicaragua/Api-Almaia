@@ -6,9 +6,32 @@ const dataService: DataService<AlertaSeveridad> = new DataService("alertaseverid
 export const AlertaSeveridadesService = {
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+           /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const alertaSeveridad = await dataService.getAll(["*"], where);
-            res.json(alertaSeveridad);
+            res.json(alertaSeveridad);*/
+            const severidadAlertas = [
+                {
+                  "alerta_severidad_id": 1,
+                  "nombre": "Informativa"
+                },
+                {
+                  "alerta_severidad_id": 2,
+                  "nombre": "Leve"
+                },
+                {
+                  "alerta_severidad_id": 3,
+                  "nombre": "Moderada"
+                },
+                {
+                  "alerta_severidad_id": 4,
+                  "nombre": "Grave"
+                },
+                {
+                  "alerta_severidad_id": 5,
+                  "nombre": "Crítica"
+                }
+              ];
+            res.json(severidadAlertas);
         } catch (error) {
             console.error("Error al obtener la alerta severidad:", error);
             res.status(500).json({ message: "Error interno del servidor" });

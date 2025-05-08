@@ -6,9 +6,42 @@ const dataService: DataService<MotorInforme> = new DataService("alertas_origenes
 export const MotorInformesService = {
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+           /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const motorInforme = await dataService.getAll(["*"], where);
-            res.json(motorInforme);
+            res.json(motorInforme);*/
+            const motoresInforme = [
+                {
+                  "motor_informe_id": 1,
+                  "freq_meses": 1,         // Mensual
+                  "dia_ejecucion": 1,      // Día 1 de cada mes
+                  "descripcion": "Informe mensual de rendimiento académico"
+                },
+                {
+                  "motor_informe_id": 2,
+                  "freq_meses": 3,         // Trimestral
+                  "dia_ejecucion": 15,     // Día 15
+                  "descripcion": "Informe trimestral de asistencia"
+                },
+                {
+                  "motor_informe_id": 3,
+                  "freq_meses": 6,         // Semestral
+                  "dia_ejecucion": 30,     // Último día
+                  "descripcion": "Informe semestral de conducta"
+                },
+                {
+                  "motor_informe_id": 4,
+                  "freq_meses": 12,        // Anual
+                  "dia_ejecucion": 31,     // Fin de año
+                  "descripcion": "Reporte anual consolidado"
+                },
+                {
+                  "motor_informe_id": 5,
+                  "freq_meses": 2,         // Bimestral
+                  "dia_ejecucion": 10,     // Día 10
+                  "descripcion": "Informe bimestral de actividades extracurriculares"
+                }
+              ];
+            res.json(motoresInforme);
         } catch (error) {
             console.error("Error al obtener el motor de informe:", error);
             res.status(500).json({ message: "Error interno del servidor" });
