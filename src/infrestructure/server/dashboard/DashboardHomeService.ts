@@ -6,57 +6,68 @@ import { ImportantDate } from "../../../core/modelo/dashboard/ImportantDate";
 import { Emotion } from "../../../core/modelo/dashboard/Emotion";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { subDays, formatISO, startOfDay } from "date-fns";
+import { AlumnoServicioCasoUso } from "../../../core/services/AlumnoServicioCasoUso";
+
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 export const DashboardHomeService = {
   async getStatsCards(req: Request, res: Response, next: NextFunction) {
     try {
-      // Total de alumnos
-      const { count: totalAlumnos, error: alumnosError } = await client
-        .from("alumnos")
-        .select("*", { count: "exact", head: true });
-  
-      if (alumnosError) {
-        console.error("Error obteniendo alumnos:", alumnosError);
-        return res.status(500).json({ message: "Error obteniendo alumnos" });
-      }
-  
-      // Simulaciones de los valores que aún no están siendo consultados directamente
-      const response = {
-        alumnos: {
-          activos: 637,        // Aquí podrías hacer una consulta con filtro si lo deseas
-          inactivos: 10,
-          frecuentes: 510,
-          totales: totalAlumnos ?? 0,
-        },
-        sos_alma: {
-          activos: 5,
-          vencidos: 0,
-          por_vencer: 2,
-          totales: 13,
-        },
-        denuncias: {
-          activos: 19,
-          vencidos: 0,
-          por_vencer: 3,
-          totales: 24,
-        },
-        alertas_alma: {
-          activos: 57,
-          vencidos: 0,
-          por_vencer: 6,
-          totales: 82,
-        },
-      };
-  
-      res.json(response);
+      const sevenDaysAgo = startOfDay(subDays(new Date(), 7)).toISOString();
+      const alumnoServicioCasoUso = new AlumnoServicioCasoUso();
+      const [totalAlumnos, alumnosActivos, alumnosSeleccion] =
+        await Promise.all([
+          alumnoServicioCasoUso.obntenerConteoporTabla("alumnos", sevenDaysAgo),
+          alumnoServicioCasoUso.obntenerConteoporTabla(
+            "alumnos_respuestas",
+            sevenDaysAgo
+          ),
+          alumnoServicioCasoUso.obntenerConteoporTabla(
+            "alumno_respuesta_seleccion",
+            sevenDaysAgo
+          ),
+        ]);
+      // Obtener datos de actividad
+      const responses = await alumnoServicioCasoUso.calcularAlumnosActivos(
+        sevenDaysAgo
+      );
+      const alumnosFrecuentes =
+        alumnoServicioCasoUso.calcularAlumnosFrecuentes(responses);
+        const response = {
+          alumnos: {
+            activos: alumnosActivos ?? 0,
+            inactivos: (totalAlumnos ?? 0) - (alumnosActivos ?? 0),
+            frecuentes: alumnosFrecuentes,
+            totales: totalAlumnos ?? 0,
+          },
+          sos_alma: {
+            activos: 5,
+            vencidos: 0,
+            por_vencer: 2,
+            totales: 13,
+          },
+          denuncias: {
+            activos: 19,
+            vencidos: 0,
+            por_vencer: 3,
+            totales: 24,
+          },
+          alertas_alma: {
+            activos: 57,
+            vencidos: 0,
+            por_vencer: 6,
+            totales: 82,
+          },
+        };
+    
+        res.json(response);
     } catch (err) {
       console.error("Error en getStatsCards:", err);
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
-  
-  async getEmotionData(req: Request, res: Response, next:NextFunction) {
+  async getEmotionData(req: Request, res: Response, next: NextFunction) {
     const data: Emotion[] = [
       { name: "Tristeza", value: 1500, color: "#3b82f6" },
       { name: "Felicidad", value: 3000, color: "#facc15" },
