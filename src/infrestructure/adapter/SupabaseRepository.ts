@@ -37,42 +37,41 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
   }
   async getAll<T>(
     columns: string[],
-    where: Record<string, any> = {} // Filtro opcional
+    where: Record<string, any> = {},
+    orderBy?: string // columna opcional para ordenar
   ): Promise<T[]> {
     await this.ensureClientInitialized();
+  
     if (!columns.length) {
       throw new Error(
         "Debes especificar al menos una columna para generar el reporte."
       );
     }
-
-    // Formatear columnas para la consulta
+  
     const columnQuery = columns.join(",");
-
-    // Crear la consulta base
+  
     let query = this.client.from(this.table).select(columnQuery);
-
-    // Aplicar filtros WHERE si se pasan
+  
     Object.keys(where).forEach((key) => {
       query = query.eq(key, where[key]);
     });
-
-    // Consultar datos desde Supabase con el filtro aplicado
-    const { data, error } = await query
-      .order(columns[0], { ascending: true })
-      .returns<T[]>(); // Ordenar por la primera columna
-
+  
+    if (orderBy && orderBy !== '*') {
+      query = query.order(orderBy, { ascending: true });
+    }
+  
+    const { data, error } = await query.returns<T[]>();
+  
     if (error) {
       throw new Error(
         `Error al consultar la tabla '${this.table}': ${error.message}`
       );
     }
-
-    if (!data || data.length === 0) {
-      return []; // Si no hay datos, devolvemos una cadena vacía.
-    }
-    return data;
+  
+    return data ?? [];
   }
+  
+  
   async getData(id: number): Promise<any> {
     await this.ensureClientInitialized();
     const { data, error } = await this.client.from(this.table).select('*').eq('id', id);
