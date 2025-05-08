@@ -46,7 +46,7 @@ export const AuthService = {
 
     // Validación básica
     if (!email || !password) {
-      return res.status(400).json({ message: "Email y contraseña son requeridos." });
+       res.status(400).json({ message: "Email y contraseña son requeridos." });
     }
 
     try {
@@ -56,10 +56,10 @@ export const AuthService = {
       });
 
       if (error) {
-        return res.status(400).json({ message: error.message });
+         res.status(400).json({ message: error.message });
       }
 
-      return res.status(201).json({
+       res.status(200).json({
         message: "Usuario registrado exitosamente. Revisa tu correo para confirmar.",
         user: data.user,
       });
@@ -67,7 +67,7 @@ export const AuthService = {
       console.error("Error en el registro:", err);
       const message =
         err instanceof AuthApiError ? err.message : "Error interno del servidor";
-      return res.status(500).json({ message });
+       res.status(500).json({ message });
     }
   },
 
