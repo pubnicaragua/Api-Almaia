@@ -1,35 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { SupabaseClientService } from "../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { getSecret, loginToVault } from "../core/services/valutClient";
+//import { getSecret, loginToVault } from "../core/services/valutClient";
 let client: SupabaseClient;
-interface ClientSupabase {
-  host: string;
-  password: string;
-}
 (async () => {
-  const token = await loginToVault();
-  if (!token) {
-    console.error("❌ No se pudo autenticar con Vault.");
-    return;
-  }
-
-  const secret = await getSecret(token, "secret/data/database");
-  if (!secret) {
-    console.error("❌ No se pudo obtener el secreto.");
-    return;
-  }
-
-  const client_credential: ClientSupabase = {
-    host: secret.SUPABASE_HOST!,
-    password: secret.SUPABASE_PASSWORD!,
-  };
-
-  const supabaseService = new SupabaseClientService(
-    client_credential.host,
-    client_credential.password
-  );
-
+  const supabaseService = new SupabaseClientService();
   client = supabaseService.getClient();
 })();
 

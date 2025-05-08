@@ -1,14 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { ISupabaseRepository } from "../../core/interface/ISupabaseRepository";
 import { SupabaseClientService } from "../../core/services/supabaseClient";
-import { getSecret, loginToVault } from "../../core/services/valutClient";
+//import { getSecret, loginToVault } from "../../core/services/valutClient";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-interface ClientSupabase {
-  host: string;
-  password: string;
-}
-
 export class SupabaseRepository<T> implements ISupabaseRepository<T> {
   private client!: SupabaseClient;
   private table: string= "";
@@ -20,27 +14,9 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
   }
 
   private async init() {
-    const token = await loginToVault();
    
-    if (!token) {
-      console.error('❌ No se pudo autenticar con Vault.');
-      return;
-    }
-    const secret = await getSecret(token, 'secret/data/database');
 
-    if (!secret) {
-      console.error('❌ No se pudo obtener el secreto.');
-      return;
-    }
-   
-    const client_credential: ClientSupabase = {
-      host: secret.SUPABASE_HOST!,
-      password: secret.SUPABASE_PASSWORD!,
-    };
-    const supabaseService = new SupabaseClientService(
-      client_credential.host,
-      client_credential.password
-    );
+    const supabaseService = new SupabaseClientService();
     this.client = supabaseService.getClient();
   }
 
