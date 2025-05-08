@@ -25,7 +25,6 @@ export const AuthService = {
                 email,
                 password,
             });
-
             if (authError || !authData.user) {
                 throw new Error(authError?.message || "Autenticación fallida");
             }

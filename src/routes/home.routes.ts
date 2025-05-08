@@ -117,7 +117,7 @@ const router = express.Router();
  *             example:
  *               error: "Error al recuperar estadísticas del home"
  */
-router.get("cards/emociones", sessionAuth, DashboardHomeService.getEmotionData);
+router.get("/cards/emociones", sessionAuth, DashboardHomeService.getStatsCards);
 /**
  * @swagger
  * /barra/emociones:

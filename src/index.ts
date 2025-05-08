@@ -45,7 +45,13 @@ const options = {
   },
   apis: ["./src/routes/*.ts"],
 };
-
+function cleanIp(ip: string): string {
+  // Si es del tipo ::ffff:127.0.0.1, extrae la parte IPv4
+  if (ip.startsWith('::ffff:')) {
+    return ip.replace('::ffff:', '');
+  }
+  return ip;
+}
 // Middleware básico
 app.use(express.json());
 app.use(helmet());
@@ -57,11 +63,9 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     // Lista de dominios permitidos (ajusta según tus necesidades)
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      // añade otros dominios permitidos aquí
-    ];
+    const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+    : [];
     
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -77,14 +81,15 @@ app.use(cors(corsOptions));
 
 // Middleware adicional para verificación de IP/headers
 app.use((req: Request, res: Response, next: NextFunction) => {
-  const clientIp = req.ip || req.connection.remoteAddress || '';
+  const rawIp = req.ip || req.connection.remoteAddress || '';
+  const clientIp = cleanIp(rawIp);
   const customHeader = req.headers['x-almaia-access'];
   
   // Lista blanca de IPs permitidas
   const allowedIps = ['::1', '127.0.0.1'];
-  
+ 
   // Si es una IP permitida o tiene el header correcto, continuar
-  if (allowedIps.includes(clientIp) || customHeader === 'mi-token-secreto') {
+  if (allowedIps.includes(clientIp) || customHeader === 'x-almaia-access') {
     return next();
   }
   
@@ -98,18 +103,19 @@ app.get('/', (req: Request, res: Response) => {
 });
 const specs = swaggerJsdoc(options);
 app.use("/documentacion", swaggerUi.serve, swaggerUi.setup(specs));
-app.use('api/v1/auth', AuthRoutes);
-app.use('api/v1/avisos', AvisosRoutes);
-app.use('api/v1/localidades', LocalidadesRoutes);
-app.use('api/v1/comparativa', ComparativaRoutes);
-app.use('api/v1/home', HomeRouters);
-app.use('api/v1/patologias', PatologiaRoutes);
-app.use('api/v1/alumnos', AlumnosRouters);
-app.use('api/v1/alertas', AlertaRouters);
-app.use('api/v1/apoderados', ApoderadosRouters);
-app.use('api/v1/perfil', PerfilRouters);
+app.use('/api/v1/auth', AuthRoutes);
+app.use('/api/v1/avisos', AvisosRoutes);
+app.use('/api/v1/localidades', LocalidadesRoutes);
+app.use('/api/v1/comparativa', ComparativaRoutes);
+app.use('/api/v1/home', HomeRouters);
+app.use('/api/v1/patologias', PatologiaRoutes);
+app.use('/api/v1/alumnos', AlumnosRouters);
+app.use('/api/v1/alertas', AlertaRouters);
+app.use('/api/v1/apoderados', ApoderadosRouters);
+app.use('/api/v1/perfil', PerfilRouters);
 // Manejador de errores
-app.use((err: Error, req: Request, res: Response) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Error interno del servidor' });
 });

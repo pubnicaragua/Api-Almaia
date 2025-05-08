@@ -49,7 +49,7 @@ const ruta_funcionalidades_roles = '/funcionalidades_roles';
  *       500:
  *         description: Error del servidor
  */
-router.post('/login', sessionAuth, AuthService.login);
+router.post('/login', AuthService.login);
 
 /**
  * @swagger
@@ -85,7 +85,7 @@ router.post('/login', sessionAuth, AuthService.login);
  *       500:
  *         description: Error del servidor
  */
-router.post('/registro', sessionAuth, AuthService.register);
+router.post('/registro', AuthService.register);
 
 /**
  * @swagger
