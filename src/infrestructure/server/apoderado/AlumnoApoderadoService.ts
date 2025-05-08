@@ -7,9 +7,28 @@ const dataService:DataService<AlumnoApoderado> = new DataService("alumnos_respue
 export const AlumnoApoderadoService = {
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+            /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const alumnoApoderado = await dataService.getAll(["*"],where);
-            res.json(alumnoApoderado);
+            res.json(alumnoApoderado);*/
+            const apoderados = [
+                {
+                  "alumno_apoderado_id": 1,
+                  "alumno_id": 123,
+                  "apoderado_id": 1001,
+                  "tipo_apoderado": "Padre",
+                  "observaciones": "Siempre disponible",
+                  "estado_usuario": "activo",
+                  "persona_id": 0,
+                  "colegio_id": 0,
+                  "telefono_contacto1": "string",
+                  "telefono_contacto2": "string",
+                  "email_contacto1": "string",
+                  "email_contacto2": "string",
+                  "profesion_id": 0,
+                  "tipo_oficio_id": 0
+                }
+              ]
+            res.json(apoderados);
         } catch (error) {
             console.error("Error al obtener la alumnoApoderado:", error);
              res.status(500).json({ message: "Error interno del servidor" });

@@ -7,9 +7,31 @@ export const AlumnoMonitoreoService = {
         
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+            /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const alumnoMonitoreo = await dataService.getAll(["*"], where);
-            res.json(alumnoMonitoreo);
+            res.json(alumnoMonitoreo);*/
+            const alumnos_monitoreos= [
+                {
+                  "monitoreo_id": 1,
+                  "fecha": "2023-05-15T10:30:00Z",
+                  "observaciones": "El alumno mostró mejoría en su rendimiento",
+                  "alumno": {
+                    "alumno_id": 101,
+                    "nombre": "Juan Pérez",
+                    "url_foto_perfil": "https://ejemplo.com/fotos/101.jpg",
+                    "telefono_contacto1": "+56912345678",
+                    "email": "juan.perez@ejemplo.com",
+                    "colegio": {
+                      "colegio_id": 201,
+                      "nombre": "Colegio Ejemplo",
+                      "nombre_fantasia": "Colegio Ejemplo S.A.",
+                      "direccion": "Calle Principal 123",
+                      "telefono_contacto": "+56223456789"
+                    }
+                  }
+                }
+              ]
+            res.json(alumnos_monitoreos);
         } catch (error) {
             console.error("Error al obtener el monitoreo del alumno:", error);
             res.status(500).json({ message: "Error interno del servidor" });

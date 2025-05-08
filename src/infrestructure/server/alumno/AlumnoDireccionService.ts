@@ -7,9 +7,58 @@ export const AlumnoDireccionService = {
 
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+            /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const alumnoDireccion = await dataService.getAll(["*"], where);
-            res.json(alumnoDireccion);
+            res.json(alumnoDireccion);*/
+           const alumnos_direcciones= [
+                {
+                  "alumno_direccion_id": 701,
+                  "alumno_id": 101,
+                  "descripcion": "Av. Principal 1234, Depto 501",
+                  "es_principal": true,
+                  "ubicaciones_mapa": "-33.45694, -70.64827",
+                  "comuna_id": 125,
+                  "region_id": 13,
+                  "pais_id": 1,
+                  "fecha_actualizacion": "2023-06-15T10:30:00Z",
+                  "alumno": {
+                    "alumno_id": 101,
+                    "nombre": "Juan Pérez",
+                    "curso_actual": "4° Básico A"
+                  },
+                  "comuna": {
+                    "comuna_id": 125,
+                    "nombre": "Santiago",
+                    "region": {
+                      "region_id": 13,
+                      "nombre": "Metropolitana",
+                      "pais": {
+                        "pais_id": 1,
+                        "nombre": "Chile"
+                      }
+                    }
+                  }
+                },
+                {
+                  "alumno_direccion_id": 702,
+                  "alumno_id": 102,
+                  "descripcion": "Calle Secundaria 567, Casa B",
+                  "es_principal": false,
+                  "ubicaciones_mapa": "-33.45872, -70.65011",
+                  "comuna_id": 126,
+                  "region_id": 13,
+                  "pais_id": 1,
+                  "alumno": {
+                    "alumno_id": 102,
+                    "nombre": "María González"
+                  },
+                  "comuna": {
+                    "comuna_id": 126,
+                    "nombre": "Providencia"
+                  }
+                }
+              ]
+            res.json(alumnos_direcciones);
         } catch (error) {
             console.error("Error al obtener la dirección del alumno:", error);
             res.status(500).json({ message: "Error interno del servidor" });
