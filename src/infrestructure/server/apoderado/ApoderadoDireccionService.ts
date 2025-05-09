@@ -7,9 +7,98 @@ const dataService:DataService<ApoderadoDireccion> = new DataService("alumnos_res
 export const ApoderadoDireccionService = {
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+           /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const apoderadoDireccion = await dataService.getAll(["*"],where);
-            res.json(apoderadoDireccion);
+            res.json(apoderadoDireccion);*/
+            const apoderados_direcciones = [
+                {
+                  "apoderado_direccion_id": 1,
+                  "apoderado_id": 2001,
+                  "descripcion": "Casa principal",
+                  "ubicaciones_mapa": "-33.4489, -70.6693",
+                  "comuna_id": 101,
+                  "region_id": 13,
+                  "pais_id": 1,
+                  
+                  // Relaciones completas
+                  "apoderados": [{
+                    "apoderado_id": 2001,
+                    "persona_id": 3001,
+                    "colegio_id": 1,
+                    "telefono_contacto1": "+56987654321",
+                    "email_contacto1": "juan.perez@email.com",
+                    "profesion_id": 5,
+                    "tipo_oficio_id": 2,
+                    
+                    "personas": [{
+                      "persona_id": 3001,
+                      "tipo_documento": "RUT",
+                      "numero_documento": "9.876.543-2",
+                      "nombres": "Juan Esteban",
+                      "apellidos": "Pérez González",
+                      "genero_id": 1,
+                      "estado_civil_id": 1,
+                      "fecha_nacimiento": "1980-08-20"
+                    }]
+                  }],
+                  
+                  "comunas": [{
+                    "comuna_id": 101,
+                    "nombre": "Santiago Centro",
+                    "region_id": 13,
+                    "pais_id": 1,
+                    
+                    "regiones": [{
+                      "region_id": 13,
+                      "nombre": "Región Metropolitana",
+                      "pais_id": 1
+                    }],
+                    
+                    "paises": [{
+                      "pais_id": 1,
+                      "nombre": "Chile",
+                      "codigo_iso": "CL"
+                    }]
+                  }],
+                  
+                  "regiones": [{
+                    "region_id": 13,
+                    "nombre": "Región Metropolitana"
+                  }],
+                  
+                  "paises": [{
+                    "pais_id": 1,
+                    "nombre": "Chile"
+                  }]
+                },
+                {
+                  "apoderado_direccion_id": 2,
+                  "apoderado_id": 2002,
+                  "descripcion": "Oficina",
+                  "ubicaciones_mapa": "-33.4195, -70.6062",
+                  "comuna_id": 102,
+                  "region_id": 13,
+                  "pais_id": 1,
+                  
+                  "apoderados": [{
+                    "apoderado_id": 2002,
+                    "persona_id": 3002,
+                    "telefono_contacto1": "+56976543210",
+                    
+                    "personas": [{
+                      "persona_id": 3002,
+                      "nombres": "María Fernanda",
+                      "apellidos": "Gómez López"
+                    }]
+                  }],
+                  
+                  "comunas": [{
+                    "comuna_id": 102,
+                    "nombre": "Providencia"
+                  }]
+                }
+              ];
+            res.json(apoderados_direcciones);
         } catch (error) {
             console.error("Error al obtener la apoderadoDireccion:", error);
              res.status(500).json({ message: "Error interno del servidor" });
