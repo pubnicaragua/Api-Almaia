@@ -5,12 +5,24 @@ import { GradosService } from "../infrestructure/server/colegio/GradoService";
 import { NivelEducativosService } from "../infrestructure/server/colegio/NivelEducativoService";
 import { AlumnoAsistenciasService } from "../infrestructure/server/colegio/AlumnoAsistenciaService";
 import { AlumnoTareasService } from "../infrestructure/server/colegio/AlumnoTareaService";
+import { AulasService } from "../infrestructure/server/colegio/AulaService";
+import { CalendarioDiaFestivosService } from "../infrestructure/server/colegio/CalendarioDiaFestivoService";
+import { CalendarioEscolarsService } from "../infrestructure/server/colegio/CalendarioEscolarService";
+import { CalendarioFechaImportantesService } from "../infrestructure/server/colegio/FechaImportanteService";
+import { CursosService } from "../infrestructure/server/colegio/CursoService";
+import { HistorialComunicacionsService } from "../infrestructure/server/colegio/HistorialComunicacionService";
 
 const router = express.Router();
 const rutas_grados = "/grados";
 const rutas_nivel_educativo = "/niveles_educativos";
 const rutas_alumnos_asistencias = "/alumnos_asistencias";
 const rutas_alumnos_tareas = "/alumnos_tareas";
+const rutas_aulas = "/aulas";
+const rutas_dias_festivos = "/aulas";
+const rutas_calendarios_escolares = "/calendarios_escolares";
+const rutas_calendarios_fechas_inportantes = "/calendarios_fechas_inportantes";
+const rutas_cursos = "/cursos";
+const rutas_historiales_comunicaciones = "/historiales_comunicaciones";
 
 /**
  * @swagger
@@ -834,6 +846,896 @@ router.delete(
  *         estado_tarea:
  *           type: string
  *           example: "Pendiente"
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: header
+ *       name: Authorization
+ *       description: Token de autenticación obtenido al iniciar sesión
+ */
+router.get(rutas_aulas, sessionAuth, AulasService.obtener);
+/**
+ * @swagger
+ * /api/v1/colegios/aulas:
+ *   post:
+ *     summary: Crear una nueva aula
+ *     description: Registra una nueva aula en el sistema
+ *     tags: [Aulas]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Aula'
+ *           example:
+ *             nombre: "Aula 101"
+ *             capacidad: 30
+ *             grado_id: 1
+ *     responses:
+ *       201:
+ *         description: Aula creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Aula'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(rutas_aulas, sessionAuth, AulasService.guardar);
+/**
+ * @swagger
+ * /api/v1/colegios/aulas/{id}:
+ *   put:
+ *     summary: Actualizar una aula existente
+ *     description: Modifica los datos de un aula registrada
+ *     tags: [Aulas]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del aula a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Aula'
+ *           example:
+ *             nombre: "Aula 102"
+ *             capacidad: 35
+ *     responses:
+ *       200:
+ *         description: Aula actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Aula'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Aula no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(`${rutas_aulas}/:id`, sessionAuth, AulasService.actualizar);
+/**
+ * @swagger
+ * /api/v1/colegios/aulas/{id}:
+ *   delete:
+ *     summary: Eliminar un aula
+ *     description: Elimina un aula del sistema
+ *     tags: [Aulas]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del aula a eliminar
+ *     responses:
+ *       204:
+ *         description: Aula eliminada exitosamente
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Aula no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(`${rutas_aulas}/:id`, sessionAuth, AulasService.eliminar);
+
+/**
+ * @swagger
+ * /api/v1/colegios/dias_festivos:
+ *   get:
+ *     summary: Obtener lista de días festivos
+ *     description: Retorna todos los días festivos registrados
+ *     tags: [Días Festivos]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de días festivos obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/DiaFestivo'
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(rutas_dias_festivos, sessionAuth, CalendarioDiaFestivosService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/colegios/dias_festivos:
+ *   post:
+ *     summary: Crear un nuevo día festivo
+ *     description: Registra un nuevo día festivo en el sistema
+ *     tags: [Días Festivos]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DiaFestivo'
+ *           example:
+ *             calendario_escolar_id: 1
+ *             dia_festivo: "2023-12-25"
+ *             descripcion: "Navidad"
+ *     responses:
+ *       201:
+ *         description: Día festivo creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DiaFestivo'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(rutas_dias_festivos, sessionAuth, CalendarioDiaFestivosService.guardar);
+/**
+ * @swagger
+ * /api/v1/colegios/dias_festivos/{id}:
+ *   put:
+ *     summary: Actualizar un día festivo existente  
+ *    description: Modifica los datos de un día festivo registrado
+ * 
+ *    tags: [Días Festivos]
+ *   security:
+ *      - sessionAuth: []
+ *   parameters:
+ *     - in: path
+ *      name: id
+ *     required: true
+ *     schema:
+ *       type: integer
+ *      description: ID del día festivo a actualizar
+ *  requestBody:
+ *    required: true
+ *   content:
+ *     application/json:
+ *      schema:
+ *      $ref: '#/components/schemas/DiaFestivo'
+ *     example:  
+ *      calendario_escolar_id: 1
+ *     dia_festivo: "2023-12-25"
+ *     descripcion: "Navidad"
+ *   responses:
+ *      200:
+ *        description: Día festivo actualizado exitosamente
+ *       content:
+ *         application/json:
+ *          schema:
+ *           $ref: '#/components/schemas/DiaFestivo'
+ * 
+ *      400:
+ *       description: Datos de entrada inválidos o faltantes
+ *      401:
+ *     description: No autorizado - Sesión no válida o no proporcionada
+ *     404:
+ *      description: Día festivo no encontrado
+ *     500:
+ *      description: Error interno del servidor
+ * */
+router.put(`${rutas_dias_festivos}/:id`, sessionAuth, CalendarioDiaFestivosService.actualizar);
+/**
+ * @swagger
+ * /api/v1/colegios/dias_festivos/{id}:
+ *   delete:
+ *     summary: Eliminar un día festivo
+ *     description: Elimina un día festivo del sistema
+ *     tags: [Días Festivos]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del día festivo a eliminar
+ *     responses:
+ *       204:
+ *         description: Día festivo eliminado exitosamente
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Día festivo no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(`${rutas_dias_festivos}/:id`, sessionAuth, CalendarioDiaFestivosService.eliminar);
+
+
+
+/**
+ * @swagger
+ * /api/v1/colegios/calendarios_escolares:
+ *   get:
+ *     summary: Obtener lista de calendarios escolares
+ *     description: Retorna todos los calendarios escolares registrados
+ *     tags: [Calendarios Escolares]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de calendarios escolares obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CalendarioEscolar'
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(rutas_calendarios_escolares, sessionAuth, CalendarioEscolarsService.obtener);
+
+
+
+//Fechas Importantes
+/**
+ * @swagger
+ * /api/v1/colegios/calendarios_fechas_importantes:
+ *   get:
+ *     summary: Obtener lista de fechas importantes
+ *     description: Retorna todas las fechas importantes registradas
+ *     tags: [Fechas Importantes]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de fechas importantes obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CalendarioFechaImportante'
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(rutas_calendarios_fechas_inportantes, sessionAuth, CalendarioFechaImportantesService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/colegios/calendarios_fechas_importantes:
+ *   post:
+ *     summary: Crear una nueva fecha importante
+ *     description: Registra una nueva fecha importante en el sistema
+ *     tags: [Fechas Importantes]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CalendarioFechaImportante'
+ *           example:
+ *             calendario_escolar_id: 1
+ *             fecha_importante: "2023-12-25"
+ *             descripcion: "Navidad"
+ *     responses:
+ *       201:
+ *         description: Fecha importante creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CalendarioFechaImportante'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(rutas_calendarios_fechas_inportantes, sessionAuth, CalendarioFechaImportantesService.guardar);
+/**
+ * @swagger
+ *   /api/v1/colegios/calendarios_fechas_importantes/{id}:
+ *  put:
+ *    summary: Actualizar una fecha importante existente
+ *   description: Modifica los datos de una fecha importante registrada
+ *   
+ *  tags: [Fechas Importantes]
+ * security:
+ *  - sessionAuth: []
+ * parameters:
+ *   - in: path
+ *     name: id
+ *     required: true
+ *     schema:
+ *       type: integer
+ *     description: ID de la fecha importante a actualizar
+ * requestBody:
+ *   required: true
+ *   content:
+ *     application/json:
+ *       schema:
+ *         $ref: '#/components/schemas/CalendarioFechaImportante'
+ *       example:
+ *         calendario_escolar_id: 1
+ *         fecha_importante: "2023-12-25"
+ *         descripcion: "Navidad"
+ * responses:
+ *   200:
+ *     description: Fecha importante actualizada exitosamente
+ *     content:
+ *       application/json:
+ *         schema:
+ *           $ref: '#/components/schemas/CalendarioFechaImportante'
+ *   400:
+ *     description: Datos de entrada inválidos o faltantes
+ *   401:
+ *     description: No autorizado - Sesión no válida o no proporcionada
+ *   404:
+ *     description: Fecha importante no encontrada
+ *   500:
+ *     description: Error interno del servidor
+ */
+router.put(`${rutas_calendarios_fechas_inportantes}/:id`, sessionAuth, CalendarioFechaImportantesService.actualizar);
+/**
+ * @swagger
+ * /api/v1/colegios/calendarios_fechas_importantes/{id}:
+ *   delete:
+ *     summary: Eliminar una fecha importante
+ *     description: Elimina una fecha importante del sistema
+ *     tags: [Fechas Importantes]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la fecha importante a eliminar
+ *     responses:
+ *       204:
+ *         description: Fecha importante eliminada exitosamente
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Fecha importante no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(`${rutas_calendarios_fechas_inportantes}/:id`, sessionAuth, CalendarioFechaImportantesService.eliminar);
+
+//cursos
+/**
+ * @swagger
+ * /api/v1/colegios/cursos:
+ *   get:
+ *     summary: Obtener lista de cursos
+ *     description: Retorna todos los cursos registrados
+ *     tags: [Cursos]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de cursos obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Cursos'
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(rutas_cursos, sessionAuth, CursosService.obtener);
+/**
+ * @swagger
+ * /api/v1/colegios/cursos:
+ *   post:
+ *     summary: Crear un nuevo curso
+ *     description: Registra un nuevo curso en el sistema
+ *     tags: [Cursos]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Cursos'
+ *           example:
+ *             nombre: "Curso de Matemáticas"
+ *             descripcion: "Curso avanzado de matemáticas"
+ *     responses:
+ *       201:
+ *         description: Curso creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Cursos'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(rutas_cursos, sessionAuth, CursosService.guardar);
+/**
+ * @swagger
+ * /api/v1/colegios/cursos/{id}:
+ *   put:
+ *     summary: Actualizar un curso existente
+ *     description: Modifica los datos de un curso registrado
+ *     tags: [Cursos]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del curso a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Cursos'
+ *           example:
+ *             nombre: "Curso de Matemáticas Avanzado"
+ *             descripcion: "Curso avanzado de matemáticas"
+ *     responses:
+ *       200:
+ *         description: Curso actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Cursos'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Curso no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(`${rutas_cursos}/:id`, sessionAuth, CursosService.actualizar);
+/**
+ * @swagger
+ * /api/v1/colegios/cursos/{id}:
+ *   delete:
+ *     summary: Eliminar un curso
+ *     description: Elimina un curso del sistema
+ *     tags: [Cursos]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del curso a eliminar
+ *     responses:
+ *       204:
+ *         description: Curso eliminado exitosamente
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Curso no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(`${rutas_cursos}/:id`, sessionAuth, CursosService.eliminar);
+
+
+
+/**
+ * @swagger
+ * /api/v1/colegios/historiales_comunicaciones:
+ *   get:
+ *     summary: Obtener historial de comunicaciones
+ *     description: Retorna el historial de comunicaciones registrado
+ *     tags: [Comunicaciones]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Historial de comunicaciones obtenido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/HistorialComunicacion'
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(rutas_historiales_comunicaciones, sessionAuth, HistorialComunicacionsService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/colegios/historiales_comunicaciones:
+ *   post:
+ *     summary: Registrar nueva comunicación
+ *     description: Crea un nuevo registro en el historial de comunicaciones
+ *     tags: [Comunicaciones]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/HistorialComunicacion'
+ *           example:
+ *             alumno_id: 1
+ *             apoderado_id: 1
+ *             usuario_id: 1
+ *             asunto: "Informe de rendimiento"
+ *             descripcion: "Reunión para discutir el rendimiento académico"
+ *             acciones_acuerdos_tomados: "Programar tutorías semanales"
+ *     responses:
+ *       201:
+ *         description: Comunicación registrada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HistorialComunicacion'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(rutas_historiales_comunicaciones, sessionAuth, HistorialComunicacionsService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/colegios/historiales_comunicaciones/{id}:
+ *   put:
+ *     summary: Actualizar comunicación existente
+ *     description: Modifica un registro existente en el historial de comunicaciones
+ *     tags: [Comunicaciones]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la comunicación a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/HistorialComunicacion'
+ *           example:
+ *             descripcion: "Reunión para discutir el rendimiento académico (actualizado)"
+ *             acciones_acuerdos_tomados: "Programar tutorías semanales y seguimiento mensual"
+ *     responses:
+ *       200:
+ *         description: Comunicación actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HistorialComunicacion'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Comunicación no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(`${rutas_historiales_comunicaciones}/:id`, sessionAuth, HistorialComunicacionsService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/colegios/historiales_comunicaciones/{id}:
+ *   delete:
+ *     summary: Eliminar comunicación
+ *     description: Elimina un registro del historial de comunicaciones
+ *     tags: [Comunicaciones]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la comunicación a eliminar
+ *     responses:
+ *       204:
+ *         description: Comunicación eliminada exitosamente
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Comunicación no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(`${rutas_historiales_comunicaciones}/:id`, sessionAuth, HistorialComunicacionsService.eliminar);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Colegio:
+ *       type: object
+ *       properties:
+ *         colegio_id:
+ *           type: integer
+ *           example: 1
+ *         nombre:
+ *           type: string
+ *           example: "Colegio Ejemplo"
+ *         nombre_fantasia:
+ *           type: string
+ *           example: "Ejemplo"
+ *         tipo_colegio:
+ *           type: string
+ *           example: "Privado"
+ *         dependencia:
+ *           type: string
+ *           example: "Particular"
+ *         sitio_web:
+ *           type: string
+ *           example: "www.colegioejemplo.cl"
+ *         direccion:
+ *           type: string
+ *           example: "Calle Principal 123"
+ *         telefono_contacto:
+ *           type: string
+ *           example: "+56912345678"
+ *         correo_electronico:
+ *           type: string
+ *           example: "contacto@colegioejemplo.cl"
+ *         comuna_id:
+ *           type: integer
+ *           example: 101
+ *         region_id:
+ *           type: integer
+ *           example: 13
+ *         pais_id:
+ *           type: integer
+ *           example: 1
+ * 
+ *     Grado:
+ *       type: object
+ *       properties:
+ *         grado_id:
+ *           type: integer
+ *           example: 1
+ *         nombre:
+ *           type: string
+ *           example: "Primero Básico"
+ * 
+ *     NivelEducativo:
+ *       type: object
+ *       properties:
+ *         nivel_educativo_id:
+ *           type: integer
+ *           example: 1
+ *         nombre:
+ *           type: string
+ *           example: "Educación Básica"
+ * 
+ *     AlumnoAsistencia:
+ *       type: object
+ *       properties:
+ *         alumno_asistencia_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 1
+ *         fecha_hora:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-10-15T08:00:00Z"
+ *         estado:
+ *           type: string
+ *           example: "Presente"
+ *         justificacion:
+ *           type: string
+ *           example: "Enfermedad"
+ *         usuario_justifica:
+ *           type: integer
+ *           example: 2
+ * 
+ *     AlumnoTarea:
+ *       type: object
+ *       properties:
+ *         alumno_tarea_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 1
+ *         fecha_programacion:
+ *           type: string
+ *           format: date
+ *           example: "2023-10-20"
+ *         materia_id:
+ *           type: integer
+ *           example: 3
+ *         color:
+ *           type: string
+ *           example: "#FF5733"
+ *         tipo_tarea:
+ *           type: string
+ *           example: "Proyecto"
+ *         descripcion_tarea:
+ *           type: string
+ *           example: "Investigación sobre ecosistemas"
+ *         estado_tarea:
+ *           type: string
+ *           example: "Pendiente"
+ * 
+ *     Aula:
+ *       type: object
+ *       properties:
+ *         aula_id:
+ *           type: integer
+ *           example: 1
+ *         nombre:
+ *           type: string
+ *           example: "Aula 101"
+ *         capacidad:
+ *           type: integer
+ *           example: 30
+ *         grado_id:
+ *           type: integer
+ *           example: 1
+ * 
+ *     DiaFestivo:
+ *       type: object
+ *       properties:
+ *         dia_festivo_id:
+ *           type: integer
+ *           example: 1
+ *         calendario_escolar_id:
+ *           type: integer
+ *           example: 1
+ *         dia_festivo:
+ *           type: string
+ *           format: date
+ *           example: "2023-12-25"
+ *         descripcion:
+ *           type: string
+ *           example: "Navidad"
+ * 
+ *     CalendarioEscolar:
+ *       type: object
+ *       properties:
+ *         calendario_escolar_id:
+ *           type: integer
+ *           example: 1
+ *         nombre:
+ *           type: string
+ *           example: "Calendario 2023"
+ *         año:
+ *           type: integer
+ *           example: 2023
+ * 
+ *     CalendarioFechaImportante:
+ *       type: object
+ *       properties:
+ *         fecha_importante_id:
+ *           type: integer
+ *           example: 1
+ *         calendario_escolar_id:
+ *           type: integer
+ *           example: 1
+ *         fecha_importante:
+ *           type: string
+ *           format: date
+ *           example: "2023-12-25"
+ *         descripcion:
+ *           type: string
+ *           example: "Navidad"
+ * 
+ *     Curso:
+ *       type: object
+ *       properties:
+ *         curso_id:
+ *           type: integer
+ *           example: 1
+ *         nombre:
+ *           type: string
+ *           example: "Matemáticas Avanzadas"
+ *         descripcion:
+ *           type: string
+ *           example: "Curso de matemáticas para nivel avanzado"
+ * 
+ *     HistorialComunicacion:
+ *       type: object
+ *       properties:
+ *         historial_comunicacion_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 1
+ *         apoderado_id:
+ *           type: integer
+ *           example: 1
+ *         usuario_id:
+ *           type: integer
+ *           example: 1
+ *         fecha_hora:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-10-15T14:30:00Z"
+ *         asunto:
+ *           type: string
+ *           example: "Informe de rendimiento"
+ *         descripcion:
+ *           type: string
+ *           example: "Reunión para discutir el rendimiento académico"
+ *         acciones_acuerdos_tomados:
+ *           type: string
+ *           example: "Programar tutorías semanales"
  * 
  *   securitySchemes:
  *     sessionAuth:
