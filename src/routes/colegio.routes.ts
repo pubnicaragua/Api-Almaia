@@ -18,9 +18,9 @@ const rutas_nivel_educativo = "/niveles_educativos";
 const rutas_alumnos_asistencias = "/alumnos_asistencias";
 const rutas_alumnos_tareas = "/alumnos_tareas";
 const rutas_aulas = "/aulas";
-const rutas_dias_festivos = "/aulas";
+const rutas_dias_festivos = "/dias_festivos";
 const rutas_calendarios_escolares = "/calendarios_escolares";
-const rutas_calendarios_fechas_inportantes = "/calendarios_fechas_inportantes";
+const rutas_calendarios_fechas_importantes = "/calendarios_fechas_importantes";
 const rutas_cursos = "/cursos";
 const rutas_historiales_comunicaciones = "/historiales_comunicaciones";
 
@@ -37,6 +37,18 @@ const rutas_historiales_comunicaciones = "/historiales_comunicaciones";
  *     description: Gestión de asistencias de alumnos
  *   - name: Tareas
  *     description: Gestión de tareas de alumnos
+ *   - name: Aulas
+ *     description: Gestión de aulas
+ *   - name: Días Festivos
+ *     description: Gestión de días festivos
+ *   - name: Calendarios Escolares
+ *     description: Gestión de calendarios escolares
+ *   - name: Fechas Importantes
+ *     description: Gestión de fechas importantes
+ *   - name: Cursos
+ *     description: Gestión de cursos
+ *   - name: Comunicaciones
+ *     description: Gestión de historial de comunicaciones
  */
 
 /**
@@ -733,128 +745,29 @@ router.delete(
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     Colegio:
- *       type: object
- *       properties:
- *         colegio_id:
- *           type: integer
- *           example: 1
- *         nombre:
- *           type: string
- *           example: "Colegio Ejemplo"
- *         nombre_fantasia:
- *           type: string
- *           example: "Ejemplo"
- *         tipo_colegio:
- *           type: string
- *           example: "Privado"
- *         dependencia:
- *           type: string
- *           example: "Particular"
- *         sitio_web:
- *           type: string
- *           example: "www.colegioejemplo.cl"
- *         direccion:
- *           type: string
- *           example: "Calle Principal 123"
- *         telefono_contacto:
- *           type: string
- *           example: "+56912345678"
- *         correo_electronico:
- *           type: string
- *           example: "contacto@colegioejemplo.cl"
- *         comuna_id:
- *           type: integer
- *           example: 101
- *         region_id:
- *           type: integer
- *           example: 13
- *         pais_id:
- *           type: integer
- *           example: 1
- * 
- *     Grado:
- *       type: object
- *       properties:
- *         grado_id:
- *           type: integer
- *           example: 1
- *         nombre:
- *           type: string
- *           example: "Primero Básico"
- * 
- *     NivelEducativo:
- *       type: object
- *       properties:
- *         nivel_educativo_id:
- *           type: integer
- *           example: 1
- *         nombre:
- *           type: string
- *           example: "Educación Básica"
- * 
- *     AlumnoAsistencia:
- *       type: object
- *       properties:
- *         alumno_asistencia_id:
- *           type: integer
- *           example: 1
- *         alumno_id:
- *           type: integer
- *           example: 1
- *         fecha_hora:
- *           type: string
- *           format: date-time
- *           example: "2023-10-15T08:00:00Z"
- *         estado:
- *           type: string
- *           example: "Presente"
- *         justificacion:
- *           type: string
- *           example: "Enfermedad"
- *         usuario_justifica:
- *           type: integer
- *           example: 2
- * 
- *     AlumnoTarea:
- *       type: object
- *       properties:
- *         alumno_tarea_id:
- *           type: integer
- *           example: 1
- *         alumno_id:
- *           type: integer
- *           example: 1
- *         fecha_programacion:
- *           type: string
- *           format: date
- *           example: "2023-10-20"
- *         materia_id:
- *           type: integer
- *           example: 3
- *         color:
- *           type: string
- *           example: "#FF5733"
- *         tipo_tarea:
- *           type: string
- *           example: "Proyecto"
- *         descripcion_tarea:
- *           type: string
- *           example: "Investigación sobre ecosistemas"
- *         estado_tarea:
- *           type: string
- *           example: "Pendiente"
- * 
- *   securitySchemes:
- *     sessionAuth:
- *       type: apiKey
- *       in: header
- *       name: Authorization
- *       description: Token de autenticación obtenido al iniciar sesión
+ * /api/v1/colegios/aulas:
+ *   get:
+ *     summary: Obtener lista de aulas
+ *     description: Retorna todas las aulas registradas
+ *     tags: [Aulas]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de aulas obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Aula'
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
  */
 router.get(rutas_aulas, sessionAuth, AulasService.obtener);
+
 /**
  * @swagger
  * /api/v1/colegios/aulas:
@@ -889,6 +802,7 @@ router.get(rutas_aulas, sessionAuth, AulasService.obtener);
  *         description: Error interno del servidor
  */
 router.post(rutas_aulas, sessionAuth, AulasService.guardar);
+
 /**
  * @swagger
  * /api/v1/colegios/aulas/{id}:
@@ -931,6 +845,7 @@ router.post(rutas_aulas, sessionAuth, AulasService.guardar);
  *         description: Error interno del servidor
  */
 router.put(`${rutas_aulas}/:id`, sessionAuth, AulasService.actualizar);
+
 /**
  * @swagger
  * /api/v1/colegios/aulas/{id}:
@@ -1018,51 +933,49 @@ router.get(rutas_dias_festivos, sessionAuth, CalendarioDiaFestivosService.obtene
  *         description: Error interno del servidor
  */
 router.post(rutas_dias_festivos, sessionAuth, CalendarioDiaFestivosService.guardar);
+
 /**
  * @swagger
  * /api/v1/colegios/dias_festivos/{id}:
  *   put:
- *     summary: Actualizar un día festivo existente  
- *    description: Modifica los datos de un día festivo registrado
- * 
- *    tags: [Días Festivos]
- *   security:
- *      - sessionAuth: []
- *   parameters:
- *     - in: path
- *      name: id
- *     required: true
- *     schema:
- *       type: integer
- *      description: ID del día festivo a actualizar
- *  requestBody:
- *    required: true
- *   content:
- *     application/json:
- *      schema:
- *      $ref: '#/components/schemas/DiaFestivo'
- *     example:  
- *      calendario_escolar_id: 1
- *     dia_festivo: "2023-12-25"
- *     descripcion: "Navidad"
- *   responses:
- *      200:
- *        description: Día festivo actualizado exitosamente
+ *     summary: Actualizar un día festivo existente
+ *     description: Modifica los datos de un día festivo registrado
+ *     tags: [Días Festivos]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del día festivo a actualizar
+ *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
- *          schema:
- *           $ref: '#/components/schemas/DiaFestivo'
- * 
- *      400:
- *       description: Datos de entrada inválidos o faltantes
- *      401:
- *     description: No autorizado - Sesión no válida o no proporcionada
- *     404:
- *      description: Día festivo no encontrado
- *     500:
- *      description: Error interno del servidor
- * */
+ *           schema:
+ *             $ref: '#/components/schemas/DiaFestivo'
+ *           example:
+ *             descripcion: "Navidad (actualizado)"
+ *     responses:
+ *       200:
+ *         description: Día festivo actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DiaFestivo'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Día festivo no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.put(`${rutas_dias_festivos}/:id`, sessionAuth, CalendarioDiaFestivosService.actualizar);
+
 /**
  * @swagger
  * /api/v1/colegios/dias_festivos/{id}:
@@ -1091,8 +1004,6 @@ router.put(`${rutas_dias_festivos}/:id`, sessionAuth, CalendarioDiaFestivosServi
  */
 router.delete(`${rutas_dias_festivos}/:id`, sessionAuth, CalendarioDiaFestivosService.eliminar);
 
-
-
 /**
  * @swagger
  * /api/v1/colegios/calendarios_escolares:
@@ -1118,9 +1029,110 @@ router.delete(`${rutas_dias_festivos}/:id`, sessionAuth, CalendarioDiaFestivosSe
  */
 router.get(rutas_calendarios_escolares, sessionAuth, CalendarioEscolarsService.obtener);
 
+/**
+ * @swagger
+ * /api/v1/colegios/calendarios_escolares:
+ *   post:
+ *     summary: Crear un nuevo calendario escolar
+ *     description: Registra un nuevo calendario escolar en el sistema
+ *     tags: [Calendarios Escolares]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CalendarioEscolar'
+ *           example:
+ *             nombre: "Calendario 2023-2024"
+ *             año: 2023
+ *     responses:
+ *       201:
+ *         description: Calendario escolar creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CalendarioEscolar'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(rutas_calendarios_escolares, sessionAuth, CalendarioEscolarsService.guardar);
 
+/**
+ * @swagger
+ * /api/v1/colegios/calendarios_escolares/{id}:
+ *   put:
+ *     summary: Actualizar un calendario escolar existente
+ *     description: Modifica los datos de un calendario escolar registrado
+ *     tags: [Calendarios Escolares]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del calendario escolar a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CalendarioEscolar'
+ *           example:
+ *             nombre: "Calendario Académico 2023-2024"
+ *     responses:
+ *       200:
+ *         description: Calendario escolar actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CalendarioEscolar'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Calendario escolar no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(`${rutas_calendarios_escolares}/:id`, sessionAuth, CalendarioEscolarsService.actualizar);
 
-//Fechas Importantes
+/**
+ * @swagger
+ * /api/v1/colegios/calendarios_escolares/{id}:
+ *   delete:
+ *     summary: Eliminar un calendario escolar
+ *     description: Elimina un calendario escolar del sistema
+ *     tags: [Calendarios Escolares]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del calendario escolar a eliminar
+ *     responses:
+ *       204:
+ *         description: Calendario escolar eliminado exitosamente
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Calendario escolar no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(`${rutas_calendarios_escolares}/:id`, sessionAuth, CalendarioEscolarsService.eliminar);
+
 /**
  * @swagger
  * /api/v1/colegios/calendarios_fechas_importantes:
@@ -1144,7 +1156,7 @@ router.get(rutas_calendarios_escolares, sessionAuth, CalendarioEscolarsService.o
  *       500:
  *         description: Error interno del servidor
  */
-router.get(rutas_calendarios_fechas_inportantes, sessionAuth, CalendarioFechaImportantesService.obtener);
+router.get(rutas_calendarios_fechas_importantes, sessionAuth, CalendarioFechaImportantesService.obtener);
 
 /**
  * @swagger
@@ -1179,51 +1191,50 @@ router.get(rutas_calendarios_fechas_inportantes, sessionAuth, CalendarioFechaImp
  *       500:
  *         description: Error interno del servidor
  */
-router.post(rutas_calendarios_fechas_inportantes, sessionAuth, CalendarioFechaImportantesService.guardar);
+router.post(rutas_calendarios_fechas_importantes, sessionAuth, CalendarioFechaImportantesService.guardar);
+
 /**
  * @swagger
- *   /api/v1/colegios/calendarios_fechas_importantes/{id}:
- *  put:
- *    summary: Actualizar una fecha importante existente
- *   description: Modifica los datos de una fecha importante registrada
- *   
- *  tags: [Fechas Importantes]
- * security:
- *  - sessionAuth: []
- * parameters:
- *   - in: path
- *     name: id
- *     required: true
- *     schema:
- *       type: integer
- *     description: ID de la fecha importante a actualizar
- * requestBody:
- *   required: true
- *   content:
- *     application/json:
- *       schema:
- *         $ref: '#/components/schemas/CalendarioFechaImportante'
- *       example:
- *         calendario_escolar_id: 1
- *         fecha_importante: "2023-12-25"
- *         descripcion: "Navidad"
- * responses:
- *   200:
- *     description: Fecha importante actualizada exitosamente
- *     content:
- *       application/json:
+ * /api/v1/colegios/calendarios_fechas_importantes/{id}:
+ *   put:
+ *     summary: Actualizar una fecha importante existente
+ *     description: Modifica los datos de una fecha importante registrada
+ *     tags: [Fechas Importantes]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
  *         schema:
- *           $ref: '#/components/schemas/CalendarioFechaImportante'
- *   400:
- *     description: Datos de entrada inválidos o faltantes
- *   401:
- *     description: No autorizado - Sesión no válida o no proporcionada
- *   404:
- *     description: Fecha importante no encontrada
- *   500:
- *     description: Error interno del servidor
+ *           type: integer
+ *         description: ID de la fecha importante a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CalendarioFechaImportante'
+ *           example:
+ *             descripcion: "Navidad (actualizado)"
+ *     responses:
+ *       200:
+ *         description: Fecha importante actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CalendarioFechaImportante'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       404:
+ *         description: Fecha importante no encontrada
+ *       500:
+ *         description: Error interno del servidor
  */
-router.put(`${rutas_calendarios_fechas_inportantes}/:id`, sessionAuth, CalendarioFechaImportantesService.actualizar);
+router.put(`${rutas_calendarios_fechas_importantes}/:id`, sessionAuth, CalendarioFechaImportantesService.actualizar);
+
 /**
  * @swagger
  * /api/v1/colegios/calendarios_fechas_importantes/{id}:
@@ -1250,9 +1261,8 @@ router.put(`${rutas_calendarios_fechas_inportantes}/:id`, sessionAuth, Calendari
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(`${rutas_calendarios_fechas_inportantes}/:id`, sessionAuth, CalendarioFechaImportantesService.eliminar);
+router.delete(`${rutas_calendarios_fechas_importantes}/:id`, sessionAuth, CalendarioFechaImportantesService.eliminar);
 
-//cursos
 /**
  * @swagger
  * /api/v1/colegios/cursos:
@@ -1270,13 +1280,14 @@ router.delete(`${rutas_calendarios_fechas_inportantes}/:id`, sessionAuth, Calend
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Cursos'
+ *                 $ref: '#/components/schemas/Curso'
  *       401:
  *         description: No autorizado - Sesión no válida o no proporcionada
  *       500:
  *         description: Error interno del servidor
  */
 router.get(rutas_cursos, sessionAuth, CursosService.obtener);
+
 /**
  * @swagger
  * /api/v1/colegios/cursos:
@@ -1291,17 +1302,17 @@ router.get(rutas_cursos, sessionAuth, CursosService.obtener);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Cursos'
+ *             $ref: '#/components/schemas/Curso'
  *           example:
- *             nombre: "Curso de Matemáticas"
- *             descripcion: "Curso avanzado de matemáticas"
+ *             nombre: "Matemáticas Avanzadas"
+ *             descripcion: "Curso de matemáticas para nivel avanzado"
  *     responses:
  *       201:
  *         description: Curso creado exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Cursos'
+ *               $ref: '#/components/schemas/Curso'
  *       400:
  *         description: Datos de entrada inválidos o faltantes
  *       401:
@@ -1310,6 +1321,7 @@ router.get(rutas_cursos, sessionAuth, CursosService.obtener);
  *         description: Error interno del servidor
  */
 router.post(rutas_cursos, sessionAuth, CursosService.guardar);
+
 /**
  * @swagger
  * /api/v1/colegios/cursos/{id}:
@@ -1331,17 +1343,16 @@ router.post(rutas_cursos, sessionAuth, CursosService.guardar);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Cursos'
+ *             $ref: '#/components/schemas/Curso'
  *           example:
- *             nombre: "Curso de Matemáticas Avanzado"
- *             descripcion: "Curso avanzado de matemáticas"
+ *             descripcion: "Curso avanzado de matemáticas (actualizado)"
  *     responses:
  *       200:
  *         description: Curso actualizado exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Cursos'
+ *               $ref: '#/components/schemas/Curso'
  *       400:
  *         description: Datos de entrada inválidos o faltantes
  *       401:
@@ -1352,6 +1363,7 @@ router.post(rutas_cursos, sessionAuth, CursosService.guardar);
  *         description: Error interno del servidor
  */
 router.put(`${rutas_cursos}/:id`, sessionAuth, CursosService.actualizar);
+
 /**
  * @swagger
  * /api/v1/colegios/cursos/{id}:
@@ -1379,8 +1391,6 @@ router.put(`${rutas_cursos}/:id`, sessionAuth, CursosService.actualizar);
  *         description: Error interno del servidor
  */
 router.delete(`${rutas_cursos}/:id`, sessionAuth, CursosService.eliminar);
-
-
 
 /**
  * @swagger

@@ -8,6 +8,8 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { subDays, formatISO, startOfDay } from "date-fns";
 import { AlumnoServicioCasoUso } from "../../../core/services/AlumnoServicioCasoUso";
+import { AlertasServicioCasoUso } from "../../../core/services/AlertasServiceCasoUso";
+import { ALERT_TYPES } from "../../../core/modelo/home/AlertType";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -32,6 +34,12 @@ export const DashboardHomeService = {
       const responses = await alumnoServicioCasoUso.calcularAlumnosActivos(
         sevenDaysAgo
       );
+      const alertas_services_caso_uso = new AlertasServicioCasoUso()
+      const [sosStats, denunciaStats, almaStats] = await Promise.all([
+        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.SOS),
+        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.DENUNCIA),
+        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMA)
+      ]);
       const alumnosFrecuentes =
         alumnoServicioCasoUso.calcularAlumnosFrecuentes(responses);
         const response = {
@@ -41,24 +49,9 @@ export const DashboardHomeService = {
             frecuentes: alumnosFrecuentes,
             totales: totalAlumnos ?? 0,
           },
-          sos_alma: {
-            activos: 5,
-            vencidos: 0,
-            por_vencer: 2,
-            totales: 13,
-          },
-          denuncias: {
-            activos: 19,
-            vencidos: 0,
-            por_vencer: 3,
-            totales: 24,
-          },
-          alertas_alma: {
-            activos: 57,
-            vencidos: 0,
-            por_vencer: 6,
-            totales: 82,
-          },
+          sos_alma: sosStats,
+          denuncias: denunciaStats,
+          alertas_alma: almaStats,
         };
     
         res.json(response);

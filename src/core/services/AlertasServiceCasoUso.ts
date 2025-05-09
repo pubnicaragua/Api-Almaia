@@ -3,14 +3,9 @@ import { SupabaseClientService } from "./supabaseClient";
 import { addDays, isAfter, isBefore } from "date-fns";
 import { AlertStats } from "../modelo/home/AlertStats";
 
-export class AlumnoServicioCasoUso {
+export class AlertasServicioCasoUso {
      private supabaseService: SupabaseClientService;
       private client: SupabaseClient;
-      private ALERT_TYPES = {
-        SOS: 1,    // ID para alertas SOS
-        DENUNCIA: 2, // ID para denuncias
-        ALMA: 3     // ID para alertas ALMA
-      };
       constructor() {
         this.supabaseService = new SupabaseClientService();
         this.client = this.supabaseService.getClient();
