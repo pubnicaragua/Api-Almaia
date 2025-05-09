@@ -120,7 +120,7 @@ const router = express.Router();
 router.get("/cards/emociones", sessionAuth, DashboardHomeService.getStatsCards);
 /**
  * @swagger
- * /barra/emociones:
+ * api/v1/home/barra/emociones:
  *   get:
  *     summary: Obtener datos estadísticos de emociones
  *     description: Retorna un listado de emociones registradas con sus valores cuantitativos y colores asociados
@@ -181,7 +181,7 @@ router.get("/cards/emociones", sessionAuth, DashboardHomeService.getStatsCards);
  *             example:
  *               error: "Error al recuperar los datos de emociones"
  */
-router.get("barra/emociones", sessionAuth, DashboardHomeService.getEmotionsData);
+router.get("/barra/emociones", sessionAuth, DashboardHomeService.getEmotionsData);
 /**
  * @swagger
  * /api/v1/home/emotions/general:
