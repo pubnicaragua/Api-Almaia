@@ -7,9 +7,23 @@ const dataService:DataService<GeneradorInforme> = new DataService("generadores_i
 export const GeneradorInformeService = {
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+            /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const generadorInforme = await dataService.getAll(["*"],where);
-            res.json(generadorInforme);
+            res.json(generadorInforme);*/
+            const informes = [
+                {
+                  generador_informe_id: 1,
+                  pregunta: "¿Cómo ha sido el comportamiento del alumno?",
+                  tiene_respuesta: true,
+                  texto: "El alumno ha mostrado...",
+                  freq_dias: 30,
+                  generador_informe_ambito: {
+                    generador_informe_ambito_id: 2,
+                    nombre: "Comportamiento"
+                  }
+                }
+              ];
+            res.json(informes);              
         } catch (error) {
             console.error("Error al obtener el generadorInforme:", error);
              res.status(500).json({ message: "Error interno del servidor" });

@@ -7,9 +7,30 @@ const dataService:DataService<Pregunta> = new DataService("preguntas");
 export const PreguntaService = {
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+           /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const pregunta = await dataService.getAll(["*"],where);
-            res.json(pregunta);
+            res.json(pregunta);*/
+            const preguntas = [
+                {
+                  pregunta_id: 1,
+                  tipo_pregunta: {
+                    tipo_pregunta_id: 2,
+                    nombre: "Opción múltiple"
+                  },
+                  nivel_educativo: {
+                    nivel_educativo_id: 3,
+                    nombre: "Secundaria"
+                  },
+                  diagnostico: "Problemas de atención",
+                  sintomas: "Falta de concentración, hiperactividad",
+                  grupo_preguntas: "Evaluación inicial",
+                  palabra_clave: "atención",
+                  horario: "am",
+                  texto_pregunta: "¿Con qué frecuencia tiene dificultad para concentrarse en sus tareas?"
+                }
+              ];
+              
+            res.json(preguntas);
         } catch (error) {
             console.error("Error al obtener la pregunta:", error);
              res.status(500).json({ message: "Error interno del servidor" });

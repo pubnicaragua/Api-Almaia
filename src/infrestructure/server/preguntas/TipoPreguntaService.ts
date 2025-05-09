@@ -7,9 +7,16 @@ const dataService:DataService<TipoPregunta> = new DataService("tipos_tipopregunt
 export const TipoPreguntaService = {
       async obtener(req: Request, res: Response) {
             try {
-                const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+                /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
                 const tipopregunta = await dataService.getAll(["*"],where);
-                res.json(tipopregunta);
+                res.json(tipopregunta);*/
+               const tipos_preguntas = [
+                    {
+                      "tipo_pregunta_id": 1,
+                      "nombre": "Evaluación inicial"
+                    }
+                  ]
+                res.json(tipos_preguntas);
             } catch (error) {
                 console.error("Error al obtener la tipopregunta:", error);
                  res.status(500).json({ message: "Error interno del servidor" });

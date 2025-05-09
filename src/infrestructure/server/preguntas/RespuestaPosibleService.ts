@@ -6,9 +6,16 @@ const dataService:DataService<RespuestaPosible> = new DataService("respuestaposi
 export const RespuestaPosibleService = {
     async obtener(req: Request, res: Response) {
         try {
-            const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+           /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const respuestaposible = await dataService.getAll(["*"],where);
-            res.json(respuestaposible);
+            res.json(respuestaposible);*/
+            const respuestas = [
+                {
+                  "respuesta_posible_id": 1,
+                  "nombre": "Siempre"
+                }
+              ]
+            res.json(respuestas);
         } catch (error) {
             console.error("Error al obtener la respuestaposible:", error);
              res.status(500).json({ message: "Error interno del servidor" });
