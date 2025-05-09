@@ -6,9 +6,26 @@ const dataService: DataService<ConfiguracionDivisionPais> = new DataService("con
 export const ConfiguracionDivisionPaisService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const configuraciondivisionpais = await dataService.getAll(["*"], where);
-      res.json(configuraciondivisionpais);
+      res.json(configuraciondivisionpais);*/
+      const configuracionesDivisionesPais = [
+        {
+          configuracion_division_pais_id: 1,
+          pais: {
+            nombre: "Chile"
+          },
+          configuracion_region: {
+            configuracion_region_id: 1,
+            nombre: "Región Metropolitana"
+          },
+          configuracion_comuna: {
+            configuracion_comuna_id: 1,
+            nombre: "Santiago"
+          }
+        }
+      ];
+      res.json(configuracionesDivisionesPais);
     } catch (error) {
       console.error("Error al obtener la configuraciondivisionpais:", error);
       res.status(500).json({ message: "Error interno del servidor" });

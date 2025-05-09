@@ -6,9 +6,17 @@ const dataService:DataService<Patologia> = new DataService("patologias");
 export const PatologiaService = {
      async obtener(req: Request, res: Response) {
             try {
-                const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+               /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
                 const patologia = await dataService.getAll(["*"],where);
-                res.json(patologia);
+                res.json(patologia);*/
+
+                const patologias = [
+                    {
+                        "patologia_id": 1,
+                        "nombre": "Patologia 1"
+                    }
+                ]
+                res.json(patologias);
             } catch (error) {
                 console.error("Error al obtener la patologia:", error);
                  res.status(500).json({ message: "Error interno del servidor" });

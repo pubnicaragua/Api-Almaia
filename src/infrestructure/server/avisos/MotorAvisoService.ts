@@ -6,9 +6,14 @@ const dataService: DataService<MotorAviso> = new DataService("motores_avisos");
 export const MotorAvisoService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const motoraviso = await dataService.getAll(["*"], where);
-      res.json(motoraviso);
+      res.json(motoraviso);*/
+      const motores_avisos = [{
+        "motor_aviso": 1,
+        "intervalo_min": 30
+      }]
+      res.json(motores_avisos);
     } catch (error) {
       console.error("Error al obtener la motoraviso:", error);
       res.status(500).json({ message: "Error interno del servidor" });

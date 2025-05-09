@@ -6,9 +6,18 @@ const dataService: DataService<Comuna> = new DataService("comunas");
 export const ComunaService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const comuna = await dataService.getAll(["*"], where);
-      res.json(comuna);
+      res.json(comuna);*/
+     const comunas = [
+        {
+          "comuna_id": 23,
+          "nombre": "Viña del Mar",
+          "region_id": 5,
+          "pais_id": 1
+        }
+      ]
+      res.json(comunas);
     } catch (error) {
       console.error("Error al obtener la comuna:", error);
       res.status(500).json({ message: "Error interno del servidor" });

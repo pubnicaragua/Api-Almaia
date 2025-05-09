@@ -6,9 +6,16 @@ const dataService: DataService<Region> = new DataService("regions");
 export const RegionService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const region = await dataService.getAll(["*"], where);
-      res.json(region);
+      res.json(region);*/
+      const regiones = [
+        {
+          "region_id": 1,
+          "nombre": "Regiones Zona Norte"
+        }
+      ]
+      res.json(regiones);
     } catch (error) {
       console.error("Error al obtener la region:", error);
       res.status(500).json({ message: "Error interno del servidor" });

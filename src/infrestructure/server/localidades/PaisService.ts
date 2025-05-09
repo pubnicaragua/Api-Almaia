@@ -6,9 +6,16 @@ const dataService: DataService<Pais> = new DataService("paiss");
 export const PaisService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const pais = await dataService.getAll(["*"], where);
-      res.json(pais);
+      res.json(pais);*/
+      const paises = [
+        {
+          "pais_id": 1,
+          "nombre": "Chile"
+        }
+      ]
+      res.json(paises);
     } catch (error) {
       console.error("Error al obtener la pais:", error);
       res.status(500).json({ message: "Error interno del servidor" });
