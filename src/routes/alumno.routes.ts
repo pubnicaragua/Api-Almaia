@@ -8,8 +8,8 @@ import { AlumnoAntecedenteClinicosService } from '../infrestructure/server/alumn
 import { AlumnoAntecedenteFamiliarsService } from '../infrestructure/server/alumno/AlumnoAntecedenteFamiliarService';
 import { AlumnoCursoService } from '../infrestructure/server/alumno/AlumnoCursoService';
 import { AlumnoDireccionService } from '../infrestructure/server/alumno/AlumnoDireccionService';
-import { AlumnoInformeService } from '../infrestructure/server/alumno/AlumnoInformeService';
 import { AlumnoNotificacionService } from '../infrestructure/server/alumno/AlumnoNotificacionService';
+import { AlumnoMonitoreoService } from '../infrestructure/server/alumno/AlumnoMonitoreoService';
 
 const router = express.Router();
 
@@ -20,7 +20,6 @@ const ruta_alumnos_antecedentes_clinicos = '/antecedentes_clinicos';
 const ruta_alumnos_antecedentes_familiares = '/antecedentes_familiares';
 const ruta_alumnos_cursos = '/cursos';
 const ruta_alumnos_direcciones = '/direcciones';
-const ruta_alumnos_informes = '/informes';
 const ruta_alumnos_monitoreos = '/monitoreos';
 const ruta_alumnos_notificaciones = '/notificaciones';
 
@@ -39,14 +38,11 @@ const ruta_alumnos_notificaciones = '/notificaciones';
  *     description: Gestión de cursos de alumnos
  *   - name: Direcciones
  *     description: Gestión de direcciones de alumnos
- *   - name: Informes
- *     description: Gestión de informes de alumnos
  *   - name: Monitoreos
  *     description: Gestión de monitoreos de alumnos
  *   - name: Notificaciones
  *     description: Gestión de notificaciones de alumnos
  */
-
 /**
  * @swagger
  * components:
@@ -2175,198 +2171,6 @@ router.put(ruta_alumnos_direcciones + '/:id', sessionAuth, AlumnoDireccionServic
  */
 router.delete(ruta_alumnos_direcciones + '/:id', sessionAuth, AlumnoDireccionService.eliminar);
 
-// Rutas para Informes
-/**
- * @swagger
- * /api/v1/alumnos/informes:
- *   get:
- *     summary: Obtener informes académicos completos
- *     description: Retorna todos los informes registrados con detalles del alumno, curso y documentos asociados
- *     tags: [Informes]
- *     security:
- *       - sessionAuth: []
- *     parameters:
- *       - in: query
- *         name: alumno_id
- *         schema:
- *           type: integer
- *         description: Filtrar por ID de alumno específico
- *         example: 101
- *       - in: query
- *         name: tipo_informe
- *         schema:
- *           type: string
- *           enum: [Académico, Conductual, Psicológico, Médico]
- *         description: Filtrar por tipo de informe
- *         example: "Académico"
- *       - in: query
- *         name: fecha_desde
- *         schema:
- *           type: string
- *           format: date
- *         description: Filtrar informes desde esta fecha (formato YYYY-MM-DD)
- *         example: "2023-01-01"
- *     responses:
- *       200:
- *         description: Lista detallada de informes con documentos asociados
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/AlumnoInforme'
- *             example:
- *               - alumno_informe_id: 801
- *                 alumno_id: 101
- *                 tipo: "Académico"
- *                 fecha: "2023-06-15"
- *                 periodo_evaluado: "Primer Semestre 2023"
- *                 url_reporte: "https://storage.colegio.com/informes/801.pdf"
- *                 url_anexos: ["https://storage.colegio.com/anexos/801-1.pdf"]
- *                 observaciones: "El alumno muestra mejora en matemáticas"
- *                 creado_por: "profesor.jimenez@colegio.com"
- *                 alumno:
- *                   alumno_id: 101
- *                   nombre: "Juan Pérez"
- *                   curso_actual: "4° Básico A"
- *                 curso:
- *                   curso_id: 5
- *                   nombre: "4° Básico A"
- *                   profesor_jefe: "Ana López"
- *
- *               - alumno_informe_id: 802
- *                 alumno_id: 102
- *                 tipo: "Conductual"
- *                 fecha: "2023-05-20"
- *                 periodo_evaluado: "Abril 2023"
- *                 url_reporte: "https://storage.colegio.com/informes/802.pdf"
- *                 observaciones: "Se recomienda seguimiento psicológico"
- *                 creado_por: "orientacion@colegio.com"
- *                 estado: "Cerrado"
- *       400:
- *         description: Parámetros de consulta inválidos
- *         content:
- *           application/json:
- *             example:
- *               error: "Parámetros inválidos"
- *               detalles: 
- *                 - "El formato de fecha debe ser YYYY-MM-DD"
- *                 - "El tipo de informe debe ser uno de: Académico, Conductual, Psicológico, Médico"
- *       401:
- *         description: No autorizado
- *         content:
- *           application/json:
- *             example:
- *               error: "Acceso no autorizado"
- *               mensaje: "Se requieren permisos de docente o administrador"
- *       404:
- *         description: No se encontraron informes
- *         content:
- *           application/json:
- *             example:
- *               error: "No encontrado"
- *               mensaje: "No existen informes para los criterios especificados"
- *       500:
- *         description: Error interno del servidor
- *         content:
- *           application/json:
- *             example:
- *               error: "Error del servidor"
- *               mensaje: "No se pudieron recuperar los informes"
- *               detalles: "Error al acceder al servicio de almacenamiento"
- */
-router.get(ruta_alumnos_informes, sessionAuth, AlumnoInformeService.obtener);
-
-/**
- * @swagger
- * /api/v1/alumnos/informes:
- *   post:
- *     summary: Crear informe de alumno
- *     description: Registra un nuevo informe para un alumno
- *     tags: [Informes]
- *     security:
- *       - sessionAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/AlumnoInforme'
- *     responses:
- *       201:
- *         description: Informe creado exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/AlumnoInforme'
- *       400:
- *         description: Datos inválidos para crear el informe
- *       500:
- *         description: Error interno del servidor
- */
-router.post(ruta_alumnos_informes, sessionAuth, AlumnoInformeService.guardar);
-
-/**
- * @swagger
- * /api/v1/alumnos/informes/{id}:
- *   put:
- *     summary: Actualizar informe de alumno
- *     description: Actualiza un informe existente de un alumno
- *     tags: [Informes]
- *     security:
- *       - sessionAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID del informe a actualizar
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/AlumnoInforme'
- *     responses:
- *       200:
- *         description: Informe actualizado exitosamente
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/AlumnoInforme'
- *       404:
- *         description: Informe no encontrado
- *       500:
- *         description: Error interno del servidor
- */
-router.put(ruta_alumnos_informes + '/:id', sessionAuth, AlumnoInformeService.actualizar);
-
-/**
- * @swagger
- * /api/v1/alumnos/informes/{id}:
- *   delete:
- *     summary: Eliminar informe de alumno
- *     description: Elimina un informe de alumno del sistema
- *     tags: [Informes]
- *     security:
- *       - sessionAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: integer
- *         description: ID del informe a eliminar
- *     responses:
- *       204:
- *         description: Informe eliminado exitosamente
- *       404:
- *         description: Informe no encontrado
- *       500:
- *         description: Error interno del servidor
- */
-router.delete(ruta_alumnos_informes + '/:id', sessionAuth, AlumnoInformeService.eliminar);
 
 // Rutas para Monitoreos
 /**
@@ -2412,7 +2216,7 @@ router.delete(ruta_alumnos_informes + '/:id', sessionAuth, AlumnoInformeService.
  *             example:
  *               error: "Error al conectar con la base de datos"
  */
-router.get(ruta_alumnos_monitoreos, sessionAuth, AlumnoInformeService.obtener);
+router.get(ruta_alumnos_monitoreos, sessionAuth, AlumnoMonitoreoService.obtener);
 
 /**
  * @swagger
@@ -2441,7 +2245,7 @@ router.get(ruta_alumnos_monitoreos, sessionAuth, AlumnoInformeService.obtener);
  *       500:
  *         description: Error interno del servidor
  */
-router.post(ruta_alumnos_monitoreos, sessionAuth, AlumnoInformeService.guardar);
+router.post(ruta_alumnos_monitoreos, sessionAuth, AlumnoMonitoreoService.guardar);
 
 /**
  * @swagger
@@ -2477,7 +2281,7 @@ router.post(ruta_alumnos_monitoreos, sessionAuth, AlumnoInformeService.guardar);
  *       500:
  *         description: Error interno del servidor
  */
-router.put(ruta_alumnos_monitoreos + '/:id', sessionAuth, AlumnoInformeService.actualizar);
+router.put(ruta_alumnos_monitoreos + '/:id', sessionAuth, AlumnoMonitoreoService.actualizar);
 
 /**
  * @swagger
@@ -2503,7 +2307,7 @@ router.put(ruta_alumnos_monitoreos + '/:id', sessionAuth, AlumnoInformeService.a
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(ruta_alumnos_monitoreos + '/:id', sessionAuth, AlumnoInformeService.eliminar);
+router.delete(ruta_alumnos_monitoreos + '/:id', sessionAuth, AlumnoMonitoreoService.eliminar);
 
 // Rutas para Notificaciones
 /**

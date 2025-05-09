@@ -16,6 +16,7 @@ import AlertaRouters from './routes/alerta.routes';
 import ApoderadosRouters from './routes/apoderado.routes';
 import HomeRouters from './routes/home.routes';
 import PerfilRouters from './routes/perfil.routes';
+import InformesRouters from './routes/informes.routes';
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
@@ -113,6 +114,7 @@ app.use('/api/v1/alumnos', AlumnosRouters);
 app.use('/api/v1/alertas', AlertaRouters);
 app.use('/api/v1/apoderados', ApoderadosRouters);
 app.use('/api/v1/perfil', PerfilRouters);
+app.use('/api/v1/informes', InformesRouters);
 // Manejador de errores
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
