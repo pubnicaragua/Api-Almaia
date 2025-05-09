@@ -29,10 +29,20 @@ export const sessionAuth = async (
     if (error || !data?.user) {
       throw new Error("Invalid token");
     }
+    await client.from("usuarios").select().eq("auth_id", data.user.id);
+    const { data: data_user, error: error_user } = await client
+      .from("usuarios")
+      .select()
+      .eq("auth_id", data.user.id); // O usa [.in(...)] si es un array
 
-    req.userId = data.user.id;
+    if (error_user) {
+      console.error("Error al obtener usuarios:", error_user);
+    }
+    req.creado_por = data_user?.[0]?.usuario_id;
+    req.actualizado_por = data_user?.[0]?.usuario_id;
+    req.fecha_creacion = new Date().toISOString()
     next();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     res.status(500).send(error.message);
   }

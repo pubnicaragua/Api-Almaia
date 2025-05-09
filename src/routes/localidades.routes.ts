@@ -3,7 +3,6 @@ import { sessionAuth } from '../middleware/supabaseMidleware';
 import { PaisService } from '../infrestructure/server/localidades/PaisService';
 
 const router = express.Router();
-const basePath = '/api/v1/localidades';
 const ruta_paises = '/paises';
 const ruta_regiones = '/regiones';
 const ruta_comunas = '/comunas';
@@ -47,7 +46,7 @@ const ruta_configuraciones_regiones = '/configuraciones_regiones';
  *       500:
  *         description: Error interno del servidor
  */
-router.get(basePath + ruta_paises + '/', sessionAuth, PaisService.obtener);
+router.get( ruta_paises + '/', sessionAuth, PaisService.obtener);
 
 /**
  * @swagger
@@ -76,7 +75,7 @@ router.get(basePath + ruta_paises + '/', sessionAuth, PaisService.obtener);
  *       500:
  *         description: Error interno del servidor
  */
-router.post(basePath + ruta_paises + '/', sessionAuth, PaisService.guardar);
+router.post( ruta_paises + '/', sessionAuth, PaisService.guardar);
 
 /**
  * @swagger
@@ -112,7 +111,7 @@ router.post(basePath + ruta_paises + '/', sessionAuth, PaisService.guardar);
  *       500:
  *         description: Error interno del servidor
  */
-router.put(basePath + ruta_paises + '/:id', sessionAuth, PaisService.actualizar);
+router.put( ruta_paises + '/:id', sessionAuth, PaisService.actualizar);
 
 /**
  * @swagger
@@ -138,7 +137,7 @@ router.put(basePath + ruta_paises + '/:id', sessionAuth, PaisService.actualizar)
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(basePath + ruta_paises + '/:id', sessionAuth, PaisService.eliminar);
+router.delete( ruta_paises + '/:id', sessionAuth, PaisService.eliminar);
 
 /**
  * @swagger
@@ -161,7 +160,7 @@ router.delete(basePath + ruta_paises + '/:id', sessionAuth, PaisService.eliminar
  *       500:
  *         description: Error interno del servidor
  */
-router.get(basePath + ruta_regiones + '/', sessionAuth, PaisService.obtener);
+router.get( ruta_regiones + '/', sessionAuth, PaisService.obtener);
 
 /**
  * @swagger
@@ -190,7 +189,7 @@ router.get(basePath + ruta_regiones + '/', sessionAuth, PaisService.obtener);
  *       500:
  *         description: Error interno del servidor
  */
-router.post(basePath + ruta_regiones + '/', sessionAuth, PaisService.guardar);
+router.post( ruta_regiones + '/', sessionAuth, PaisService.guardar);
 
 /**
  * @swagger
@@ -226,7 +225,7 @@ router.post(basePath + ruta_regiones + '/', sessionAuth, PaisService.guardar);
  *       500:
  *         description: Error interno del servidor
  */
-router.put(basePath + ruta_regiones + '/:id', sessionAuth, PaisService.actualizar);
+router.put( ruta_regiones + '/:id', sessionAuth, PaisService.actualizar);
 
 /**
  * @swagger
@@ -252,7 +251,7 @@ router.put(basePath + ruta_regiones + '/:id', sessionAuth, PaisService.actualiza
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(basePath + ruta_regiones + '/:id', sessionAuth, PaisService.eliminar);
+router.delete( ruta_regiones + '/:id', sessionAuth, PaisService.eliminar);
 
 /**
  * @swagger
@@ -275,7 +274,7 @@ router.delete(basePath + ruta_regiones + '/:id', sessionAuth, PaisService.elimin
  *       500:
  *         description: Error interno del servidor
  */
-router.get(basePath + ruta_comunas + '/', sessionAuth, PaisService.obtener);
+router.get( ruta_comunas + '/', sessionAuth, PaisService.obtener);
 
 /**
  * @swagger
@@ -304,7 +303,7 @@ router.get(basePath + ruta_comunas + '/', sessionAuth, PaisService.obtener);
  *       500:
  *         description: Error interno del servidor
  */
-router.post(basePath + ruta_comunas + '/', sessionAuth, PaisService.guardar);
+router.post( ruta_comunas + '/', sessionAuth, PaisService.guardar);
 
 /**
  * @swagger
@@ -340,7 +339,7 @@ router.post(basePath + ruta_comunas + '/', sessionAuth, PaisService.guardar);
  *       500:
  *         description: Error interno del servidor
  */
-router.put(basePath + ruta_comunas + '/:id', sessionAuth, PaisService.actualizar);
+router.put( ruta_comunas + '/:id', sessionAuth, PaisService.actualizar);
 
 /**
  * @swagger
@@ -366,7 +365,7 @@ router.put(basePath + ruta_comunas + '/:id', sessionAuth, PaisService.actualizar
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(basePath + ruta_comunas + '/:id', sessionAuth, PaisService.eliminar);
+router.delete( ruta_comunas + '/:id', sessionAuth, PaisService.eliminar);
 
 /**
  * @swagger
@@ -389,7 +388,7 @@ router.delete(basePath + ruta_comunas + '/:id', sessionAuth, PaisService.elimina
  *       500:
  *         description: Error interno del servidor
  */
-router.get(basePath + ruta_configuraciones_divisiones_paises + '/', sessionAuth, PaisService.obtener);
+router.get( ruta_configuraciones_divisiones_paises + '/', sessionAuth, PaisService.obtener);
 
 /**
  * @swagger
@@ -418,7 +417,7 @@ router.get(basePath + ruta_configuraciones_divisiones_paises + '/', sessionAuth,
  *       500:
  *         description: Error interno del servidor
  */
-router.post(basePath + ruta_configuraciones_divisiones_paises + '/', sessionAuth, PaisService.guardar);
+router.post( ruta_configuraciones_divisiones_paises + '/', sessionAuth, PaisService.guardar);
 
 /**
  * @swagger
@@ -454,7 +453,7 @@ router.post(basePath + ruta_configuraciones_divisiones_paises + '/', sessionAuth
  *       500:
  *         description: Error interno del servidor
  */
-router.put(basePath + ruta_configuraciones_divisiones_paises + '/:id', sessionAuth, PaisService.actualizar);
+router.put( ruta_configuraciones_divisiones_paises + '/:id', sessionAuth, PaisService.actualizar);
 
 /**
  * @swagger
@@ -480,7 +479,7 @@ router.put(basePath + ruta_configuraciones_divisiones_paises + '/:id', sessionAu
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(basePath + ruta_configuraciones_divisiones_paises + '/:id', sessionAuth, PaisService.eliminar);
+router.delete( ruta_configuraciones_divisiones_paises + '/:id', sessionAuth, PaisService.eliminar);
 
 /**
  * @swagger
@@ -503,7 +502,7 @@ router.delete(basePath + ruta_configuraciones_divisiones_paises + '/:id', sessio
  *       500:
  *         description: Error interno del servidor
  */
-router.get(basePath + ruta_configuraciones_comunas + '/', sessionAuth, PaisService.obtener);
+router.get( ruta_configuraciones_comunas + '/', sessionAuth, PaisService.obtener);
 
 /**
  * @swagger
@@ -532,7 +531,7 @@ router.get(basePath + ruta_configuraciones_comunas + '/', sessionAuth, PaisServi
  *       500:
  *         description: Error interno del servidor
  */
-router.post(basePath + ruta_configuraciones_comunas + '/', sessionAuth, PaisService.guardar);
+router.post( ruta_configuraciones_comunas + '/', sessionAuth, PaisService.guardar);
 
 /**
  * @swagger
@@ -568,7 +567,7 @@ router.post(basePath + ruta_configuraciones_comunas + '/', sessionAuth, PaisServ
  *       500:
  *         description: Error interno del servidor
  */
-router.put(basePath + ruta_configuraciones_comunas + '/:id', sessionAuth, PaisService.actualizar);
+router.put( ruta_configuraciones_comunas + '/:id', sessionAuth, PaisService.actualizar);
 
 /**
  * @swagger
@@ -594,7 +593,7 @@ router.put(basePath + ruta_configuraciones_comunas + '/:id', sessionAuth, PaisSe
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(basePath + ruta_configuraciones_comunas + '/:id', sessionAuth, PaisService.eliminar);
+router.delete( ruta_configuraciones_comunas + '/:id', sessionAuth, PaisService.eliminar);
 
 /**
  * @swagger
@@ -617,7 +616,7 @@ router.delete(basePath + ruta_configuraciones_comunas + '/:id', sessionAuth, Pai
  *       500:
  *         description: Error interno del servidor
  */
-router.get(basePath + ruta_configuraciones_regiones + '/', sessionAuth, PaisService.obtener);
+router.get( ruta_configuraciones_regiones + '/', sessionAuth, PaisService.obtener);
 
 /**
  * @swagger
@@ -646,7 +645,7 @@ router.get(basePath + ruta_configuraciones_regiones + '/', sessionAuth, PaisServ
  *       500:
  *         description: Error interno del servidor
  */
-router.post(basePath + ruta_configuraciones_regiones + '/', sessionAuth, PaisService.guardar);
+router.post( ruta_configuraciones_regiones + '/', sessionAuth, PaisService.guardar);
 
 /**
  * @swagger
@@ -682,7 +681,7 @@ router.post(basePath + ruta_configuraciones_regiones + '/', sessionAuth, PaisSer
  *       500:
  *         description: Error interno del servidor
  */
-router.put(basePath + ruta_configuraciones_regiones + '/:id', sessionAuth, PaisService.actualizar);
+router.put( ruta_configuraciones_regiones + '/:id', sessionAuth, PaisService.actualizar);
 
 /**
  * @swagger
@@ -708,7 +707,7 @@ router.put(basePath + ruta_configuraciones_regiones + '/:id', sessionAuth, PaisS
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(basePath + ruta_configuraciones_regiones + '/:id', sessionAuth, PaisService.eliminar);
+router.delete( ruta_configuraciones_regiones + '/:id', sessionAuth, PaisService.eliminar);
 
 /**
  * @swagger
