@@ -9,42 +9,81 @@ export const AlumnosService = {
         /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
         const alumno = await dataService.getAll(["*"], where);
         res.json(alumno);*/
-      const alumnos=  [
-          {
-            "alumno_id": 101,
-            "colegio_id": 1,
-            "url_foto_perfil": "https://ejemplo.com/fotos/alumno101.jpg",
-            "telefono_contacto1": "+56912345678",
-            "email": "alumno101@ejemplo.com",
-            "telefono_contacto2": "+56987654321",
-            "activo": true,
-            "colegio": {
-              "colegio_id": 1,
-              "nombre": "Colegio Ejemplo",
-              "tipo_colegio": "Particular",
-              "comuna_id": 125,
-              "region_id": 13,
-              "pais_id": 1
+      const alumnos = [
+        {
+          "alumno_id": 101,
+          "colegio_id": 1,
+          "persona_id": 501,
+          "edad": 10, // Nuevo campo numérico
+          "estado": "bien", // Nuevo campo (bien/mal/regular)
+          "url_foto_perfil": "https://ejemplo.com/fotos/alumno101.jpg",
+          "activo": true,
+      
+          // Relación persona (en plural aunque sea 1-1)
+          "personas": [
+            {
+              "persona_id": 501,
+              "nombres": "Juan Pablo",
+              "apellidos": "González López",
+              "fecha_nacimiento": "2014-05-15" // Para calcular edad
             }
-          },
-          {
-            "alumno_id": 102,
-            "colegio_id": 1,
-            "url_foto_perfil": "https://ejemplo.com/fotos/alumno102.jpg",
-            "telefono_contacto1": "+56923456789",
-            "email": "alumno102@ejemplo.com",
-            "telefono_contacto2": "+56911223344",
-            "activo": true,
-            "colegio": {
-              "colegio_id": 1,
-              "nombre": "Colegio Ejemplo",
-              "tipo_colegio": "Particular",
-              "comuna_id": 125,
-              "region_id": 13,
-              "pais_id": 1
+          ],
+      
+          // Relación cursos
+          "alumnos_cursos": [
+            {
+              "alumno_curso_id": 1001,
+              "cursos": [
+                {
+                  "nombre_curso": "4° A",
+                  "grados": [
+                    {
+                      "nombre": "4° Básico"
+                    }
+                  ]
+                }
+              ]
             }
-          }
-        ]
+          ]
+        },
+        {
+          "alumno_id": 102,
+          "edad": 11,
+          "estado": "regular", // Ejemplo de otro estado
+          "personas": [
+            {
+              "persona_id": 502,
+              "nombres": "María Fernanda",
+              "apellidos": "Martínez"
+            }
+          ],
+          "alumnos_cursos": [
+            {
+              "cursos": [
+                {
+                  "nombre_curso": "5° B",
+                  "grados": [
+                    {
+                      "nombre": "5° Básico"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "alumno_id": 103,
+          "edad": 9,
+          "estado": "mal", // Tercer estado posible
+          "personas": [
+            {
+              "persona_id": 503,
+              "nombres": "Diego Alejandro"
+            }
+          ]
+        }
+      ];
         res.json(alumnos);
         } catch (error) {
         console.error("Error al obtener el alumno:", error);

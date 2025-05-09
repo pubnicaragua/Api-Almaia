@@ -9,78 +9,81 @@ export const AlumnoAlertaService = {
             /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
             const alumnoAlerta = await dataService.getAll(["*"], where);
             res.json(alumnoAlerta);*/
-           const alumnos_alertas= [
-                {
-                  "alumno_alerta_id": 201,
+            const alumnos_alertas = [
+              {
+                "alumno_alerta_id": 201,
+                "alumno_id": 101,
+                "tipo_alerta": "amarilla",  // Nuevo tipo de alerta
+                "fecha_generada": "2023-06-15T14:30:00Z",
+                "fecha_resolucion": null,
+                "estado": "Pendiente",
+                "responsable": "Prof. Jefe - Ana López",  // Nuevo campo
+                "curso_alumno": "4° Básico A",  // Nuevo campo
+                
+                // Detalle completo del alumno
+                "alumno": {
                   "alumno_id": 101,
-                  "alerta_regla_id": 3,
-                  "fecha_generada": "2023-06-15T14:30:00Z",
-                  "fecha_resolucion": null,
-                  "estado": "Pendiente",
-                  "accion_tomada": null,
-                  "leida": false,
-                  "prioridad_id": 1,
-                  "severidad_id": 2,
-                  "alertas_tipo_alerta_tipo_id": 4,
-                  "alumno": {
-                    "alumno_id": 101,
-                    "nombre": "Juan Pérez",
-                    "email": "juan.perez@colegio.com",
-                    "colegio": {
-                      "colegio_id": 1,
-                      "nombre": "Colegio Ejemplo"
-                    }
-                  },
-                  "prioridad": {
-                    "alerta_prioridad_id": 1,
-                    "nombre": "Alta",
-                    "color": "#FF0000"
-                  },
-                  "severidad": {
-                    "alerta_severidad_id": 2,
-                    "nombre": "Media",
-                    "icono": "warning"
-                  },
-                  "tipo_alerta": {
-                    "alerta_tipo_id": 4,
-                    "nombre": "Rendimiento Académico",
-                    "descripcion": "Alertas relacionadas con bajo rendimiento"
+                  "nombre": "Juan Pérez",
+                  "email": "juan.perez@colegio.com",
+                  
+                  // Curso actual (relación adicional)
+                  "curso_actual": {
+                    "curso_id": 10,
+                    "nombre": "4° Básico A",
+                    "profesor_jefe": "Ana López"
                   }
                 },
-                {
-                  "alumno_alerta_id": 202,
-                  "alumno_id": 102,
-                  "alerta_regla_id": 5,
-                  "fecha_generada": "2023-06-16T09:15:00Z",
-                  "fecha_resolucion": "2023-06-16T16:45:00Z",
-                  "estado": "Resuelta",
-                  "accion_tomada": "Se contactó al apoderado",
-                  "leida": true,
-                  "prioridad_id": 2,
-                  "severidad_id": 1,
-                  "alertas_tipo_alerta_tipo_id": 3,
-                  "alumno": {
-                    "alumno_id": 102,
-                    "nombre": "María González",
-                    "email": "maria.gonzalez@colegio.com"
-                  },
-                  "prioridad": {
-                    "alerta_prioridad_id": 2,
-                    "nombre": "Media",
-                    "color": "#FFA500"
-                  },
-                  "severidad": {
-                    "alerta_severidad_id": 1,
-                    "nombre": "Baja",
-                    "icono": "info"
-                  },
-                  "tipo_alerta": {
-                    "alerta_tipo_id": 3,
-                    "nombre": "Asistencia",
-                    "descripcion": "Alertas relacionadas con inasistencias"
+                
+                // Detalles de prioridad/severidad adaptados
+                "prioridad": {
+                  "nivel": "media",
+                  "color": "#FFD700"  // Amarillo
+                },
+                
+                "evidencias": [  // Ejemplo de evidencias adjuntas
+                  {
+                    "tipo": "foto",
+                    "url": "/evidencias/alertas/201.jpg",
+                    "fecha": "2023-06-15T14:25:00Z"
                   }
+                ]
+              },
+              {
+                "alumno_alerta_id": 202,
+                "alumno_id": 102,
+                "tipo_alerta": "roja",  // Alerta grave
+                "fecha_generada": "2023-06-16T09:15:00Z",
+                "fecha_resolucion": "2023-06-16T16:45:00Z",
+                "responsable": "Psicóloga - Marta Rojas",
+                "curso_alumno": "5° Básico B",
+                "estado": "Escalada",  // Nuevo estado
+                "accion_tomada": "Derivado a psicología",
+                
+                "alumno": {
+                  "alumno_id": 102,
+                  "nombre": "María González",
+                  "curso_actual": {
+                    "nombre": "5° Básico B",
+                    "profesor_jefe": "Carlos Méndez"
+                  }
+                },
+                
+                "prioridad": {
+                  "nivel": "crítica",
+                  "color": "#FF0000"  // Rojo
                 }
-              ]
+              },
+              // Ejemplo de alerta "sos alma"
+              {
+                "alumno_alerta_id": 203,
+                "tipo_alerta": "sos alma",  // Alerta especial
+                "fecha_generada": "2023-06-17T11:20:00Z",
+                "responsable": "Equipo de Convivencia Escolar",
+                "curso_alumno": "3° Medio A",
+                "estado": "En seguimiento",
+                "protocolo_activado": true  // Campo adicional
+              }
+            ];
             res.json(alumnos_alertas);
         } catch (error) {
             console.error("Error al obtener la alerta del alumno:", error);
