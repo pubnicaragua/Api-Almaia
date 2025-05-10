@@ -2,9 +2,10 @@ import { SupabaseRepository } from "../adapter/SupabaseRepository";
 
 export class DataService<T> {
     protected repository: SupabaseRepository<T>;
-  
-    constructor(tableName: string) {
-      this.repository = new SupabaseRepository<T>(tableName);
+    protected pkName:string;
+    constructor(tableName: string,pkName:string ="id") {
+      this.pkName = pkName
+      this.repository = new SupabaseRepository<T>(tableName,pkName);
     }
   
     async processData(entity: T): Promise<T> {
@@ -30,7 +31,7 @@ export class DataService<T> {
       await this.repository.deleteData(id);
     }
   
-    async updateById(id: number, entity: T, namePk:string ='id'): Promise<void> {
-      await this.repository.updateData(id, entity,namePk);
+    async updateById(id: number, entity: T): Promise<void> {
+      await this.repository.updateData(id, entity);
     }
   }

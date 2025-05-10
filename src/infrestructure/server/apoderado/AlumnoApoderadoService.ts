@@ -2,15 +2,34 @@ import { Request, Response } from "express";
 
 import { DataService } from "../DataService";
 import { AlumnoApoderado } from "../../../core/modelo/apoderado/AlumnoApoderado";
-
-const dataService:DataService<AlumnoApoderado> = new DataService("alumnos_respuestas");
+import Joi from "joi";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+const AlumnoApoderadoSchema = Joi.object({
+  tipo_apoderado: Joi.string().max(20).optional(),
+  observaciones: Joi.string().max(200).optional(),
+  estado_usuario: Joi.string().max(20).optional(),
+  alumno_id: Joi.number().integer().required(),
+  apoderado_id: Joi.number().integer().required(),
+});
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
+const dataService: DataService<AlumnoApoderado> = new DataService(
+  "alumnos_apoderados",
+  "alumno_apoderado_id"
+);
 export const AlumnoApoderadoService = {
-    async obtener(req: Request, res: Response) {
-        try {
-            /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-            const alumnoApoderado = await dataService.getAll(["*"],where);
-            res.json(alumnoApoderado);*/
-            const  alumnos_apoderados = [
+  async obtener(req: Request, res: Response) {
+    try {
+      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      const alumnoApoderado = await dataService.getAll(
+        [
+          "*,apoderados('apoderado_id',persona_id,personas('persona_id','tipo_documento','tipo_documento','numero_documento','nombres','apellidos','genero_id','estado_civil_id','fecha_nacimiento'))",
+        ],
+        where
+      );
+      res.json(alumnoApoderado);
+      /* const  alumnos_apoderados = [
                 {
                   // Relación alumno-apoderado (entidad principal)
                   "alumno_apoderado_id": 1,
@@ -105,43 +124,105 @@ export const AlumnoApoderadoService = {
                   }
                 }
               ];
-            res.json(alumnos_apoderados);
-        } catch (error) {
-            console.error("Error al obtener la alumnoApoderado:", error);
-             res.status(500).json({ message: "Error interno del servidor" });
-        }
-    },
-    guardar: async (req: Request, res: Response) => {
-        try {
-            const alumnoApoderado: AlumnoApoderado = req.body;
-            const savedAlumnoApoderado = await dataService.processData(alumnoApoderado);
-            res.status(201).json(savedAlumnoApoderado);
-        } catch (error) {
-            console.error("Error al guardar la alumnoApoderado:", error);
-             res.status(500).json({ message: "Error interno del servidor" });
-        }
+            res.json(alumnos_apoderados);*/
+    } catch (error) {
+      console.error("Error al obtener la alumnoApoderado:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
     }
-    ,
-    async actualizar(req: Request, res: Response) {
-        try {
-            const id = parseInt(req.params.id);
-            const alumnoApoderado: AlumnoApoderado = req.body;
-            await dataService.updateById(id, alumnoApoderado);
-            res.status(200).json({ message: "AlumnoApoderado actualizado correctamente" });
-        } catch (error) {
-            console.error("Error al actualizar la alumnoApoderado:", error);
-             res.status(500).json({ message: "Error interno del servidor" });
-        }
+  },
+  guardar: async (req: Request, res: Response) => {
+    try {
+      const alumnoApoderado: AlumnoApoderado = req.body;
+      Object.assign(alumnoApoderado, req.body);
+      alumnoApoderado.creado_por = req.creado_por;
+      alumnoApoderado.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = AlumnoApoderadoSchema.validate(
+        req.body
+      );
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumnoApoderado.alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
+      const { data: dataApoderado, error: errorApoderado } = await client
+        .from("apoderados")
+        .select("*")
+        .eq("apoderado_id", alumnoApoderado.alumno_id)
+        .single();
+      if (errorApoderado || !dataApoderado) {
+        throw new Error("El alumno no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        const savedAlumnoApoderado = await dataService.processData(
+          alumnoApoderado
+        );
+        res.status(200).json(savedAlumnoApoderado);
+      }
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error al guardar la alumnoApoderado:", error);
+      res.status(500).json({ message: error.message || "Error inesperado" });
     }
-    ,
-    async eliminar(req: Request, res: Response) {
-        try {
-            const id = parseInt(req.params.id);
-            await dataService.deleteById(id);
-            res.status(200).json({ message: "AlumnoApoderado eliminada correctamente" });
-        } catch (error) {
-            console.error("Error al eliminar la alumnoApoderado:", error);
-             res.status(500).json({ message: "Error interno del servidor" });
-        }
+  },
+  async actualizar(req: Request, res: Response) {
+    try {
+      const id = parseInt(req.params.id);
+      const alumnoApoderado: AlumnoApoderado = req.body;
+      Object.assign(alumnoApoderado, req.body);
+      alumnoApoderado.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = AlumnoApoderadoSchema.validate(
+        req.body
+      );
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumnoApoderado.alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
+      const { data: dataApoderado, error: errorApoderado } = await client
+        .from("apoderados")
+        .select("*")
+        .eq("apoderado_id", alumnoApoderado.alumno_id)
+        .single();
+      if (errorApoderado || !dataApoderado) {
+        throw new Error("El alumno no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        await dataService.updateById(id, alumnoApoderado);
+        res
+          .status(200)
+          .json({ message: "AlumnoApoderado actualizado correctamente" });
+      }
+    } catch (error) {
+      console.error("Error al actualizar la alumnoApoderado:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
     }
-}
+  },
+  async eliminar(req: Request, res: Response) {
+    try {
+      const id = parseInt(req.params.id);
+      await dataService.deleteById(id);
+      res
+        .status(200)
+        .json({ message: "AlumnoApoderado eliminada correctamente" });
+    } catch (error) {
+      console.error("Error al eliminar la alumnoApoderado:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
+    }
+  },
+};

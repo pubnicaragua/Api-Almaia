@@ -6,8 +6,11 @@ import { SupabaseClientService } from "../../core/services/supabaseClient";
 export class SupabaseRepository<T> implements ISupabaseRepository<T> {
   private client!: SupabaseClient;
   private table: string = "";
-  constructor(tableName: string) {
+      protected pkName:string;
+
+  constructor(tableName: string,pkName:string="id") {
     this.table = tableName;
+    this.pkName = pkName
     this.init().catch((err) => {
       throw new Error(`Error al inicializar SupabaseClient: ${err.message}`);
     });
@@ -81,19 +84,19 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
 
   async deleteData(id: number): Promise<any> {
     await this.ensureClientInitialized();
-    const { error } = await this.client.from(this.table).delete().eq("id", id);
+    const { error } = await this.client.from(this.table)
+      .update({activo:false})
+      .eq(this.pkName, id);
     if (error) throw new Error(error.message);
   }
 
-  async updateData(id: number, data: T, namePk:string ='id'): Promise<any> {
+  async updateData(id: number, data: T): Promise<any> {
     await this.ensureClientInitialized();
-    const primaryKey = namePk;
-    console.log(primaryKey);
-    
+   
     const { error } = await this.client
       .from(this.table)
       .update(data)
-      .eq(primaryKey, id);
+      .eq(this.pkName, id);
     if (error) throw new Error(error.message);
   }
 }

@@ -8,7 +8,7 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 
-const dataService: DataService<Alumno> = new DataService("alumnos");
+const dataService: DataService<Alumno> = new DataService("alumnos",'alumno_id');
 const AlumnoSchema = Joi.object({
   url_foto_perfil: Joi.string().max(255).optional(),
   telefono_contacto1: Joi.string().max(16).optional(),
@@ -182,7 +182,7 @@ export const AlumnosService = {
       }
       if (!responseSent) {
     
-      await dataService.updateById(id, alumno,'alumno_id');
+      await dataService.updateById(id, alumno);
       res.status(200).json({ message: "Alumno actualizado correctamente" });
       }
 
