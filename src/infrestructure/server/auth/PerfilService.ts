@@ -37,8 +37,8 @@ export const PerfilService = {
       
         // Funcionalidades del rol
         const funcionalidades: Funcionalidad[] = [
-          { funcionalidad_id: 1, nombre: "Dashboard", descripcion: "Acceso al panel principal", creado_por:22, actualizado_por:2,fecha_creacion: new Date(), fecha_actualizacion: new Date(), activo: true },
-          { funcionalidad_id: 2, nombre: "Gestión de Usuarios", descripcion: "Administrar usuarios del sistema",creado_por:22, actualizado_por:2,fecha_creacion: new Date(), fecha_actualizacion: new Date(), activo: true },
+          { funcionalidad_id: 1, nombre: "Dashboard", descripcion: "Acceso al panel principal", creado_por:22, actualizado_por:2,fecha_creacion: new Date().toISOString(), fecha_actualizacion: new Date().toISOString(), activo: true },
+          { funcionalidad_id: 2, nombre: "Gestión de Usuarios", descripcion: "Administrar usuarios del sistema",creado_por:22, actualizado_por:2,fecha_creacion: new Date().toISOString(), fecha_actualizacion: new Date().toISOString(), activo: true },
         ];
       
          res.json({
