@@ -182,7 +182,7 @@ export const AlumnosService = {
       }
       if (!responseSent) {
     
-      await dataService.updateById(id, alumno);
+      await dataService.updateById(id, alumno,'alumno_id');
       res.status(200).json({ message: "Alumno actualizado correctamente" });
       }
 

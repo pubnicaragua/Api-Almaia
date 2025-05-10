@@ -30,7 +30,7 @@ export class DataService<T> {
       await this.repository.deleteData(id);
     }
   
-    async updateById(id: number, entity: T): Promise<void> {
-      await this.repository.updateData(id, entity);
+    async updateById(id: number, entity: T, namePk:string ='id'): Promise<void> {
+      await this.repository.updateData(id, entity,namePk);
     }
   }

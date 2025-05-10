@@ -85,9 +85,11 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     if (error) throw new Error(error.message);
   }
 
-  async updateData(id: number, data: T): Promise<any> {
+  async updateData(id: number, data: T, namePk:string ='id'): Promise<any> {
     await this.ensureClientInitialized();
-    const primaryKey = Object.keys(data as Record<string, any>)[0];
+    const primaryKey = namePk;
+    console.log(primaryKey);
+    
     const { error } = await this.client
       .from(this.table)
       .update(data)
