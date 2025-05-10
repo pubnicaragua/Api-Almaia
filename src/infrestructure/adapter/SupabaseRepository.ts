@@ -5,17 +5,15 @@ import { SupabaseClientService } from "../../core/services/supabaseClient";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export class SupabaseRepository<T> implements ISupabaseRepository<T> {
   private client!: SupabaseClient;
-  private table: string= "";
-  constructor(tableName:string) {
-    this.table= tableName
+  private table: string = "";
+  constructor(tableName: string) {
+    this.table = tableName;
     this.init().catch((err) => {
       throw new Error(`Error al inicializar SupabaseClient: ${err.message}`);
     });
   }
 
   private async init() {
-   
-
     const supabaseService = new SupabaseClientService();
     this.client = supabaseService.getClient();
   }
@@ -26,7 +24,7 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     }
   }
 
-  async saveData( entity: T): Promise<void> {
+  async saveData(entity: T): Promise<void> {
     await this.ensureClientInitialized();
     const { data, error } = await this.client
       .from(this.table)
@@ -41,40 +39,42 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     orderBy?: string // columna opcional para ordenar
   ): Promise<T[]> {
     await this.ensureClientInitialized();
-  
+
     if (!columns.length) {
       throw new Error(
         "Debes especificar al menos una columna para generar el reporte."
       );
     }
-  
+
     const columnQuery = columns.join(",");
-  
+
     let query = this.client.from(this.table).select(columnQuery);
-  
+
     Object.keys(where).forEach((key) => {
       query = query.eq(key, where[key]);
     });
-  
-    if (orderBy && orderBy !== '*') {
+
+    if (orderBy && orderBy !== "*") {
       query = query.order(orderBy, { ascending: true });
     }
-  
+
     const { data, error } = await query.returns<T[]>();
-  
+
     if (error) {
       throw new Error(
         `Error al consultar la tabla '${this.table}': ${error.message}`
       );
     }
-  
+
     return data ?? [];
   }
-  
-  
+
   async getData(id: number): Promise<any> {
     await this.ensureClientInitialized();
-    const { data, error } = await this.client.from(this.table).select('*').eq('id', id);
+    const { data, error } = await this.client
+      .from(this.table)
+      .select("*")
+      .eq("id", id);
     if (error) throw new Error(error.message);
     return data[0];
   }
@@ -87,7 +87,11 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
 
   async updateData(id: number, data: T): Promise<any> {
     await this.ensureClientInitialized();
-    const { error } = await this.client.from(this.table).update(data).eq("id", id);
+    const primaryKey = Object.keys(data as Record<string, any>)[0];
+    const { error } = await this.client
+      .from(this.table)
+      .update(data)
+      .eq(primaryKey, id);
     if (error) throw new Error(error.message);
   }
 }

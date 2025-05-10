@@ -134,8 +134,6 @@ export const AlumnosService = {
       Object.assign(alumno, req.body);
       alumno.creado_por = req.creado_por;
       alumno.actualizado_por = req.actualizado_por
-      console.log(alumno);
-      
       let responseSent = false;
       const { error: validationError } = AlumnoSchema.validate(req.body);
       const { data, error } = await client
@@ -165,9 +163,29 @@ export const AlumnosService = {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const alumno: Alumno = req.body;
+      const alumno: Alumno = new Alumno();
+      Object.assign(alumno, req.body);
+      alumno.actualizado_por = req.actualizado_por
+      let responseSent = false;
+      const { error: validationError } = AlumnoSchema.validate(req.body);
+      const { data, error } = await client
+        .from("colegios")
+        .select("*")
+        .eq("colegio_id", alumno.colegio_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El colegio no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+    
       await dataService.updateById(id, alumno);
       res.status(200).json({ message: "Alumno actualizado correctamente" });
+      }
+
     } catch (error) {
       console.error("Error al actualizar el alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
