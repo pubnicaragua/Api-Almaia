@@ -151,7 +151,7 @@ export const AlumnoApoderadoService = {
       const { data: dataApoderado, error: errorApoderado } = await client
         .from("apoderados")
         .select("*")
-        .eq("apoderado_id", alumnoApoderado.alumno_id)
+        .eq("apoderado_id", alumnoApoderado.apoderado_id)
         .single();
       if (errorApoderado || !dataApoderado) {
         throw new Error("El alumno no existe");
