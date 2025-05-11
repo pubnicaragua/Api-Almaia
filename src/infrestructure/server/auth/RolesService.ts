@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
 import { Rol } from "../../../core/modelo/auth/Rol";
 import { DataService } from "../DataService";
-
-const dataService: DataService<Rol> = new DataService("roles");
+import Joi from "joi";
+const RolSchema = Joi.object({
+  nombre: Joi.string().max(50).required(),
+  descripcion: Joi.string().max(50).required(),
+});
+const dataService: DataService<Rol> = new DataService("roles","rol_id");
 export const RolesService = {
   async obtener(req: Request, res: Response) {
     try {
@@ -16,9 +20,20 @@ export const RolesService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
-      const rol: Rol = req.body;
-      const savedrol = await dataService.processData(rol);
-      res.status(201).json(savedrol);
+      const rol: Rol = new Rol();
+      Object.assign(rol, req.body);
+      rol.creado_por = req.creado_por;
+      rol.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = RolSchema.validate(req.body);
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        const savedrol = await dataService.processData(rol);
+        res.status(201).json(savedrol);
+      }
     } catch (error) {
       console.error("Error al guardar la rol:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -27,9 +42,20 @@ export const RolesService = {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const rol: Rol = req.body;
-      await dataService.updateById(id, rol);
-      res.status(200).json({ message: "rol actualizada correctamente" });
+      const rol: Rol = new Rol();
+      Object.assign(rol, req.body);
+      rol.creado_por = req.creado_por;
+      rol.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = RolSchema.validate(req.body);
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        await dataService.updateById(id, rol);
+        res.status(200).json({ message: "rol actualizada correctamente" });
+      }
     } catch (error) {
       console.error("Error al actualizar la rol:", error);
       res.status(500).json({ message: "Error interno del servidor" });
