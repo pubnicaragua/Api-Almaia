@@ -24,7 +24,7 @@ export const AlumnoApoderadoService = {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const alumnoApoderado = await dataService.getAll(
         [
-          "*,apoderados('apoderado_id',persona_id,personas('persona_id','tipo_documento','tipo_documento','numero_documento','nombres','apellidos','genero_id','estado_civil_id','fecha_nacimiento'))",
+          "*","apoderados(apoderado_id,persona_id,personas(persona_id,tipo_documento,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id))",
         ],
         where
       );
@@ -132,7 +132,7 @@ export const AlumnoApoderadoService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
-      const alumnoApoderado: AlumnoApoderado = req.body;
+      const alumnoApoderado: AlumnoApoderado = new AlumnoApoderado();
       Object.assign(alumnoApoderado, req.body);
       alumnoApoderado.creado_por = req.creado_por;
       alumnoApoderado.actualizado_por = req.actualizado_por;
@@ -145,7 +145,7 @@ export const AlumnoApoderadoService = {
         .select("*")
         .eq("alumno_id", alumnoApoderado.alumno_id)
         .single();
-      if (error || !data) {
+      if (error ||!data) {
         throw new Error("El alumno no existe");
       }
       const { data: dataApoderado, error: errorApoderado } = await client
@@ -153,8 +153,9 @@ export const AlumnoApoderadoService = {
         .select("*")
         .eq("apoderado_id", alumnoApoderado.apoderado_id)
         .single();
+      
       if (errorApoderado || !dataApoderado) {
-        throw new Error("El alumno no existe");
+        throw new Error("El apoderado no existe");
       }
       if (validationError) {
         responseSent = true;
@@ -175,7 +176,7 @@ export const AlumnoApoderadoService = {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const alumnoApoderado: AlumnoApoderado = req.body;
+      const alumnoApoderado: AlumnoApoderado = new AlumnoApoderado();
       Object.assign(alumnoApoderado, req.body);
       alumnoApoderado.actualizado_por = req.actualizado_por;
       let responseSent = false;
@@ -196,7 +197,7 @@ export const AlumnoApoderadoService = {
         .eq("apoderado_id", alumnoApoderado.alumno_id)
         .single();
       if (errorApoderado || !dataApoderado) {
-        throw new Error("El alumno no existe");
+        throw new Error("El apoderado no existe");
       }
       if (validationError) {
         responseSent = true;

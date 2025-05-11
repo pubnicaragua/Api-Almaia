@@ -6,12 +6,12 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 const dataService: DataService<AlumnoCurso> = new DataService(
-  "alumnos_alertas"
+  "alumnos_cursos","alumno_curso_id"
 );
 const AlumnoCursoSchema = Joi.object({
   fecha_egreso: Joi.string().required(),
   fecha_ingreso: Joi.string().required(),
-  anio_escolar: Joi.number().integer().required(),
+  ano_escolar: Joi.number().integer().required(),
   alumno_id: Joi.number().integer().required(),
   curso_id: Joi.number().integer().required(),
 });
@@ -23,7 +23,8 @@ export const AlumnoCursoService = {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const alumnoCurso = await dataService.getAll(
         [
-          "*,alumnos('alumno_id','url_foto_perfil','telefono_contacto1','telefono_contacto2','email'),cursos('curso_id','nombre',colegios('colegio_id','nombre'),grados('grado_id','nombre'),nivel_educativo('nivel_educativo_id','nombre'))",
+          "*","alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)"
+          ,"cursos(curso_id,nombre_curso,colegios(colegio_id,nombre),grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
         ],
         where
       );
@@ -82,10 +83,11 @@ export const AlumnoCursoService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
-      const alumnoCurso: AlumnoCurso = req.body;
+      const alumnoCurso: AlumnoCurso = new AlumnoCurso();
       Object.assign(alumnoCurso, req.body);
       alumnoCurso.creado_por = req.creado_por;
       alumnoCurso.actualizado_por = req.actualizado_por;
+      alumnoCurso.activo=true
       let responseSent = false;
       const { error: validationError } = AlumnoCursoSchema.validate(req.body);
       const { data, error } = await client
@@ -120,7 +122,7 @@ export const AlumnoCursoService = {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const alumnoCurso: AlumnoCurso = req.body;
+      const alumnoCurso: AlumnoCurso = new AlumnoCurso();
       Object.assign(alumnoCurso, req.body);
       alumnoCurso.creado_por = req.creado_por;
       alumnoCurso.actualizado_por = req.actualizado_por;

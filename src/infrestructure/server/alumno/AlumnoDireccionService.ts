@@ -12,7 +12,7 @@ const AlumnoDireccionSchema = Joi.object({
   region_id: Joi.number().integer().required(),
 });
 const dataService: DataService<AlumnoDireccion> = new DataService(
-  "alumnos_alertas"
+  "alumnos_direcciones","alumno_direccion_id"
 );
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -22,7 +22,9 @@ export const AlumnoDireccionService = {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const alumnoDireccion = await dataService.getAll(
         [
-          "*,alumnos('alumno_id','url_foto_perfil','telefono_contacto1','telefono_contacto2','email'),comunas('comuna_id','nombre'),paises('pais_id','nombre'),regiones('region_id','nombre')",
+          "*",
+          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
+          "comunas(comuna_id,nombre,regiones(region_id,nombre))",
         ],
         where
       );
@@ -83,7 +85,7 @@ export const AlumnoDireccionService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
-      const alumnoDireccion: AlumnoDireccion = req.body;
+      const alumnoDireccion: AlumnoDireccion = new AlumnoDireccion();
       Object.assign(alumnoDireccion, req.body);
       alumnoDireccion.creado_por = req.creado_por;
       alumnoDireccion.actualizado_por = req.actualizado_por;
@@ -141,7 +143,7 @@ export const AlumnoDireccionService = {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const alumnoDireccion: AlumnoDireccion = req.body;
+      const alumnoDireccion: AlumnoDireccion = new AlumnoDireccion();
       Object.assign(alumnoDireccion, req.body);
       alumnoDireccion.actualizado_por = req.actualizado_por;
       let responseSent = false;

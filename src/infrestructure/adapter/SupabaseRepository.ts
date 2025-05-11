@@ -50,7 +50,6 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     }
 
     const columnQuery = columns.join(",");
-
     let query = this.client.from(this.table).select(columnQuery);
 
     Object.keys(where).forEach((key) => {
