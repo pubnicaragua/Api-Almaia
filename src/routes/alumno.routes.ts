@@ -432,8 +432,8 @@ const ruta_alumnos_notificaciones = '/notificaciones';
  * @swagger
  * /api/v1/alumnos:
  *   get:
- *     summary: Obtener lista de alumnos con filtros avanzados
- *     description: Retorna alumnos registrados en el sistema con posibilidad de filtrar por diversos criterios (sin paginación)
+ *     summary: Obtener lista de alumnos con información completa
+ *     description: Retorna alumnos registrados en el sistema incluyendo datos personales, colegio y cursos asociados
  *     tags: [Alumnos]
  *     security:
  *       - sessionAuth: []
@@ -443,7 +443,7 @@ const ruta_alumnos_notificaciones = '/notificaciones';
  *         schema:
  *           type: integer
  *         description: Filtrar por ID específico de alumno
- *         example: 101
+ *         example: 7
  *       - in: query
  *         name: colegio_id
  *         schema:
@@ -451,87 +451,162 @@ const ruta_alumnos_notificaciones = '/notificaciones';
  *         description: Filtrar por ID de colegio
  *         example: 1
  *       - in: query
- *         name: comuna_id
- *         schema:
- *           type: integer
- *         description: Filtrar por ID de comuna
- *         example: 125
- *       - in: query
- *         name: region_id
- *         schema:
- *           type: integer
- *         description: Filtrar por ID de región
- *         example: 13
- *       - in: query
- *         name: pais_id
- *         schema:
- *           type: integer
- *         description: Filtrar por ID de país
- *         example: 1
- *       - in: query
- *         name: tipo_colegio
- *         schema:
- *           type: string
- *         description: Filtrar por tipo de colegio (Particular/Subvencionado/Público)
- *         example: "Particular"
- *       - in: query
  *         name: activo
  *         schema:
  *           type: boolean
  *         description: Filtrar por estado activo/inactivo
  *         example: true
+ *       - in: query
+ *         name: curso_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de curso
+ *         example: 9
  *     responses:
  *       200:
- *         description: Lista de alumnos obtenida correctamente
+ *         description: Lista de alumnos obtenida correctamente con información completa
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Alumno'
+ *                 $ref: '#/components/schemas/AlumnoCompleto'
  *             example:
- *               - alumno_id: 101
+ *               - alumno_id: 7
  *                 colegio_id: 1
- *                 url_foto_perfil: "https://ejemplo.com/fotos/alumno101.jpg"
- *                 telefono_contacto1: "+56912345678"
- *                 email: "alumno101@ejemplo.com"
- *                 telefono_contacto2: "+56987654321"
- *                 activo: true
- *                 colegio:
+ *                 url_foto_perfil: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ *                 telefono_contacto1: "+56 9 1284 5678"
+ *                 email: "alumno2.demo@colegio.cl"
+ *                 telefono_contacto2: "+56 9 8765 4321"
+ *                 creado_por: 0
+ *                 actualizado_por: 1
+ *                 fecha_creacion: "2025-05-10T19:37:38.661"
+ *                 fecha_actualizacion: "2025-05-10T19:37:38.661"
+ *                 activo: false
+ *                 persona_id: 2
+ *                 personas:
+ *                   nombres: "Carlos"
+ *                   apellidos: "Muñoz"
+ *                   persona_id: 2
+ *                   fecha_nacimiento: null
+ *                 colegios:
+ *                   nombre: "Colegio Bicentenario Santiago Centro"
  *                   colegio_id: 1
- *                   nombre: "Colegio Ejemplo"
- *                   tipo_colegio: "Particular"
- *                   comuna_id: 125
- *                   region_id: 13
- *                   pais_id: 1
- *               - alumno_id: 102
- *                 colegio_id: 1
- *                 url_foto_perfil: "https://ejemplo.com/fotos/alumno102.jpg"
- *                 telefono_contacto1: "+56923456789"
- *                 email: "alumno102@ejemplo.com"
- *                 telefono_contacto2: "+56911223344"
- *                 activo: true
- *                 colegio:
- *                   colegio_id: 1
- *                   nombre: "Colegio Ejemplo"
- *                   tipo_colegio: "Particular"
- *                   comuna_id: 125
- *                   region_id: 13
- *                   pais_id: 1
+ *                 cursos:
+ *                   - grados:
+ *                       nombre: "Quinto Básico"
+ *                       grado_id: 9
+ *                     niveles_educativos:
+ *                       nombre: "Educación Básica"
+ *                       nivel_educativo_id: 1
  *       400:
  *         description: Parámetros de consulta inválidos
- *         content:
- *           application/json:
- *             example:
- *               error: "Parámetro 'tipo_colegio' debe ser uno de: Particular, Subvencionado, Público"
  *       401:
  *         description: No autorizado - Sesión no válida
  *       500:
  *         description: Error interno del servidor
- *         content:
- *           application/json:
- *             example:
- *               error: "Error al consultar la base de datos"
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlumnoCompleto:
+ *       type: object
+ *       properties:
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         colegio_id:
+ *           type: integer
+ *           example: 1
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ *         telefono_contacto1:
+ *           type: string
+ *           example: "+56 9 1284 5678"
+ *         email:
+ *           type: string
+ *           example: "alumno2.demo@colegio.cl"
+ *         telefono_contacto2:
+ *           type: string
+ *           example: "+56 9 8765 4321"
+ *         creado_por:
+ *           type: integer
+ *           example: 0
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-10T19:37:38.661"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-10T19:37:38.661"
+ *         activo:
+ *           type: boolean
+ *           example: false
+ *         persona_id:
+ *           type: integer
+ *           example: 2
+ *         personas:
+ *           type: object
+ *           properties:
+ *             nombres:
+ *               type: string
+ *               example: "Carlos"
+ *             apellidos:
+ *               type: string
+ *               example: "Muñoz"
+ *             persona_id:
+ *               type: integer
+ *               example: 2
+ *             fecha_nacimiento:
+ *               type: string
+ *               format: date
+ *               nullable: true
+ *               example: null
+ *         colegios:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Colegio Bicentenario Santiago Centro"
+ *             colegio_id:
+ *               type: integer
+ *               example: 1
+ *         cursos:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               grados:
+ *                 type: object
+ *                 properties:
+ *                   nombre:
+ *                     type: string
+ *                     example: "Quinto Básico"
+ *                   grado_id:
+ *                     type: integer
+ *                     example: 9
+ *               niveles_educativos:
+ *                 type: object
+ *                 properties:
+ *                   nombre:
+ *                     type: string
+ *                     example: "Educación Básica"
+ *                   nivel_educativo_id:
+ *                     type: integer
+ *                     example: 1
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: session
  */
 router.get('/', sessionAuth, AlumnosService.obtener);
 /**
