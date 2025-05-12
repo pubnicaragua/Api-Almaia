@@ -1113,6 +1113,8 @@ router.delete(ruta_actividades + '/:id', sessionAuth, ActividadsService.eliminar
  */
 router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
 
+router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
+
 /**
  * @swagger
  * /api/v1/alumnos/alertas:
