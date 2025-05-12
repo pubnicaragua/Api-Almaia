@@ -11,6 +11,7 @@ import { CalendarioEscolarsService } from "../infrestructure/server/colegio/Cale
 import { CalendarioFechaImportantesService } from "../infrestructure/server/colegio/FechaImportanteService";
 import { CursosService } from "../infrestructure/server/colegio/CursoService";
 import { HistorialComunicacionsService } from "../infrestructure/server/colegio/HistorialComunicacionService";
+import { UsuarioColegiosService } from "../infrestructure/server/colegio/UsuarioColegioService";
 
 const router = express.Router();
 const rutas_grados = "/grados";
@@ -23,6 +24,7 @@ const rutas_calendarios_escolares = "/calendarios_escolares";
 const rutas_calendarios_fechas_importantes = "/calendarios_fechas_importantes";
 const rutas_cursos = "/cursos";
 const rutas_historiales_comunicaciones = "/historiales_comunicaciones";
+const rutas_usuarios_colegios = "/usuarios_colegios";
 
 /**
  * @swagger
@@ -1753,6 +1755,235 @@ router.delete(`${rutas_historiales_comunicaciones}/:id`, sessionAuth, HistorialC
  *       in: header
  *       name: Authorization
  *       description: Token de autenticación obtenido al iniciar sesión
+ */
+/**
+ * @swagger
+ * tags:
+ *   - name: UsuarioColegios
+ *     description: Gestión de relaciones entre usuarios y colegios
+ */
+
+/**
+ * @swagger
+ * /api/v1/colegio/usuario_colegios/:
+ *   get:
+ *     tags: [UsuarioColegios]
+ *     summary: Obtener todas las relaciones usuario-colegio
+ *     description: Retorna una lista de todas las asignaciones de usuarios a colegios
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de relaciones usuario-colegio obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/UsuarioColegioResponse'
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(`${rutas_usuarios_colegios}/`, sessionAuth, UsuarioColegiosService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/colegio/usuarios_colegios/:
+ *   post:
+ *     tags: [UsuarioColegios]
+ *     summary: Crear una nueva relación usuario-colegio
+ *     description: Asigna un usuario a un colegio con un rol específico
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UsuarioColegioInput'
+ *     responses:
+ *       201:
+ *         description: Relación usuario-colegio creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UsuarioColegioResponse'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       409:
+ *         description: La relación usuario-colegio ya existe
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(`${rutas_usuarios_colegios}/`, sessionAuth, UsuarioColegiosService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/colegio/usuarios_colegios/{id}:
+ *   put:
+ *     tags: [UsuarioColegios]
+ *     summary: Actualizar una relación usuario-colegio
+ *     description: Actualiza los datos de una relación usuario-colegio por su ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la relación usuario-colegio a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UsuarioColegioInput'
+ *     responses:
+ *       200:
+ *         description: Relación usuario-colegio actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UsuarioColegioResponse'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       404:
+ *         description: Relación usuario-colegio no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(`${rutas_usuarios_colegios}/:id`, sessionAuth, UsuarioColegiosService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/colegio/usuarios_colegios/{id}:
+ *   delete:
+ *     tags: [UsuarioColegios]
+ *     summary: Eliminar una relación usuario-colegio
+ *     description: Elimina una relación usuario-colegio por su ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la relación usuario-colegio a eliminar
+ *     responses:
+ *       204:
+ *         description: Relación usuario-colegio eliminada exitosamente
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       404:
+ *         description: Relación usuario-colegio no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(`${rutas_usuarios_colegios}/:id`, sessionAuth, UsuarioColegiosService.eliminar);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     UsuarioColegioInput:
+ *       type: object
+ *       properties:
+ *         usuario_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario a asignar
+ *         colegio_id:
+ *           type: integer
+ *           example: 5
+ *           description: ID del colegio al que se asigna el usuario
+ *         rol_id:
+ *           type: integer
+ *           example: 3
+ *           description: ID del rol que tendrá el usuario en el colegio
+ *       required:
+ *         - usuario_id
+ *         - colegio_id
+ *         - rol_id
+ * 
+ *     UsuarioColegioResponse:
+ *       type: object
+ *       properties:
+ *         usuarios_colegio_id:
+ *           type: integer
+ *           example: 10
+ *           readOnly: true
+ *         usuario_id:
+ *           type: integer
+ *           example: 1
+ *         colegio_id:
+ *           type: integer
+ *           example: 5
+ *         rol_id:
+ *           type: integer
+ *           example: 3
+ *         fecha_asignacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-05-15T14:30:00Z"
+ *         usuario:
+ *           $ref: '#/components/schemas/UsuarioMinimo'
+ *         colegio:
+ *           $ref: '#/components/schemas/ColegioMinimo'
+ *         rol:
+ *           $ref: '#/components/schemas/RolMinimo'
+ * 
+ *     UsuarioMinimo:
+ *       type: object
+ *       properties:
+ *         usuario_id:
+ *           type: integer
+ *           example: 1
+ *         nombre_social:
+ *           type: string
+ *           example: "Profesor Carlos"
+ *         email:
+ *           type: string
+ *           example: "carlos@colegio.edu"
+ * 
+ *     ColegioMinimo:
+ *       type: object
+ *       properties:
+ *         colegio_id:
+ *           type: integer
+ *           example: 5
+ *         nombre:
+ *           type: string
+ *           example: "Colegio San Marcos"
+ *         codigo:
+ *           type: string
+ *           example: "CSM-2023"
+ * 
+ *     RolMinimo:
+ *       type: object
+ *       properties:
+ *         rol_id:
+ *           type: integer
+ *           example: 3
+ *         nombre:
+ *           type: string
+ *           example: "Docente"
+ *         descripcion:
+ *           type: string
+ *           example: "Rol para profesores del colegio"
+ * 
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 
 export default router;
