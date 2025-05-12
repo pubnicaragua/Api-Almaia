@@ -151,8 +151,8 @@ export const DashboardHomeService = {
       .gte(
         "fecha_generada",
         new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      ) // Últimos 7 días
-      .eq("activo", 1) // Solo alertas activas
+      ) 
+      .eq("activo", true) // Solo alertas activas
       .order("fecha_generada", { ascending: false }) // Más recientes primero
       .order("prioridad_id", { ascending: false }); // Prioridad alta primero
 

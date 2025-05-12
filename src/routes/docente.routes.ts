@@ -64,6 +64,98 @@ const ruta_docentes_cursos = '/docentes_cursos';
  *         description: Error interno del servidor
  */
 router.get('/', sessionAuth, DocentesService.obtener);
+/**
+ * @swagger
+ * /api/v1/docentes/{id}:
+ *   get:
+ *     summary: Obtener información básica de un docente
+ *     description: Retorna los datos principales de un docente incluyendo información personal y del colegio
+ *     tags: [Docentes]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: ID del docente a consultar
+ *     responses:
+ *       200:
+ *         description: Información básica del docente obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DocenteBasico'
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       404:
+ *         description: Docente no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     DocenteBasico:
+ *       type: object
+ *       properties:
+ *         docente_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID único del docente
+ *         persona_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID de la persona asociada
+ *         colegio_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del colegio donde trabaja el docente
+ *         especialidad:
+ *           type: string
+ *           example: "Matemáticas"
+ *           description: Área de especialización del docente
+ *         estado:
+ *           type: string
+ *           example: "Activo"
+ *           enum: [Activo, Inactivo, Licencia]
+ *           description: Estado laboral del docente
+ *         persona:
+ *           type: object
+ *           properties:
+ *             persona_id:
+ *               type: integer
+ *               example: 1
+ *             nombres:
+ *               type: string
+ *               example: "Juan"
+ *             apellidos:
+ *               type: string
+ *               example: "Pérez"
+ *           description: Información básica de la persona asociada
+ *         colegio:
+ *           type: object
+ *           properties:
+ *             colegio_id:
+ *               type: integer
+ *               example: 1
+ *             nombre:
+ *               type: string
+ *               example: "Colegio San Juan"
+ *           description: Información básica del colegio
+ * 
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+router.get('/:id', sessionAuth, DocentesService.detalle);
+
 
 /**
  * @swagger

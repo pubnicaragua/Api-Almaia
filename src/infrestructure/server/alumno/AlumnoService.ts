@@ -8,7 +8,10 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 
-const dataService: DataService<Alumno> = new DataService("alumnos",'alumno_id');
+const dataService: DataService<Alumno> = new DataService(
+  "alumnos",
+  "alumno_id"
+);
 const AlumnoSchema = Joi.object({
   url_foto_perfil: Joi.string().max(255).optional(),
   telefono_contacto1: Joi.string().max(16).optional(),
@@ -20,7 +23,14 @@ export const AlumnosService = {
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnos = await dataService.getAll(["*"], where);
+      const alumnos = await dataService.getAll(
+        [
+          "*",
+          "personas(persona_id,nombres,apellidos)",
+          "colegios(colegio_id,nombre)",
+        ],
+        where
+      );
       res.json(alumnos);
     } catch (error) {
       console.error("Error al obtener el alumno:", error);
@@ -133,7 +143,7 @@ export const AlumnosService = {
       const alumno: Alumno = new Alumno();
       Object.assign(alumno, req.body);
       alumno.creado_por = req.creado_por;
-      alumno.actualizado_por = req.actualizado_por
+      alumno.actualizado_por = req.actualizado_por;
       let responseSent = false;
       const { error: validationError } = AlumnoSchema.validate(req.body);
       const { data, error } = await client
@@ -150,14 +160,14 @@ export const AlumnosService = {
       }
       if (!responseSent) {
         console.log(alumno);
-        
+
         const savedAlumno = await dataService.processData(alumno);
         res.status(201).json(savedAlumno);
       }
     } catch (err) {
       const error = err as Error;
       console.error("Error al guardar el alumno:", error);
-      res.status(500).json({ message: error.message || 'Error inesperado' });
+      res.status(500).json({ message: error.message || "Error inesperado" });
     }
   },
   async actualizar(req: Request, res: Response) {
@@ -165,7 +175,7 @@ export const AlumnosService = {
       const id = parseInt(req.params.id);
       const alumno: Alumno = new Alumno();
       Object.assign(alumno, req.body);
-      alumno.actualizado_por = req.actualizado_por
+      alumno.actualizado_por = req.actualizado_por;
       let responseSent = false;
       const { error: validationError } = AlumnoSchema.validate(req.body);
       const { data, error } = await client
@@ -181,11 +191,9 @@ export const AlumnosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-    
-      await dataService.updateById(id, alumno);
-      res.status(200).json({ message: "Alumno actualizado correctamente" });
+        await dataService.updateById(id, alumno);
+        res.status(200).json({ message: "Alumno actualizado correctamente" });
       }
-
     } catch (error) {
       console.error("Error al actualizar el alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
