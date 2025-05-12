@@ -810,7 +810,7 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *           type: string
  *           example: "activo"
  */
-router.get('/alumno/:alumnoId', AlumnosService.getAlumnoDetalle);
+router.get('/:alumnoId', AlumnosService.getAlumnoDetalle);
 
 /**
  * @swagger
