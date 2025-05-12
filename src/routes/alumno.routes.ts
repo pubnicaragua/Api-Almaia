@@ -810,7 +810,7 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *           type: string
  *           example: "activo"
  */
-router.get('/:alumnoId', AlumnosService.getAlumnoDetalle);
+router.get('/detalle/:alumnoId', AlumnosService.getAlumnoDetalle);
 
 /**
  * @swagger
@@ -1021,7 +1021,7 @@ router.delete(ruta_actividades + '/:id', sessionAuth, ActividadsService.eliminar
 // Rutas para Alertas
 /**
  * @swagger
- * /api/v1/alumnos/alertas:
+ * /api/v1/alumnos/alumnos_alertas:
  *   get:
  *     summary: Obtener alertas de alumnos con relaciones completas
  *     description: Retorna todas las alertas registradas con información detallada del alumno, prioridad, severidad y tipo de alerta
@@ -1112,12 +1112,203 @@ router.delete(ruta_actividades + '/:id', sessionAuth, ActividadsService.eliminar
  *               detalles: "Error de conexión con la base de datos"
  */
 router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
-
-router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
+/**
+ * @swagger
+ * /api/v1/alumnos-alertas/{id}:
+ *   get:
+ *     summary: Obtener el detalle completo de una alerta de alumno
+ *     description: Retorna toda la información detallada de una alerta específica de alumno, incluyendo datos del alumno, reglas de alerta, prioridad, severidad y tipo.
+ *     tags: [Alertas]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la alerta de alumno a consultar
+ *     responses:
+ *       200:
+ *         description: Detalle de la alerta de alumno obtenido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AlertaAlumnoDetallada'
+ *       401:
+ *         description: No autorizado, falta autenticación
+ *       404:
+ *         description: Alerta no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
 
 /**
  * @swagger
- * /api/v1/alumnos/alertas:
+ * components:
+ *   schemas:
+ *     AlertaAlumnoDetallada:
+ *       type: object
+ *       properties:
+ *         alumno_alerta_id:
+ *           type: integer
+ *           example: 14
+ *           description: ID único de la alerta del alumno
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *           description: ID del alumno asociado
+ *         alerta_regla_id:
+ *           type: integer
+ *           example: 2
+ *           description: ID de la regla que generó la alerta
+ *         fecha_generada:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T20:13:12.302209"
+ *           description: Fecha y hora cuando se generó la alerta
+ *         fecha_resolucion:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: null
+ *           description: Fecha y hora cuando se resolvió la alerta (null si no está resuelta)
+ *         alerta_origen_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del origen de la alerta
+ *         prioridad_id:
+ *           type: integer
+ *           example: 2
+ *           description: ID de la prioridad asignada
+ *         severidad_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID de la severidad asignada
+ *         accion_tomada:
+ *           type: string
+ *           nullable: true
+ *           example: null
+ *           description: Descripción de la acción tomada (null si no hay acción)
+ *         leida:
+ *           type: boolean
+ *           example: false
+ *           description: Indica si la alerta ha sido leída
+ *         responsable_actual_id:
+ *           type: integer
+ *           example: 5
+ *           description: ID del usuario responsable actual de la alerta
+ *         estado:
+ *           type: string
+ *           example: "pendiente"
+ *           enum: [pendiente, en_proceso, resuelta, descartada]
+ *           description: Estado actual de la alerta
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que creó el registro
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que actualizó por última vez el registro
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T20:13:12.302209"
+ *           description: Fecha de creación del registro
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T20:13:12.302209"
+ *           description: Fecha de última actualización del registro
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *           description: Indica si el registro está activo
+ *         alertas_tipo_alerta_tipo_id:
+ *           type: integer
+ *           example: 2
+ *           description: ID del tipo de alerta
+ *         alumnos:
+ *           type: object
+ *           properties:
+ *             personas:
+ *               type: object
+ *               properties:
+ *                 nombres:
+ *                   type: string
+ *                   example: "Carlos"
+ *                 apellidos:
+ *                   type: string
+ *                   example: "Muñoz"
+ *                 persona_id:
+ *                   type: integer
+ *                   example: 2
+ *             alumno_id:
+ *               type: integer
+ *               example: 7
+ *             url_foto_perfil:
+ *               type: string
+ *               example: "https://example.com/foto.jpg"
+ *           description: Información detallada del alumno asociado
+ *         alertas_reglas:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Regla Tranquilidad Constante"
+ *             alerta_regla_id:
+ *               type: integer
+ *               example: 2
+ *           description: Información de la regla que generó la alerta
+ *         alertas_origenes:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "SOS"
+ *             alerta_origen_id:
+ *               type: integer
+ *               example: 1
+ *           description: Origen de la alerta
+ *         alertas_severidades:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Baja"
+ *             alerta_severidad_id:
+ *               type: integer
+ *               example: 1
+ *           description: Nivel de severidad de la alerta
+ *         alertas_prioridades:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Media"
+ *             alerta_prioridad_id:
+ *               type: integer
+ *               example: 2
+ *           description: Nivel de prioridad de la alerta
+ *         alertas_tipos:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "SOS ALMA"
+ *             alerta_tipo_id:
+ *               type: integer
+ *               example: 2
+ *           description: Tipo de alerta
+ */
+router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle);
+
+/**
+ * @swagger
+ * /api/v1/alumnos/alumnos_alertas:
  *   post:
  *     summary: Crear nueva alerta
  *     description: Registra una nueva alerta para un alumno
@@ -1146,7 +1337,7 @@ router.post(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.guardar);
 
 /**
  * @swagger
- * /api/v1/alumnos/alertas/{id}:
+ * /api/v1/alumnos/alumnos_alertas/{id}:
  *   put:
  *     summary: Actualizar alerta
  *     description: Actualiza una alerta existente
@@ -1182,7 +1373,7 @@ router.put(ruta_alumnos_alertas + '/:id', sessionAuth, AlumnoAlertaService.actua
 
 /**
  * @swagger
- * /api/v1/alumnos/alertas/{id}:
+ * /api/v1/alumnos/alumnos_alertas/{id}:
  *   delete:
  *     summary: Eliminar alerta
  *     description: Elimina una alerta del sistema

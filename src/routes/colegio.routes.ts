@@ -1680,9 +1680,6 @@ router.delete(`${rutas_historiales_comunicaciones}/:id`, sessionAuth, HistorialC
  *     CalendarioEscolar:
  *       type: object
  *       properties:
- *         calendario_escolar_id:
- *           type: integer
- *           example: 1
  *         nombre:
  *           type: string
  *           example: "Calendario 2023"
@@ -1693,9 +1690,6 @@ router.delete(`${rutas_historiales_comunicaciones}/:id`, sessionAuth, HistorialC
  *     CalendarioFechaImportante:
  *       type: object
  *       properties:
- *         fecha_importante_id:
- *           type: integer
- *           example: 1
  *         calendario_escolar_id:
  *           type: integer
  *           example: 1

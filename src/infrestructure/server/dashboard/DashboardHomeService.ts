@@ -16,7 +16,8 @@ import { DataService } from "../DataService";
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<CalendarioFechaImportante> = new DataService(
-  "calendarios_fechas_importantes","calendario_fecha_importante_id"
+  "calendarios_fechas_importantes",
+  "calendario_fecha_importante_id"
 );
 export const DashboardHomeService = {
   async getStatsCards(req: Request, res: Response, next: NextFunction) {
@@ -39,27 +40,27 @@ export const DashboardHomeService = {
       const responses = await alumnoServicioCasoUso.calcularAlumnosActivos(
         sevenDaysAgo
       );
-      const alertas_services_caso_uso = new AlertasServicioCasoUso()
+      const alertas_services_caso_uso = new AlertasServicioCasoUso();
       const [sosStats, denunciaStats, almaStats] = await Promise.all([
         alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.SOS),
         alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.DENUNCIA),
-        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMA)
+        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMA),
       ]);
       const alumnosFrecuentes =
         alumnoServicioCasoUso.calcularAlumnosFrecuentes(responses);
-        const response = {
-          alumnos: {
-            activos: alumnosActivos ?? 0,
-            inactivos: (totalAlumnos ?? 0) - (alumnosActivos ?? 0),
-            frecuentes: alumnosFrecuentes,
-            totales: totalAlumnos ?? 0,
-          },
-          sos_alma: sosStats,
-          denuncias: denunciaStats,
-          alertas_alma: almaStats,
-        };
-    
-        res.json(response);
+      const response = {
+        alumnos: {
+          activos: alumnosActivos ?? 0,
+          inactivos: (totalAlumnos ?? 0) - (alumnosActivos ?? 0),
+          frecuentes: alumnosFrecuentes,
+          totales: totalAlumnos ?? 0,
+        },
+        sos_alma: sosStats,
+        denuncias: denunciaStats,
+        alertas_alma: almaStats,
+      };
+
+      res.json(response);
     } catch (err) {
       console.error("Error en getStatsCards:", err);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -130,41 +131,37 @@ export const DashboardHomeService = {
 
   // Función para fechas importantes
   async getImportantDates(req: Request, res: Response) {
-    const fechasImportantes = await dataService.getAll(["*",
+    const fechasImportantes = await dataService.getAll(
+      [
+        "*",
         "colegios(colegio_id,nombre)",
         "cursos(nombre_curso,grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
-        "calendarios_escolares(calendario_escolar_id,ano_escolar,fecha_inicio,fecha_fin,dias_habiles)"
-      ], req.query);
-            res.json(fechasImportantes);
+        "calendarios_escolares(calendario_escolar_id,ano_escolar,fecha_inicio,fecha_fin,dias_habiles)",
+      ],
+      req.query
+    );
+    res.json(fechasImportantes);
   },
 
   // Función para alertas recientes
   async getRecentAlerts(req: Request, res: Response) {
-    const data: RecentAlert[] = [
-      {
-        student: {
-          name: "Carolina Espina",
-          image: "/smiling-woman-garden.png",
-        },
-        alertType: "SOS Alma",
-        date: "Abr 02 - 2024",
-      },
-      {
-        student: { name: "Jaime Brito", image: "/young-man-city.png" },
-        alertType: "Denuncias",
-        date: "Mar 29 - 2024",
-      },
-      {
-        student: { name: "Teresa Ulloa", image: "/smiling-woman-garden.png" },
-        alertType: "IA",
-        date: "Mar 27 - 2024",
-      },
-      {
-        student: { name: "Carlos Araneda", image: "/young-man-city.png" },
-        alertType: "SOS Alma",
-        date: "Mar 26 - 2024",
-      },
-    ];
+    const { data, error } = await client
+      .from("alumnos_alertas")
+      .select("*,alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos)),alertas_reglas(alerta_regla_id,nombre),alertas_origenes(alerta_origen_id,nombre),alertas_severidades(alerta_severidad_id,nombre),alertas_prioridades(alerta_prioridad_id,nombre),alertas_tipos(alerta_tipo_id,nombre)")
+      .gte(
+        "fecha_generada",
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      ) // Últimos 7 días
+      .eq("activo", 1) // Solo alertas activas
+      .order("fecha_generada", { ascending: false }) // Más recientes primero
+      .order("prioridad_id", { ascending: false }); // Prioridad alta primero
+
+    if (error) {
+      console.error("Error fetching alertas:", error);
+    } else {
+      console.log("Alertas recientes:", data);
+      // Aquí puedes trabajar con los datos (mostrar en UI, etc.)
+    }
     res.json(data);
   },
 };
