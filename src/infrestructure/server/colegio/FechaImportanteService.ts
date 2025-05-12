@@ -23,7 +23,7 @@ export const CalendarioFechaImportantesService = {
     try {
       const fechasImportantes = await dataService.getAll(["*",
         "colegios(colegio_id,nombre)",
-        "calendariofechaimportantes(calendariofechaimportante_id,nombre_calendariofechaimportante,grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
+        "cursos(nombre_curso,grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
         "calendarios_escolares(calendario_escolar_id,ano_escolar,fecha_inicio,fecha_fin,dias_habiles)"
       ], req.query);
             res.json(fechasImportantes);
