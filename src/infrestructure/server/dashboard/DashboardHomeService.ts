@@ -10,9 +10,14 @@ import { subDays, formatISO, startOfDay } from "date-fns";
 import { AlumnoServicioCasoUso } from "../../../core/services/AlumnoServicioCasoUso";
 import { AlertasServicioCasoUso } from "../../../core/services/AlertasServiceCasoUso";
 import { ALERT_TYPES } from "../../../core/modelo/home/AlertType";
+import { CalendarioFechaImportante } from "../../../core/modelo/colegio/CalendarioFechaImportante";
+import { DataService } from "../DataService";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
+const dataService: DataService<CalendarioFechaImportante> = new DataService(
+  "calendarios_fechas_importantes","calendario_fecha_importante_id"
+);
 export const DashboardHomeService = {
   async getStatsCards(req: Request, res: Response, next: NextFunction) {
     try {
@@ -125,16 +130,12 @@ export const DashboardHomeService = {
 
   // Función para fechas importantes
   async getImportantDates(req: Request, res: Response) {
-    const data: ImportantDate[] = [
-      { event: "Pruebas Parciales", dateRange: "Abr 02 - Abr 07" },
-      { event: "Reunión de Apoderados", dateRange: "Abr 02 - Abr 07" },
-      { event: "Matrícula 2025", dateRange: "Abr 02 - Abr 07" },
-      { event: "Semana santa", dateRange: "Abr 02 - Abr 07" },
-      { event: "Pruebas Parciales", dateRange: "Abr 02 - Abr 07" },
-      { event: "Pruebas Parciales", dateRange: "Abr 02 - Abr 07" },
-      { event: "Pruebas Parciales", dateRange: "Abr 02 - Abr 07" },
-    ];
-    res.json(data);
+    const fechasImportantes = await dataService.getAll(["*",
+        "colegios(colegio_id,nombre)",
+        "cursos(nombre_curso,grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
+        "calendarios_escolares(calendario_escolar_id,ano_escolar,fecha_inicio,fecha_fin,dias_habiles)"
+      ], req.query);
+            res.json(fechasImportantes);
   },
 
   // Función para alertas recientes
