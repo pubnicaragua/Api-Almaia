@@ -4,9 +4,11 @@ import { AuthService } from '../infrestructure/server/auth/AuthService';
 import { RolesService } from '../infrestructure/server/auth/RolesService';
 import { FuncionalidadesService } from '../infrestructure/server/auth/Funcionalidades';
 import { FuncionalidadRolService } from '../infrestructure/server/auth/FuncionalidadRolService';
+import { UsuariosService } from '../infrestructure/server/auth/UsuarioService';
 
 const router = express.Router();
 const ruta_roles = '/roles';
+const ruta_usuarios = '/usuarios';
 const ruta_funcionalidades = '/funcionalidades';
 const ruta_funcionalidades_roles = '/funcionalidades_roles';
 
@@ -542,6 +544,250 @@ router.delete(ruta_funcionalidades_roles+'/:id', sessionAuth, FuncionalidadRolSe
  *       in: header
  *       name: Authorization
  *       description: Token de autenticación obtenido al iniciar sesión
+ */
+/**
+ * @swagger
+ * tags:
+ *   - name: Usuarios
+ *     description: Gestión de usuarios del sistema
+ */
+
+/**
+ * @swagger
+ * /api/v1/usuarios/:
+ *   get:
+ *     tags: [Usuarios]
+ *     summary: Obtener todos los usuarios
+ *     description: Retorna una lista de todos los usuarios registrados en el sistema
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/UsuarioResponse'
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(ruta_usuarios+'/', sessionAuth, UsuariosService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/usuarios/:
+ *   post:
+ *     tags: [Usuarios]
+ *     summary: Crear un nuevo usuario
+ *     description: Registra un nuevo usuario en el sistema
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UsuarioInput'
+ *     responses:
+ *       201:
+ *         description: Usuario creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UsuarioResponse'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       409:
+ *         description: El email ya está registrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(ruta_usuarios+'/', sessionAuth, UsuariosService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/usuarios/{id}:
+ *   put:
+ *     tags: [Usuarios]
+ *     summary: Actualizar un usuario existente
+ *     description: Actualiza la información de un usuario por su ID
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UsuarioInput'
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UsuarioResponse'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(ruta_usuarios+'/:id', sessionAuth, UsuariosService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/usuarios/{id}:
+ *   delete:
+ *     tags: [Usuarios]
+ *     summary: Eliminar un usuario
+ *     description: Elimina un usuario por su ID (eliminación lógica)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario a eliminar
+ *     responses:
+ *       204:
+ *         description: Usuario eliminado exitosamente
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       404:
+ *         description: Usuario no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(ruta_usuarios+'/:id', sessionAuth, UsuariosService.eliminar);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     UsuarioInput:
+ *       type: object
+ *       properties:
+ *         nombre_social:
+ *           type: string
+ *           example: "Alex"
+ *           minLength: 2
+ *           maxLength: 50
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: "alex@example.com"
+ *         encripted_password:
+ *           type: string
+ *           example: "hashedPassword123"
+ *           description: Contraseña encriptada (hash)
+ *         rol_id:
+ *           type: integer
+ *           example: 2
+ *           description: ID del rol del usuario
+ *         telefono_contacto:
+ *           type: string
+ *           example: "+51987654321"
+ *           maxLength: 20
+ *         estado_usuario:
+ *           type: string
+ *           example: "ACTIVO"
+ *           enum: [ACTIVO, INACTIVO, SUSPENDIDO, PENDIENTE]
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://example.com/profile.jpg"
+ *           nullable: true
+ *         persona_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID de la persona asociada
+ *         idioma_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del idioma preferido
+ *       required:
+ *         - nombre_social
+ *         - email
+ *         - encripted_password
+ *         - rol_id
+ *         - estado_usuario
+ *         - persona_id
+ *         - idioma_id
+ * 
+ *     UsuarioResponse:
+ *       type: object
+ *       properties:
+ *         usuario_id:
+ *           type: integer
+ *           example: 1
+ *           readOnly: true
+ *         nombre_social:
+ *           type: string
+ *           example: "Alex"
+ *         email:
+ *           type: string
+ *           example: "alex@example.com"
+ *         rol_id:
+ *           type: integer
+ *           example: 2
+ *         telefono_contacto:
+ *           type: string
+ *           example: "+51987654321"
+ *         ultimo_inicio_sesion:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-05-15T10:00:00Z"
+ *         estado_usuario:
+ *           type: string
+ *           example: "ACTIVO"
+ *         intentos_inicio_sesion:
+ *           type: integer
+ *           example: 0
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://example.com/profile.jpg"
+ *           nullable: true
+ *         persona_id:
+ *           type: integer
+ *           example: 1
+ *         idioma_id:
+ *           type: integer
+ *           example: 1
+ *         auth_id:
+ *           type: string
+ *           example: "auth0|123456789"
+ *           nullable: true
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-01-10T08:30:00Z"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-05-12T15:45:00Z"
+ * 
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  */
 
 export default router;
