@@ -234,22 +234,145 @@ router.get("/alertas/totales", sessionAuth, DashboardHomeService.getDonutData);
  * @swagger
  * /api/v1/home/fechas/importantes:
  *   get:
- *     summary: Obtener fechas importantes
- *     description: Retorna un listado de fechas relevantes para el home
+ *     summary: Obtener fechas importantes del calendario escolar
+ *     description: Retorna un listado completo de fechas relevantes para el home con toda la información relacionada (colegio, curso, calendario escolar)
  *     tags: [Home]
  *     security:
  *       - sessionAuth: []
  *     responses:
  *       200:
- *         description: Lista de fechas importantes obtenida correctamente
+ *         description: Lista de fechas importantes obtenida correctamente con todos sus datos relacionados
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/ImportantDate'
+ *                 $ref: '#/components/schemas/FechaImportanteDetallada'
+ *       401:
+ *         description: No autorizado, falta autenticación
  *       500:
  *         description: Error interno del servidor
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     FechaImportanteDetallada:
+ *       type: object
+ *       properties:
+ *         calendario_fecha_importante_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID único de la fecha importante
+ *         colegio_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del colegio asociado
+ *         curso_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del curso asociado
+ *         calendario_escolar_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del calendario escolar
+ *         titulo:
+ *           type: string
+ *           example: "Inicio de clases"
+ *           description: Título del evento
+ *         descripcion:
+ *           type: string
+ *           example: "Primer día del año escolar"
+ *           description: Descripción detallada del evento
+ *         fecha:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-02-28T00:00:00"
+ *           description: Fecha y hora del evento
+ *         tipo:
+ *           type: string
+ *           example: "académico"
+ *           enum: [académico, festivo, receso, conmemoración]
+ *           description: Tipo de fecha importante
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que creó el registro
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que actualizó por última vez el registro
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T17:36:28.764228"
+ *           description: Fecha de creación del registro
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T17:36:28.764228"
+ *           description: Fecha de última actualización del registro
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *           description: Indica si el registro está activo
+ *         colegios:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Colegio Bicentenario Santiago Centro"
+ *             colegio_id:
+ *               type: integer
+ *               example: 1
+ *           description: Información básica del colegio asociado
+ *         cursos:
+ *           type: object
+ *           properties:
+ *             grados:
+ *               type: object
+ *               properties:
+ *                 nombre:
+ *                   type: string
+ *                   example: "Quinto Básico"
+ *                 grado_id:
+ *                   type: integer
+ *                   example: 9
+ *             nombre_curso:
+ *               type: string
+ *               example: "1° Medio - Jornada Mañana - Colegio 1"
+ *             niveles_educativos:
+ *               type: object
+ *               properties:
+ *                 nombre:
+ *                   type: string
+ *                   example: "Educación Básica"
+ *                 nivel_educativo_id:
+ *                   type: integer
+ *                   example: 1
+ *           description: Información detallada del curso asociado
+ *         calendarios_escolares:
+ *           type: object
+ *           properties:
+ *             fecha_fin:
+ *               type: string
+ *               format: date-time
+ *               example: "2025-12-12T00:00:00"
+ *             ano_escolar:
+ *               type: integer
+ *               example: 2025
+ *             dias_habiles:
+ *               type: integer
+ *               example: 190
+ *             fecha_inicio:
+ *               type: string
+ *               format: date-time
+ *               example: "2025-02-28T00:00:00"
+ *             calendario_escolar_id:
+ *               type: integer
+ *               example: 1
+ *           description: Información del calendario escolar asociado
  */
 router.get("/fechas/importantes", sessionAuth, DashboardHomeService.getImportantDates);
 /**

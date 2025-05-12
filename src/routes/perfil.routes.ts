@@ -12,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /obtener:
+ * /api/v1/perfil/obtener:
  *   get:
  *     summary: Obtener perfil completo del usuario autenticado
  *     description: Retorna toda la información del usuario logueado incluyendo datos personales, rol y funcionalidades asignadas
