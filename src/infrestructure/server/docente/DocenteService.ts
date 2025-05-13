@@ -7,11 +7,15 @@ export const DocentesService = {
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-        const docente = await dataService.getAll(["*",
-        "personas(persona_id,nombres,apellidos)",
-        "colegios(colegio_id,nombre)"], where);
-        res.json(docente);
-     
+      const docente = await dataService.getAll(
+        [
+          "*",
+          "personas(persona_id,nombres,apellidos)",
+          "colegios(colegio_id,nombre)",
+        ],
+        where
+      );
+      res.json(docente);
     } catch (error) {
       console.error("Error al obtener el docente:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -24,23 +28,39 @@ export const DocentesService = {
       /*const docente = await dataService.getAll(["*",
         "personas(persona_id,nombres,apellidos)",
         "colegios(colegio_id,nombre)"], where);*/
-const docente= 
+      const docente = {
+        docente_id: 1,
+        persona_id: 1,
+        colegio_id: 1,
+        especialidad: "Matemáticas",
+        estado: "Activo",
+        persona: {
+          persona_id: 1,
+          nombres: "Juan",
+          apellidos: "Pérez",
+        },
+        colegio: {
+          colegio_id: 1,
+          nombre: "Colegio San Juan",
+        },
+        docentes_cursos: {
+          docente_curso_id: 1,
+          cursos: [
             {
-              "docente_id": 1,
-              "persona_id": 1,
-              "colegio_id": 1,
-              "especialidad": "Matemáticas",
-              "estado": "Activo",
-              "persona": {
-                "persona_id": 1,
-                "nombres": "Juan",
-                "apellidos": "Pérez",
-               },
-              "colegio": {
-                "colegio_id": 1,
-                "nombre": "Colegio San Juan",
-              }
-            }
+              curso_id: 1,
+              nombre_curso: "matematicas",
+              grados: {
+                grado_id: 1,
+                nombre: "4to",
+              },
+              niveles_educativos: {
+                nivel_educativo: 1,
+                nombre: "basico",
+              },
+            },
+          ],
+        },
+      };
       res.json(docente);
     } catch (error) {
       console.error("Error al obtener el docente:", error);
