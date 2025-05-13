@@ -758,7 +758,76 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *         email:
  *           type: string
  *           example: "alumno.demo@colegio.cl"
- * 
+ *         persona_id:
+ *           type: integer
+ *           example: 2
+ *         creado_por:
+ *           type: integer
+ *           example: 0
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-10T19:37:38.661Z"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-10T19:37:38.661Z"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *         personas:
+ *           type: object
+ *           properties:
+ *             persona_id:
+ *               type: integer
+ *               example: 2
+ *             nombres:
+ *               type: string
+ *               example: "Carlos"
+ *             apellidos:
+ *               type: string
+ *               example: "Muñoz"
+ *             fecha_nacimiento:
+ *               type: string
+ *               format: date
+ *               nullable: true
+ *               example: null
+ *         colegios:
+ *           type: object
+ *           properties:
+ *             colegio_id:
+ *               type: integer
+ *               example: 1
+ *             nombre:
+ *               type: string
+ *               example: "Colegio Bicentenario Santiago Centro"
+ *         cursos:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               grados:
+ *                 type: object
+ *                 properties:
+ *                   grado_id:
+ *                     type: integer
+ *                     example: 9
+ *                   nombre:
+ *                     type: string
+ *                     example: "Quinto Básico"
+ *               niveles_educativos:
+ *                 type: object
+ *                 properties:
+ *                   nivel_educativo_id:
+ *                     type: integer
+ *                     example: 1
+ *                   nombre:
+ *                     type: string
+ *                     example: "Educación Básica"
+ *
  *     FichaClinica:
  *       type: object
  *       properties:
@@ -789,7 +858,7 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *         terapias_tratamiento_curso:
  *           type: string
  *           example: "Inhalador según necesidad"
- * 
+ *
  *     Alerta:
  *       type: object
  *       properties:
@@ -822,6 +891,7 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *           example: 1
  *         accion_tomada:
  *           type: string
+ *           nullable: true
  *           example: "Conversación con apoderado"
  *         leida:
  *           type: boolean
@@ -832,10 +902,72 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *         estado:
  *           type: string
  *           example: "pendiente"
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T23:19:15.916Z"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T23:19:15.916Z"
+ *         activo:
+ *           type: boolean
+ *           example: true
  *         alertas_tipo_alerta_tipo_id:
  *           type: integer
  *           example: 4
- * 
+ *         alertas_reglas:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Regla Orgullo Recurrente"
+ *             alerta_regla_id:
+ *               type: integer
+ *               example: 3
+ *         alertas_origenes:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Alumno"
+ *             alerta_origen_id:
+ *               type: integer
+ *               example: 1
+ *         alertas_severidades:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Media"
+ *             alerta_severidad_id:
+ *               type: integer
+ *               example: 2
+ *         alertas_prioridades:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Media"
+ *             alerta_prioridad_id:
+ *               type: integer
+ *               example: 3
+ *         alertas_tipos:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Académica"
+ *             alerta_tipo_id:
+ *               type: integer
+ *               example: 1
+ *
  *     Informe:
  *       type: object
  *       properties:
@@ -852,7 +984,7 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *         url_reporte:
  *           type: string
  *           example: "https://example.com/informe1.pdf"
- * 
+ *
  *     Emocion:
  *       type: object
  *       properties:
@@ -862,7 +994,22 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *         valor:
  *           type: integer
  *           example: 3100
- * 
+ *
+ *     ComparativaDato:
+ *       type: object
+ *       properties:
+ *         emocion:
+ *           type: string
+ *           example: "Feliz"
+ *         alumno:
+ *           type: number
+ *           format: float
+ *           example: 2.0
+ *         promedio:
+ *           type: number
+ *           format: float
+ *           example: 1.5
+ *
  *     Apoderado:
  *       type: object
  *       properties:
@@ -884,6 +1031,80 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *         estado_usuario:
  *           type: string
  *           example: "activo"
+ *         apoderados:
+ *           type: object
+ *           properties:
+ *             apoderado_id:
+ *               type: integer
+ *               example: 1001
+ *             personas:
+ *               type: object
+ *               properties:
+ *                 persona_id:
+ *                   type: integer
+ *                   example: 101
+ *                 nombres:
+ *                   type: string
+ *                   example: "Juan"
+ *                 apellidos:
+ *                   type: string
+ *                   example: "Pérez"
+ *
+ *     AlumnoDetalle:
+ *       type: object
+ *       properties:
+ *         alumno:
+ *           $ref: '#/components/schemas/Alumno'
+ *         ficha:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/FichaClinica'
+ *         alertas:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Alerta'
+ *         informes:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Informe'
+ *         emociones:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Emocion'
+ *         datosComparativa:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/ComparativaDato'
+ *         apoderados:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/Apoderado'
+ */
+
+/**
+ * @swagger
+ * /api/v1/alumnos/detalle/{alumnoId}:
+ *   get:
+ *     summary: Obtiene los detalles completos de un alumno
+ *     description: Retorna información detallada del alumno, incluyendo datos personales, ficha clínica, alertas, informes, emociones y apoderados
+ *     parameters:
+ *       - in: path
+ *         name: alumnoId
+ *         required: true
+ *         description: ID único del alumno
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Detalles del alumno obtenidos correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoDetalle'
+ *       404:
+ *         description: Alumno no encontrado
+ *       500:
+ *         description: Error interno del servidor
  */
 router.get('/detalle/:alumnoId', AlumnosService.getAlumnoDetalle);
 
