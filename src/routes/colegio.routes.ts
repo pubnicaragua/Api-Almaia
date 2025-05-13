@@ -749,8 +749,8 @@ router.delete(
  * @swagger
  * /api/v1/colegios/aulas:
  *   get:
- *     summary: Obtener lista de aulas
- *     description: Retorna todas las aulas registradas
+ *     summary: Obtener lista de aulas con información completa
+ *     description: Retorna todas las aulas registradas con sus relaciones (colegio, grado, nivel educativo)
  *     tags: [Aulas]
  *     security:
  *       - sessionAuth: []
@@ -762,7 +762,23 @@ router.delete(
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Aula'
+ *                 $ref: '#/components/schemas/AulaCompleta'
+ *             example:
+ *               - aula_id: 1
+ *                 nombre: "Aula 101"
+ *                 capacidad: 30
+ *                 colegio_id: 1
+ *                 grado_id: 5
+ *                 activo: true
+ *                 colegio:
+ *                   colegio_id: 1
+ *                   nombre: "Colegio Ejemplo"
+ *                 grado:
+ *                   grado_id: 5
+ *                   nombre: "Quinto Grado"
+ *                   nivel_educativo:
+ *                     nivel_educativo_id: 2
+ *                     nombre: "Primaria"
  *       401:
  *         description: No autorizado - Sesión no válida o no proporcionada
  *       500:
@@ -775,7 +791,7 @@ router.get(rutas_aulas, sessionAuth, AulasService.obtener);
  * /api/v1/colegios/aulas:
  *   post:
  *     summary: Crear una nueva aula
- *     description: Registra una nueva aula en el sistema
+ *     description: Registra una nueva relación aula-curso-docente-materia en el sistema
  *     tags: [Aulas]
  *     security:
  *       - sessionAuth: []
@@ -784,11 +800,13 @@ router.get(rutas_aulas, sessionAuth, AulasService.obtener);
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Aula'
+ *             $ref: '#/components/schemas/AulaInput'
  *           example:
- *             nombre: "Aula 101"
- *             capacidad: 30
- *             grado_id: 1
+ *             curso_id: 5
+ *             colegio_id: 1
+ *             materia_id: 3
+ *             docente_id: 7
+ *             tipo_docente: "Titular"
  *     responses:
  *       201:
  *         description: Aula creada exitosamente
@@ -796,10 +814,25 @@ router.get(rutas_aulas, sessionAuth, AulasService.obtener);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Aula'
+ *             example:
+ *               aula_id: 1
+ *               curso_id: 5
+ *               colegio_id: 1
+ *               materia_id: 3
+ *               docente_id: 7
+ *               tipo_docente: "Titular"
+ *               fecha_creacion: "2023-05-10T14:30:00Z"
+ *               fecha_actualizacion: null
+ *               creado_por: 1
+ *               actualizado_por: null
  *       400:
- *         description: Datos de entrada inválidos o faltantes
+ *         description: Datos de entrada inválidos
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "El campo 'curso_id' es requerido"
  *       401:
- *         description: No autorizado - Sesión no válida o no proporcionada
+ *         description: No autorizado
  *       500:
  *         description: Error interno del servidor
  */
@@ -809,8 +842,8 @@ router.post(rutas_aulas, sessionAuth, AulasService.guardar);
  * @swagger
  * /api/v1/colegios/aulas/{id}:
  *   put:
- *     summary: Actualizar una aula existente
- *     description: Modifica los datos de un aula registrada
+ *     summary: Actualizar un aula existente
+ *     description: Modifica los datos de una relación aula-curso-docente-materia
  *     tags: [Aulas]
  *     security:
  *       - sessionAuth: []
@@ -820,16 +853,20 @@ router.post(rutas_aulas, sessionAuth, AulasService.guardar);
  *         required: true
  *         schema:
  *           type: integer
+ *           example: 1
  *         description: ID del aula a actualizar
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Aula'
+ *             $ref: '#/components/schemas/AulaUpdate'
  *           example:
- *             nombre: "Aula 102"
- *             capacidad: 35
+ *             curso_id: 6
+ *             materia_id: 4
+ *             docente_id: 8
+ *             tipo_docente: "Suplente"
+ *             actualizado_por: 2
  *     responses:
  *       200:
  *         description: Aula actualizada exitosamente
@@ -837,10 +874,21 @@ router.post(rutas_aulas, sessionAuth, AulasService.guardar);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Aula'
+ *             example:
+ *               aula_id: 1
+ *               curso_id: 6
+ *               colegio_id: 1
+ *               materia_id: 4
+ *               docente_id: 8
+ *               tipo_docente: "Suplente"
+ *               fecha_creacion: "2023-05-10T14:30:00Z"
+ *               fecha_actualizacion: "2023-05-15T10:15:00Z"
+ *               creado_por: 1
+ *               actualizado_por: 2
  *       400:
- *         description: Datos de entrada inválidos o faltantes
+ *         description: Datos de entrada inválidos
  *       401:
- *         description: No autorizado - Sesión no válida o no proporcionada
+ *         description: No autorizado
  *       404:
  *         description: Aula no encontrada
  *       500:
@@ -852,8 +900,8 @@ router.put(`${rutas_aulas}/:id`, sessionAuth, AulasService.actualizar);
  * @swagger
  * /api/v1/colegios/aulas/{id}:
  *   delete:
- *     summary: Eliminar un aula
- *     description: Elimina un aula del sistema
+ *     summary: Eliminar un aula (desactivar)
+ *     description: Realiza una eliminación lógica (desactivación) de un aula del sistema
  *     tags: [Aulas]
  *     security:
  *       - sessionAuth: []
@@ -863,10 +911,11 @@ router.put(`${rutas_aulas}/:id`, sessionAuth, AulasService.actualizar);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID del aula a eliminar
+ *           example: 1
+ *         description: ID del aula a desactivar
  *     responses:
  *       204:
- *         description: Aula eliminada exitosamente
+ *         description: Aula desactivada exitosamente
  *       401:
  *         description: No autorizado - Sesión no válida o no proporcionada
  *       404:
@@ -1980,4 +2029,117 @@ router.delete(`${rutas_usuarios_colegios}/:id`, sessionAuth, UsuarioColegiosServ
  *       bearerFormat: JWT
  */
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AulaInput:
+ *       type: object
+ *       required:
+ *         - curso_id
+ *         - colegio_id
+ *         - materia_id
+ *         - docente_id
+ *         - tipo_docente
+ *       properties:
+ *         curso_id:
+ *           type: integer
+ *           example: 5
+ *           description: ID del curso asociado
+ *         colegio_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del colegio
+ *         materia_id:
+ *           type: integer
+ *           example: 3
+ *           description: ID de la materia
+ *         docente_id:
+ *           type: integer
+ *           example: 7
+ *           description: ID del docente asignado
+ *         tipo_docente:
+ *           type: string
+ *           example: "Titular"
+ *           enum: [Titular, Suplente, Reemplazante]
+ *           description: Tipo de asignación del docente
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que crea el registro
+ * 
+ *     AulaUpdate:
+ *       type: object
+ *       properties:
+ *         curso_id:
+ *           type: integer
+ *           example: 6
+ *           description: ID del curso asociado
+ *         materia_id:
+ *           type: integer
+ *           example: 4
+ *           description: ID de la materia
+ *         docente_id:
+ *           type: integer
+ *           example: 8
+ *           description: ID del docente asignado
+ *         tipo_docente:
+ *           type: string
+ *           example: "Suplente"
+ *           enum: [Titular, Suplente, Reemplazante]
+ *           description: Tipo de asignación del docente
+ *         actualizado_por:
+ *           type: integer
+ *           example: 2
+ *           description: ID del usuario que actualiza el registro
+ * 
+ *     Aula:
+ *       type: object
+ *       properties:
+ *         aula_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID único del aula
+ *         curso_id:
+ *           type: integer
+ *           example: 5
+ *           description: ID del curso asociado
+ *         colegio_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID del colegio
+ *         materia_id:
+ *           type: integer
+ *           example: 3
+ *           description: ID de la materia
+ *         docente_id:
+ *           type: integer
+ *           example: 7
+ *           description: ID del docente asignado
+ *         tipo_docente:
+ *           type: string
+ *           example: "Titular"
+ *           enum: [Titular, Suplente, Reemplazante]
+ *           description: Tipo de asignación del docente
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-05-10T14:30:00Z"
+ *           description: Fecha de creación del registro
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: null
+ *           description: Fecha de última actualización
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que creó el registro
+ *         actualizado_por:
+ *           type: integer
+ *           nullable: true
+ *           example: null
+ *           description: ID del usuario que actualizó el registro
+ */
 export default router;
