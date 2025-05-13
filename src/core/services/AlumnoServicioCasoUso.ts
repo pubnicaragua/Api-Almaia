@@ -67,7 +67,7 @@ export class AlumnoServicioCasoUso {
     return {
       alumnos: {
         activos: alumnosActivos,
-        inactivos: totalAlumnos - alumnosActivos,
+        inactivos:  alumnosActivos-totalAlumnos,
         frecuentes: alumnosFrecuentes,
         totales: totalAlumnos + alumnosSeleccion,
       },
