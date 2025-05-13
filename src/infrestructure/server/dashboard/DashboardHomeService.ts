@@ -12,6 +12,7 @@ import { AlertasServicioCasoUso } from "../../../core/services/AlertasServiceCas
 import { ALERT_TYPES } from "../../../core/modelo/home/AlertType";
 import { CalendarioFechaImportante } from "../../../core/modelo/colegio/CalendarioFechaImportante";
 import { DataService } from "../DataService";
+import { AlertStats } from "../../../core/modelo/home/AlertStats";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -41,13 +42,21 @@ export const DashboardHomeService = {
         sevenDaysAgo
       );
       const alertas_services_caso_uso = new AlertasServicioCasoUso();
-      const [sosStats, denunciaStats, almaStats] = await Promise.all([
+      const [sosStats, denunciaStats, amarillaStats,naranjaStats,rojaStats] = await Promise.all([
         alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.SOS),
         alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.DENUNCIA),
-        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMA),
+        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMARILLA),
+        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.NARANJA),
+        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ROJA),
       ]);
       const alumnosFrecuentes =
         alumnoServicioCasoUso.calcularAlumnosFrecuentes(responses);
+        const almaStats :AlertStats = {
+              totales: amarillaStats.totales+naranjaStats.totales+rojaStats.totales,
+              activos: amarillaStats.activos+naranjaStats.activos+rojaStats.activos,
+              vencidos: amarillaStats.vencidos+naranjaStats.vencidos+rojaStats.vencidos,
+              por_vencer: amarillaStats.por_vencer+naranjaStats.por_vencer+rojaStats.por_vencer,
+            }
       const response = {
         alumnos: {
           activos: alumnosActivos ?? 0,
