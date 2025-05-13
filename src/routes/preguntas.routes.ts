@@ -55,6 +55,165 @@ const ruta_tipos_preguntas = '/tipos_preguntas';
  *         description: Error interno del servidor
  */
 router.get('/', sessionAuth, PreguntaService.obtener);
+/**
+ * @swagger
+ * /api/v1/preguntas/{id}:
+ *   get:
+ *     summary: Obtener detalle completo de una pregunta con respuestas posibles
+ *     description: Retorna toda la información de una pregunta específica incluyendo su tipo, nivel educativo, detalles de diagnóstico y respuestas posibles asociadas con sus nombres
+ *     tags: [Preguntas]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: ID de la pregunta a consultar
+ *     responses:
+ *       200:
+ *         description: Detalle de pregunta obtenido correctamente con respuestas asociadas
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PreguntaDetallada'
+ *             example:
+ *               pregunta_id: 1
+ *               tipo_pregunta:
+ *                 tipo_pregunta_id: 2
+ *                 nombre: "Opción múltiple"
+ *               nivel_educativo:
+ *                 nivel_educativo_id: 3
+ *                 nombre: "Secundaria"
+ *               diagnostico: "Problemas de atención"
+ *               sintomas: "Falta de concentración, hiperactividad"
+ *               grupo_preguntas: "Evaluación inicial"
+ *               palabra_clave: "atención"
+ *               horario: "am"
+ *               texto_pregunta: "¿Con qué frecuencia tiene dificultad para concentrarse en sus tareas?"
+ *               respuestas_posibles_has_preguntas:
+ *                 - respuesta_posible_id: 1
+ *                   pregunta_id: 1
+ *                   nombre: "Nunca"
+ *                 - respuesta_posible_id: 2
+ *                   pregunta_id: 1
+ *                   nombre: "Ocasionalmente"
+ *                 - respuesta_posible_id: 3
+ *                   pregunta_id: 1
+ *                   nombre: "Frecuentemente"
+ *       401:
+ *         description: No autorizado - Sesión no válida
+ *       404:
+ *         description: Pregunta no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     PreguntaDetallada:
+ *       type: object
+ *       properties:
+ *         pregunta_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID único de la pregunta
+ *         tipo_pregunta:
+ *           type: object
+ *           properties:
+ *             tipo_pregunta_id:
+ *               type: integer
+ *               example: 2
+ *             nombre:
+ *               type: string
+ *               example: "Opción múltiple"
+ *           description: Tipo de pregunta
+ *         nivel_educativo:
+ *           type: object
+ *           properties:
+ *             nivel_educativo_id:
+ *               type: integer
+ *               example: 3
+ *             nombre:
+ *               type: string
+ *               example: "Secundaria"
+ *           description: Nivel educativo asociado
+ *         diagnostico:
+ *           type: string
+ *           example: "Problemas de atención"
+ *           description: Área de diagnóstico relacionada
+ *         sintomas:
+ *           type: string
+ *           example: "Falta de concentración, hiperactividad"
+ *           description: Síntomas asociados
+ *         grupo_preguntas:
+ *           type: string
+ *           example: "Evaluación inicial"
+ *           description: Grupo al que pertenece la pregunta
+ *         palabra_clave:
+ *           type: string
+ *           example: "atención"
+ *           description: Palabra clave para búsquedas
+ *         horario:
+ *           type: string
+ *           example: "am"
+ *           enum: [am, pm]
+ *           description: Horario sugerido para aplicar la pregunta
+ *         texto_pregunta:
+ *           type: string
+ *           example: "¿Con qué frecuencia tiene dificultad para concentrarse en sus tareas?"
+ *           description: Texto completo de la pregunta
+ *         respuestas_posibles_has_preguntas:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/RespuestaPosible'
+ *           description: Lista de respuestas posibles asociadas a la pregunta
+ * 
+ *     RespuestaPosible:
+ *       type: object
+ *       properties:
+ *         respuesta_posible_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID único de la respuesta posible
+ *         pregunta_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID de la pregunta asociada
+ *         nombre:
+ *           type: string
+ *           example: "Nunca"
+ *           description: Texto de la respuesta posible
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: session
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     RespuestaPosibleModelo:
+ *       type: object
+ *       description: Modelo de datos para RespuestaPosible
+ *       properties:
+ *         respuesta_posible_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID único de la respuesta posible
+ *         nombre:
+ *           type: string
+ *           example: "Nunca"
+ *           description: Texto de la respuesta posible
+ */
+router.get('/:id', sessionAuth, PreguntaService.detalle);
 
 /**
  * @swagger
