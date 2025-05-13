@@ -13,7 +13,7 @@ const AulaSchema = Joi.object({
   materia_id: Joi.number().integer().required(),
   docente_id: Joi.number().integer().required(),
 });
-const dataService: DataService<Aula> = new DataService("aulas");
+const dataService: DataService<Aula> = new DataService("aulas","aula_id");
 export const AulasService = {
   async obtener(req: Request, res: Response) {
     try {
