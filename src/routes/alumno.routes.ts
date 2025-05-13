@@ -10,6 +10,7 @@ import { AlumnoCursoService } from '../infrestructure/server/alumno/AlumnoCursoS
 import { AlumnoDireccionService } from '../infrestructure/server/alumno/AlumnoDireccionService';
 import { AlumnoNotificacionService } from '../infrestructure/server/alumno/AlumnoNotificacionService';
 import { AlumnoMonitoreoService } from '../infrestructure/server/alumno/AlumnoMonitoreoService';
+import { AlumnoActividadService } from '../infrestructure/server/alumno/AlumnoActividadService';
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ const ruta_alumnos_cursos = '/cursos';
 const ruta_alumnos_direcciones = '/direcciones';
 const ruta_alumnos_monitoreos = '/monitoreos';
 const ruta_alumnos_notificaciones = '/notificaciones';
+const ruta_alumnos_actividades = '/alumnos_actividades';
 
 /**
  * @swagger
@@ -2978,4 +2980,272 @@ router.put(ruta_alumnos_notificaciones + '/:id', sessionAuth, AlumnoNotificacion
  */
 router.delete(ruta_alumnos_notificaciones + '/:id', sessionAuth, AlumnoNotificacionService.eliminar);
 
+/**
+ * @swagger
+ * /api/v1/alumnos/alumnos_actividades:
+ *   get:
+ *     summary: Obtener todas las relaciones alumno-actividad
+ *     description: Retorna todas las asociaciones entre alumnos y actividades
+ *     tags: [AlumnoActividades]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de relaciones alumno-actividad obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AlumnoActividadCompleta'
+ *             example:
+ *               - alumno_actividad_id: 1
+ *                 alumno_id: 5
+ *                 actividad_id: 3
+ *                 actividad:
+ *                   actividad_id: 3
+ *                   nombre: "Taller de Matemáticas"
+ *                 fecha_creacion: "2023-05-10T14:30:00Z"
+ *                 fecha_actualizacion: null
+ *                 creado_por: 1
+ *                 actualizado_por: null
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.obtener)
+/**
+ * @swagger
+ * /api/v1/alumnos/alumnos_actividades:
+ *   post:
+ *     summary: Crear nueva relación alumno-actividad
+ *     description: Asocia un alumno con una actividad específica
+ *     tags: [AlumnoActividades]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlumnoActividadInput'
+ *           example:
+ *             alumno_id: 5
+ *             actividad_id: 3
+ *             creado_por: 1
+ *     responses:
+ *       201:
+ *         description: Relación alumno-actividad creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoActividadCompleta'
+ *             example:
+ *               alumno_actividad_id: 1
+ *               alumno_id: 5
+ *               actividad_id: 3
+ *               actividad:
+ *                 actividad_id: 3
+ *                 nombre: "Taller de Matemáticas"
+ *               fecha_creacion: "2023-05-10T14:30:00Z"
+ *               fecha_actualizacion: null
+ *               creado_por: 1
+ *               actualizado_por: null
+ *       400:
+ *         description: Datos de entrada inválidos
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "El campo 'alumno_id' es requerido"
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.guardar)
+/**
+ * @swagger
+ * /api/v1/alumnos/alumnos_actividades:
+ *   put:
+ *     summary: Actualizar relación alumno-actividad
+ *     description: Modifica una asociación existente entre alumno y actividad
+ *     tags: [AlumnoActividades]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlumnoActividadUpdate'
+ *           example:
+ *             alumno_actividad_id: 1
+ *             alumno_id: 5
+ *             actividad_id: 4
+ *             actualizado_por: 2
+ *     responses:
+ *       200:
+ *         description: Relación alumno-actividad actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoActividadCompleta'
+ *             example:
+ *               alumno_actividad_id: 1
+ *               alumno_id: 5
+ *               actividad_id: 4
+ *               actividad:
+ *                 actividad_id: 4
+ *                 nombre: "Taller de Ciencias"
+ *               fecha_creacion: "2023-05-10T14:30:00Z"
+ *               fecha_actualizacion: "2023-05-15T10:15:00Z"
+ *               creado_por: 1
+ *               actualizado_por: 2
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Relación no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.actualizar)
+/**
+ * @swagger
+ * /api/v1/alumnos/alumnos_actividades:
+ *   delete:
+ *     summary: Eliminar relación alumno-actividad
+ *     description: Elimina una asociación entre alumno y actividad
+ *     tags: [AlumnoActividades]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlumnoActividadDelete'
+ *           example:
+ *             alumno_actividad_id: 1
+ *     responses:
+ *       204:
+ *         description: Relación eliminada exitosamente
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Relación no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.eliminar)
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlumnoActividadInput:
+ *       type: object
+ *       required:
+ *         - alumno_id
+ *         - actividad_id
+ *         - creado_por
+ *       properties:
+ *         alumno_id:
+ *           type: integer
+ *           example: 5
+ *           description: ID del alumno
+ *         actividad_id:
+ *           type: integer
+ *           example: 3
+ *           description: ID de la actividad
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que crea la relación
+ * 
+ *     AlumnoActividadUpdate:
+ *       type: object
+ *       required:
+ *         - alumno_actividad_id
+ *       properties:
+ *         alumno_actividad_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID de la relación a actualizar
+ *         alumno_id:
+ *           type: integer
+ *           example: 5
+ *           description: Nuevo ID del alumno
+ *         actividad_id:
+ *           type: integer
+ *           example: 4
+ *           description: Nuevo ID de la actividad
+ *         actualizado_por:
+ *           type: integer
+ *           example: 2
+ *           description: ID del usuario que actualiza la relación
+ * 
+ *     AlumnoActividadDelete:
+ *       type: object
+ *       required:
+ *         - alumno_actividad_id
+ *       properties:
+ *         alumno_actividad_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID de la relación a eliminar
+ * 
+ *     AlumnoActividadCompleta:
+ *       type: object
+ *       properties:
+ *         alumno_actividad_id:
+ *           type: integer
+ *           example: 1
+ *           description: ID único de la relación
+ *         alumno_id:
+ *           type: integer
+ *           example: 5
+ *           description: ID del alumno
+ *         actividad_id:
+ *           type: integer
+ *           example: 3
+ *           description: ID de la actividad
+ *         actividad:
+ *           type: object
+ *           properties:
+ *             actividad_id:
+ *               type: integer
+ *               example: 3
+ *             nombre:
+ *               type: string
+ *               example: "Taller de Matemáticas"
+ *           description: Información de la actividad asociada
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-05-10T14:30:00Z"
+ *           description: Fecha de creación del registro
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: null
+ *           description: Fecha de última actualización
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que creó el registro
+ *         actualizado_por:
+ *           type: integer
+ *           nullable: true
+ *           example: null
+ *           description: ID del usuario que actualizó el registro
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: session
+ */
 export default router;
