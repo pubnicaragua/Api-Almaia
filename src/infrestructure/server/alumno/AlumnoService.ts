@@ -4,6 +4,7 @@ import { Alumno } from "../../../core/modelo/alumno/Alumno";
 import Joi from "joi";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { ComparativaDato } from "../../../core/modelo/alumno/ComparativaDato";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -28,7 +29,7 @@ export const AlumnosService = {
           "*",
           "personas(persona_id,nombres,apellidos,fecha_nacimiento)",
           "colegios(colegio_id,nombre)",
-          "cursos(grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))"
+          "cursos(grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
         ],
         where
       );
@@ -41,84 +42,49 @@ export const AlumnosService = {
 
   async getAlumnoDetalle(req: Request, res: Response) {
     const { alumnoId } = req.params;
-
-    // Alumno simulado
-    const alumno = {
-      alumno_id: parseInt(alumnoId),
-      colegio_id: 101,
-      url_foto_perfil: "https://example.com/foto.jpg",
-      telefono_contacto1: "+56 9 1234 5678",
-      telefono_contacto2: "+56 9 8765 4321",
-      email: "alumno.demo@colegio.cl",
-    };
-
-    // Ficha clínica simulada
-    const ficha = {
-      alumno_ant_clinico_id: 1,
-      alumno_id: parseInt(alumnoId),
-      historial_medico: "Historial general sin eventos graves.",
-      alergias: "Ninguna conocida",
-      enfermedades_cronicas: "Asma leve",
-      condiciones_medicas_relevantes: "Controlado por pediatra",
-      medicamentos_actuales: "Salbutamol",
-      diagnosticos_previos: "Asma infantil",
-      terapias_tratamiento_curso: "Inhalador según necesidad",
-    };
-
-    // Alertas simuladas
-    const alertas = [
-      {
-        alumno_alerta_id: 1,
-        alumno_id: parseInt(alumnoId),
-        alerta_regla_id: 12,
-        fecha_generada: new Date(),
-        fecha_resolucion: null,
-        alerta_origen_id: 3,
-        prioridad_id: 2,
-        severidad_id: 1,
-        accion_tomada: "Conversación con apoderado",
-        leida: false,
-        responsable_actual_id: 7,
-        estado: "pendiente",
-        alertas_tipo_alerta_tipo_id: 4,
-      },
-    ];
-
-    // Informes simulados
-    const informes = [
-      {
-        alumno_informe_id: 1,
-        alumno_id: parseInt(alumnoId),
-        fecha: new Date("2024-12-01"),
-        url_reporte: "https://example.com/informe1.pdf",
-      },
-      {
-        alumno_informe_id: 2,
-        alumno_id: parseInt(alumnoId),
-        fecha: new Date("2025-03-15"),
-        url_reporte: "https://example.com/informe2.pdf",
-      },
-    ];
-
-    // Apoderados simulados
-    const apoderados = [
-      {
-        alumno_apoderado_id: 1,
-        alumno_id: parseInt(alumnoId),
-        apoderado_id: 1001,
-        tipo_apoderado: "Padre",
-        observaciones: "Siempre disponible",
-        estado_usuario: "activo",
-      },
-      {
-        alumno_apoderado_id: 2,
-        alumno_id: parseInt(alumnoId),
-        apoderado_id: 1002,
-        tipo_apoderado: "Madre",
-        observaciones: "Vive con el alumno",
-        estado_usuario: "activo",
-      },
-    ];
+    const where = { alumno_id: alumnoId }; // Convertir los parámetros de consulta en filtros
+    const data_alumno = await dataService.getAll(
+      [
+        "*",
+        "personas(persona_id,nombres,apellidos,fecha_nacimiento)",
+        "colegios(colegio_id,nombre)",
+        "cursos(grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
+      ],
+      where
+    );
+    const alumno = data_alumno[0];
+    const { data: ficha, error: error_ant_clinicos } = await client
+      .from("alumnos_ant_clinicos")
+      .select("*")
+      .eq("alumno_id", alumno.alumno_id);
+    if (error_ant_clinicos) {
+      throw new Error(error_ant_clinicos.message);
+    }
+    const { data: alertas, error: error_alertas } = await client
+      .from("alumnos_alertas")
+      .select(
+        "*,alertas_reglas(alerta_regla_id,nombre),alertas_origenes(alerta_origen_id,nombre),alertas_severidades(alerta_severidad_id,nombre)alertas_prioridades(alerta_prioridad_id,nombre),alertas_tipos(alerta_tipo_id,nombre)"
+      )
+      .eq("alumno_id", alumno.alumno_id);
+    if (error_alertas) {
+      throw new Error(error_alertas.message);
+    }
+    const { data: informes, error: error_informes } = await client
+      .from("alumnos_informes")
+      .select("*")
+      .eq("alumno_id", alumno.alumno_id);
+    if (error_informes) {
+      throw new Error(error_informes.message);
+    }
+    const { data: apoderados, error: error_apoderados } = await client
+      .from("alumnos_apoderados")
+      .select(
+        "*,apoderados(apoderado_id,personas(persona_id,nombres,apellidos))"
+      )
+      .eq("alumno_id", alumno.alumno_id);
+    if (error_apoderados) {
+      throw new Error(error_apoderados.message);
+    }
 
     // Emociones simuladas
     const emociones = [
@@ -129,6 +95,33 @@ export const AlumnosService = {
       { nombre: "Enojo", valor: 750 },
       { nombre: "Otros", valor: 1900 },
     ];
+    const datosComparativa: ComparativaDato[] = [
+      {
+        emocion: "Feliz",
+        alumno: 2.0, // Punto más alejado (y=110)
+        promedio: 1.5, // Punto más cercano (y=128)
+      },
+      {
+        emocion: "Triste",
+        alumno: 1.9, // x=290
+        promedio: 1.6, // x=272
+      },
+      {
+        emocion: "Estresada",
+        alumno: 1.5, // y=277
+        promedio: 1.2, // y=257
+      },
+      {
+        emocion: "Enojada",
+        alumno: 1.5,
+        promedio: 1.2,
+      },
+      {
+        emocion: "Ansiosa",
+        alumno: 1.9,
+        promedio: 1.6,
+      },
+    ];
 
     res.json({
       alumno,
@@ -136,6 +129,7 @@ export const AlumnosService = {
       alertas,
       informes,
       emociones,
+      datosComparativa,
       apoderados,
     });
   },
