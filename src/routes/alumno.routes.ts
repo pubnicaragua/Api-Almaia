@@ -223,9 +223,6 @@ const ruta_alumnos_actividades = '/alumnos_actividades';
  *     AlumnoAntecedenteFamiliar:
  *       type: object
  *       properties:
- *         alumno_ent_familiar:
- *           type: integer
- *           description: ID único del antecedente familiar
  *         alumno_id:
  *           type: integer
  *           description: ID del alumno asociado
@@ -1891,11 +1888,11 @@ router.delete(ruta_alumnos_alertas_bitacoras + '/:id', sessionAuth, AlumnoAlerta
 // Rutas para Antecedentes Clínicos
 /**
  * @swagger
- * /api/v1/alumnos/antecedentes_clinicos:
+ * /api/v1/alumnos/antecedentes_familiares:
  *   get:
- *     summary: Obtener antecedentes clínicos de alumnos
- *     description: Retorna los antecedentes médicos registrados para los alumnos con información básica del alumno
- *     tags: [Antecedentes]
+ *     summary: Obtener antecedentes familiares de alumnos
+ *     description: Retorna los antecedentes familiares y socioeconómicos registrados para los alumnos
+ *     tags: [AntecedentesFamiliares]
  *     security:
  *       - sessionAuth: []
  *     parameters:
@@ -1904,7 +1901,7 @@ router.delete(ruta_alumnos_alertas_bitacoras + '/:id', sessionAuth, AlumnoAlerta
  *         schema:
  *           type: integer
  *         description: Filtrar por ID de alumno específico
- *         example: 12
+ *         example: 7
  *       - in: query
  *         name: activo
  *         schema:
@@ -1913,37 +1910,57 @@ router.delete(ruta_alumnos_alertas_bitacoras + '/:id', sessionAuth, AlumnoAlerta
  *         example: true
  *     responses:
  *       200:
- *         description: Antecedentes clínicos obtenidos correctamente
+ *         description: Antecedentes familiares obtenidos correctamente
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/AntecedenteClinicoCompleto'
+ *                 $ref: '#/components/schemas/AntecedenteFamiliarCompleto'
  *             example:
- *               - creado_por: 3
- *                 actualizado_por: 5
- *                 fecha_creacion: "2025-05-14T10:30:00.000Z"
- *                 fecha_actualizacion: "2025-05-14T12:45:00.000Z"
+ *               - alumno_ent_familiar: 1
+ *                 alumno_id: 7
+ *                 informacion_socio_economica: "string"
+ *                 composicion_familiar: "string"
+ *                 situacion_laboral_padres: "string"
+ *                 recursos_disponibles: "string"
+ *                 dinamica_familiar: "string"
+ *                 relaciones_familiares: "string"
+ *                 apoyo_emocional: "string"
+ *                 factores_riesgo: "string"
+ *                 observaciones_entrevistador: "string"
+ *                 resumen_entrevista: "string"
+ *                 impresiones_recomendaciones: "string"
+ *                 procesos_pisicoteurapeuticos_adicionales: "string"
+ *                 desarrollo_social: ""
+ *                 fecha_inicio_escolaridad: "2025-05-14T00:00:00"
+ *                 personas_apoya_aprendzaje_alumno: "string"
+ *                 higiene_sueno: "string"
+ *                 uso_plantillas: "string"
+ *                 otros_antecedentes_relevantes: "string"
+ *                 creado_por: 1
+ *                 actualizado_por: 1
+ *                 fecha_creacion: "2025-05-14T12:49:57.479"
+ *                 fecha_actualizacion: "2025-05-14T12:49:57.479"
  *                 activo: true
- *                 alumno_id: 12
- *                 historial_medico: "Historial de asma infantil controlado con tratamiento"
- *                 alergias: "Alergia al maní y penicilina"
- *                 enfermedades_cronicas: "Asma"
- *                 condiciones_medicas_relevantes: "Antecedentes familiares de hipertensión"
- *                 medicamentos_actuales: "Salbutamol en inhalador"
- *                 diagnosticos_previos: "Crisis asmáticas moderadas durante la infancia"
- *                 terapias_tratamiento_curso: "Control mensual con neumólogo pediátrico"
- *                 alumno:
- *                   email: "juanfelipe.mendez@escuela.edu"
+ *                 alumnos:
+ *                   email: "alextest@colegio.cl"
  *                   personas:
- *                     nombres: "Juan Felipe"
- *                     apellidos: "Méndez Castillo"
- *                     persona_id: 9
- *                   alumno_id: 12
- *                   url_foto_perfil: "https://randomuser.me/api/portraits/men/52.jpg"
- *                   telefono_contacto1: "+56 9 3421 5678"
- *                   telefono_contacto2: "+56 9 8765 2345"
+ *                     nombres: "Carlos"
+ *                     apellidos: "Muñoz"
+ *                     persona_id: 2
+ *                   alumno_id: 7
+ *                   url_foto_perfil: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ *                   telefono_contacto1: "+56 9 1284 5678"
+ *                   telefono_contacto2: "+56 9 8765 4321"
+ *       400:
+ *         description: Parámetros de consulta inválidos
+ *       401:
+ *         description: No autorizado - Sesión no válida
+ *       404:
+ *         description: No se encontraron registros
+ *       500:
+ *         description: Error interno del servidor
  */
 router.get(ruta_alumnos_antecedentes_clinicos, sessionAuth, AlumnoAntecedenteClinicosService.obtener);
 
@@ -3324,5 +3341,151 @@ router.delete(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.el
  *       in: cookie
  *       name: session
  */
-
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AntecedenteFamiliarCompleto:
+ *       type: object
+ *       properties:
+ *         alumno_ent_familiar:
+ *           type: integer
+ *           example: 1
+ *           description: ID único del antecedente familiar
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *           description: ID del alumno asociado
+ *         informacion_socio_economica:
+ *           type: string
+ *           example: "string"
+ *           description: Información socioeconómica de la familia
+ *         composicion_familiar:
+ *           type: string
+ *           example: "string"
+ *           description: Composición del núcleo familiar
+ *         situacion_laboral_padres:
+ *           type: string
+ *           example: "string"
+ *           description: Situación laboral de los padres/tutores
+ *         recursos_disponibles:
+ *           type: string
+ *           example: "string"
+ *           description: Recursos económicos disponibles
+ *         dinamica_familiar:
+ *           type: string
+ *           example: "string"
+ *           description: Dinámica familiar y relaciones
+ *         relaciones_familiares:
+ *           type: string
+ *           example: "string"
+ *           description: Calidad de las relaciones familiares
+ *         apoyo_emocional:
+ *           type: string
+ *           example: "string"
+ *           description: Nivel de apoyo emocional en la familia
+ *         factores_riesgo:
+ *           type: string
+ *           example: "string"
+ *           description: Factores de riesgo identificados
+ *         observaciones_entrevistador:
+ *           type: string
+ *           example: "string"
+ *           description: Observaciones del entrevistador
+ *         resumen_entrevista:
+ *           type: string
+ *           example: "string"
+ *           description: Resumen de la entrevista familiar
+ *         impresiones_recomendaciones:
+ *           type: string
+ *           example: "string"
+ *           description: Impresiones y recomendaciones
+ *         procesos_pisicoteurapeuticos_adicionales:
+ *           type: string
+ *           example: "string"
+ *           description: Procesos psicoterapéuticos adicionales
+ *         desarrollo_social:
+ *           type: string
+ *           example: ""
+ *           description: Desarrollo social del alumno
+ *         fecha_inicio_escolaridad:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T00:00:00"
+ *           description: Fecha de inicio de la escolaridad
+ *         personas_apoya_aprendzaje_alumno:
+ *           type: string
+ *           example: "string"
+ *           description: Personas que apoyan el aprendizaje
+ *         higiene_sueno:
+ *           type: string
+ *           example: "string"
+ *           description: Hábitos de higiene del sueño
+ *         uso_plantillas:
+ *           type: string
+ *           example: "string"
+ *           description: Uso de plantillas o ayudas técnicas
+ *         otros_antecedentes_relevantes:
+ *           type: string
+ *           example: "string"
+ *           description: Otros antecedentes relevantes
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que creó el registro
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *           description: ID del usuario que actualizó el registro
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T12:49:57.479"
+ *           description: Fecha de creación del registro
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T12:49:57.479"
+ *           description: Fecha de última actualización
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *           description: Indica si el registro está activo
+ *         alumnos:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
+ *               example: "alextest@colegio.cl"
+ *             personas:
+ *               type: object
+ *               properties:
+ *                 nombres:
+ *                   type: string
+ *                   example: "Carlos"
+ *                 apellidos:
+ *                   type: string
+ *                   example: "Muñoz"
+ *                 persona_id:
+ *                   type: integer
+ *                   example: 2
+ *             alumno_id:
+ *               type: integer
+ *               example: 7
+ *             url_foto_perfil:
+ *               type: string
+ *               example: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ *             telefono_contacto1:
+ *               type: string
+ *               example: "+56 9 1284 5678"
+ *             telefono_contacto2:
+ *               type: string
+ *               example: "+56 9 8765 4321"
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: session
+ */
 export default router;
