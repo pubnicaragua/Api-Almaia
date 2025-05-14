@@ -52,7 +52,7 @@ const ruta_motores_preguntas = '/motores_preguntas';
  * /api/v1/alertas/alertas_evidencias:
  *   get:
  *     summary: Obtener todas las evidencias de alertas
- *     description: Retorna una lista de todas las evidencias de alertas registradas
+ *     description: Retorna una lista detallada de todas las evidencias de alertas registradas, incluyendo información relacionada de alumnos, tipos de alerta y estados
  *     tags: [Alertas - Evidencias]
  *     security:
  *       - sessionAuth: []
@@ -65,8 +65,152 @@ const ruta_motores_preguntas = '/motores_preguntas';
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/AlertaEvidencia'
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
  *       500:
  *         description: Error interno del servidor
+ * 
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlertaEvidencia:
+ *       type: object
+ *       properties:
+ *         alerta_evidencia_id:
+ *           type: integer
+ *           example: 1
+ *         url_evidencia:
+ *           type: string
+ *           example: "string"
+ *         alumno_alerta_id:
+ *           type: integer
+ *           example: 14
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T23:05:09.438"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T23:05:09.438"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *         alumnos_alertas:
+ *           $ref: '#/components/schemas/AlumnoAlerta'
+ * 
+ *     AlumnoAlerta:
+ *       type: object
+ *       properties:
+ *         alumnos:
+ *           $ref: '#/components/schemas/AlumnoInfo'
+ *         accion_tomada:
+ *           type: string
+ *           nullable: true
+ *           example: null
+ *         alertas_tipos:
+ *           $ref: '#/components/schemas/AlertaTipo'
+ *         alertas_reglas:
+ *           $ref: '#/components/schemas/AlertaRegla'
+ *         fecha_generada:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T20:13:12.302209"
+ *         alertas_origenes:
+ *           $ref: '#/components/schemas/AlertaOrigen'
+ *         alumno_alerta_id:
+ *           type: integer
+ *           example: 14
+ *         fecha_resolucion:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: null
+ *         alertas_prioridades:
+ *           $ref: '#/components/schemas/AlertaPrioridad'
+ *         alertas_severidades:
+ *           $ref: '#/components/schemas/AlertaSeveridad'
+ * 
+ *     AlumnoInfo:
+ *       type: object
+ *       properties:
+ *         personas:
+ *           $ref: '#/components/schemas/PersonaInfo'
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ * 
+ *     PersonaInfo:
+ *       type: object
+ *       properties:
+ *         nombres:
+ *           type: string
+ *           example: "Carlos"
+ *         apellidos:
+ *           type: string
+ *           example: "Muñoz"
+ *         persona_id:
+ *           type: integer
+ *           example: 2
+ * 
+ *     AlertaTipo:
+ *       type: object
+ *       properties:
+ *         nombre:
+ *           type: string
+ *           example: "SOS Alma"
+ *         alerta_tipo_id:
+ *           type: integer
+ *           example: 1
+ * 
+ *     AlertaRegla:
+ *       type: object
+ *       properties:
+ *         nombre:
+ *           type: string
+ *           example: "Regla Tranquilidad Constante"
+ *         alerta_regla_id:
+ *           type: integer
+ *           example: 2
+ * 
+ *     AlertaOrigen:
+ *       type: object
+ *       properties:
+ *         nombre:
+ *           type: string
+ *           example: "Alumno"
+ *         alerta_origen_id:
+ *           type: integer
+ *           example: 1
+ * 
+ *     AlertaPrioridad:
+ *       type: object
+ *       properties:
+ *         nombre:
+ *           type: string
+ *           example: "Baja"
+ *         alerta_prioridad_id:
+ *           type: integer
+ *           example: 1
+ * 
+ *     AlertaSeveridad:
+ *       type: object
+ *       properties:
+ *         nombre:
+ *           type: string
+ *           example: "Baja"
+ *         alerta_severidad_id:
+ *           type: integer
+ *           example: 1
  */
 router.get(ruta_alertas_evidencias+'/', sessionAuth, AlertaEvidenciasService.obtener);
 
@@ -1008,9 +1152,6 @@ router.delete(ruta_motores_preguntas+'/:id', sessionAuth, MotorPreguntasService.
  *     AlertaEvidencia:
  *       type: object
  *       properties:
- *         alerta_evidencia_id:
- *           type: integer
- *           description: ID único de la evidencia
  *         url_evidencia:
  *           type: string
  *           description: URL de la evidencia
