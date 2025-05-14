@@ -78,7 +78,6 @@ export const AlumnoAntecedenteClinicosService = {
       const antecedente: AlumnoAntecedenteClinico =
         new AlumnoAntecedenteClinico();
       Object.assign(antecedente, req.body);
-      antecedente.creado_por = req.creado_por;
       antecedente.actualizado_por = req.actualizado_por;
       antecedente.activo = true;
       let responseSent = false;

@@ -1,7 +1,7 @@
 import { BaseModel } from "../BaseModel";
 
 export class AlumnoAntecedenteFamiliar extends BaseModel {
-    alumno_ent_familiar: number;
+    alumno_ent_familiar?: number;
     alumno_id: number;
     informacion_socio_economica?: string;
     composicion_familiar?: string;
@@ -23,7 +23,6 @@ export class AlumnoAntecedenteFamiliar extends BaseModel {
     otros_antecedentes_relevantes?: string;
     constructor(){
         super();
-        this.alumno_ent_familiar = 0;
         this.alumno_id = 0;
         this.informacion_socio_economica = '';
         this.composicion_familiar = '';
