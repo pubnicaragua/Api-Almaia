@@ -456,10 +456,70 @@ router.delete(
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Persona:
+ *       type: object
+ *       properties:
+ *         persona_id:
+ *           type: integer
+ *         nombres:
+ *           type: string
+ *         apellidos:
+ *           type: string
+ *     Alumno:
+ *       type: object
+ *       properties:
+ *         alumno_id:
+ *           type: integer
+ *         email:
+ *           type: string
+ *           format: email
+ *         url_foto_perfil:
+ *           type: string
+ *           format: uri
+ *         telefono_contacto1:
+ *           type: string
+ *         telefono_contacto2:
+ *           type: string
+ *         personas:
+ *           $ref: '#/components/schemas/Persona'
+ *     AlumnoAsistencia:
+ *       type: object
+ *       properties:
+ *         alumno_asistencia_id:
+ *           type: integer
+ *         alumno_id:
+ *           type: integer
+ *         fecha_hora:
+ *           type: string
+ *           format: date-time
+ *         estado:
+ *           type: string
+ *           enum: [Presente, Ausente, Justificado]
+ *         justificacion:
+ *           type: string
+ *         usuario_justifica:
+ *           type: integer
+ *         creado_por:
+ *           type: integer
+ *         actualizado_por:
+ *           type: integer
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *         activo:
+ *           type: boolean
+ *         alumnos:
+ *           $ref: '#/components/schemas/Alumno'
+ *
  * /api/v1/colegios/alumnos_asistencias:
  *   get:
  *     summary: Obtener lista de asistencias de alumnos
- *     description: Retorna todos los registros de asistencia de alumnos
+ *     description: Retorna todos los registros de asistencia de alumnos, incluyendo información del alumno y su persona relacionada.
  *     tags: [Asistencias]
  *     security:
  *       - sessionAuth: []
@@ -488,7 +548,7 @@ router.get(
  * /api/v1/colegios/alumnos_asistencias:
  *   post:
  *     summary: Registrar asistencia de alumno
- *     description: Crea un nuevo registro de asistencia para un alumno
+ *     description: Crea un nuevo registro de asistencia para un alumno.
  *     tags: [Asistencias]
  *     security:
  *       - sessionAuth: []
@@ -499,9 +559,11 @@ router.get(
  *           schema:
  *             $ref: '#/components/schemas/AlumnoAsistencia'
  *           example:
- *             alumno_id: 1
- *             estado: "Presente"
+ *             alumno_id: 7
  *             fecha_hora: "2023-10-15T08:00:00Z"
+ *             estado: "Presente"
+ *             justificacion: ""
+ *             usuario_justifica: 1
  *     responses:
  *       201:
  *         description: Asistencia registrada exitosamente
@@ -527,7 +589,7 @@ router.post(
  * /api/v1/colegios/alumnos_asistencias/{id}:
  *   put:
  *     summary: Actualizar registro de asistencia
- *     description: Modifica un registro existente de asistencia de alumno
+ *     description: Modifica un registro existente de asistencia de alumno.
  *     tags: [Asistencias]
  *     security:
  *       - sessionAuth: []
@@ -548,6 +610,7 @@ router.post(
  *             estado: "Justificado"
  *             justificacion: "Enfermedad"
  *             usuario_justifica: 2
+ *             actualizado_por: 1
  *     responses:
  *       200:
  *         description: Asistencia actualizada exitosamente
@@ -575,7 +638,7 @@ router.put(
  * /api/v1/colegios/alumnos_asistencias/{id}:
  *   delete:
  *     summary: Eliminar registro de asistencia
- *     description: Elimina un registro de asistencia de alumno
+ *     description: Elimina un registro de asistencia de alumno.
  *     tags: [Asistencias]
  *     security:
  *       - sessionAuth: []
@@ -588,7 +651,7 @@ router.put(
  *         description: ID del registro de asistencia a eliminar
  *     responses:
  *       204:
- *         description: Asistencia eliminada exitosamente
+ *         description: Asistencia eliminada exitosamente (sin contenido)
  *       401:
  *         description: No autorizado - Sesión no válida o no proporcionada
  *       404:

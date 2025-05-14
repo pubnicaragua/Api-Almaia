@@ -35,7 +35,8 @@ export const AlumnoAntecedenteFamiliarsService = {
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const antecedentes = await dataService.getAll(["*","alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))"], where);
+      const antecedentes = await dataService.getAll(["*",
+        "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))"], where);
       res.json(antecedentes);
     } catch (error) {
       console.error("Error al obtener los antecedentes clínicos:", error);
