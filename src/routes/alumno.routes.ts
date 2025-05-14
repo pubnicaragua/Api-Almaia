@@ -1893,8 +1893,8 @@ router.delete(ruta_alumnos_alertas_bitacoras + '/:id', sessionAuth, AlumnoAlerta
  * @swagger
  * /api/v1/alumnos/antecedentes_clinicos:
  *   get:
- *     summary: Obtener antecedentes clínicos completos
- *     description: Retorna todos los antecedentes médicos registrados con información detallada del alumno
+ *     summary: Obtener antecedentes clínicos de alumnos
+ *     description: Retorna los antecedentes médicos registrados para los alumnos con información básica del alumno
  *     tags: [Antecedentes]
  *     security:
  *       - sessionAuth: []
@@ -1903,83 +1903,47 @@ router.delete(ruta_alumnos_alertas_bitacoras + '/:id', sessionAuth, AlumnoAlerta
  *         name: alumno_id
  *         schema:
  *           type: integer
- *         description: Filtrar por ID de alumno
- *         example: 101
+ *         description: Filtrar por ID de alumno específico
+ *         example: 12
  *       - in: query
- *         name: tiene_alergias
+ *         name: activo
  *         schema:
  *           type: boolean
- *         description: Filtrar por alumnos con alergias registradas
+ *         description: Filtrar por estado activo/inactivo
  *         example: true
  *     responses:
  *       200:
- *         description: Lista completa de antecedentes clínicos con datos del alumno
+ *         description: Antecedentes clínicos obtenidos correctamente
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/AlumnoAntecedenteClinico'
+ *                 $ref: '#/components/schemas/AntecedenteClinicoCompleto'
  *             example:
- *               - alumno_ant_clinico_id: 401
- *                 alumno_id: 101
- *                 historial_medico: "Vacunas completas, parto normal"
- *                 alergias: "Penicilina, polvo"
- *                 enfermedades_cronicas: "Asma leve controlado"
- *                 condiciones_medicas_relevantes: "Uso de inhalador ocasional"
- *                 medicamentos_actuales: "Salbutamol PRN"
- *                 diagnosticos_previos: "Bronquitis a los 5 años"
- *                 terapias_tratamiento_curso: "Ninguna actualmente"
- *                 fecha_actualizacion: "2023-06-15T09:30:00Z"
+ *               - creado_por: 3
+ *                 actualizado_por: 5
+ *                 fecha_creacion: "2025-05-14T10:30:00.000Z"
+ *                 fecha_actualizacion: "2025-05-14T12:45:00.000Z"
+ *                 activo: true
+ *                 alumno_id: 12
+ *                 historial_medico: "Historial de asma infantil controlado con tratamiento"
+ *                 alergias: "Alergia al maní y penicilina"
+ *                 enfermedades_cronicas: "Asma"
+ *                 condiciones_medicas_relevantes: "Antecedentes familiares de hipertensión"
+ *                 medicamentos_actuales: "Salbutamol en inhalador"
+ *                 diagnosticos_previos: "Crisis asmáticas moderadas durante la infancia"
+ *                 terapias_tratamiento_curso: "Control mensual con neumólogo pediátrico"
  *                 alumno:
- *                   alumno_id: 101
- *                   nombre: "Juan Pérez"
- *                   fecha_nacimiento: "2012-05-15"
- *                   curso_actual: "4° Básico A"
- *               - alumno_ant_clinico_id: 402
- *                 alumno_id: 102
- *                 historial_medico: "Nacimiento por cesárea"
- *                 alergias: "Ninguna conocida"
- *                 enfermedades_cronicas: null
- *                 condiciones_medicas_relevantes: "Uso lentes desde 2022"
- *                 medicamentos_actuales: null
- *                 diagnosticos_previos: "Varicela a los 3 años"
- *                 terapias_tratamiento_curso: "Terapia visual"
- *                 fecha_actualizacion: "2023-05-20T14:15:00Z"
- *                 alumno:
- *                   alumno_id: 102
- *                   nombre: "María González"
- *                   fecha_nacimiento: "2011-08-22"
- *                   curso_actual: "5° Básico B"
- *       400:
- *         description: Parámetros de consulta inválidos
- *         content:
- *           application/json:
- *             example:
- *               error: "Parámetros inválidos"
- *               detalles: "El ID de alumno debe ser un número válido"
- *       401:
- *         description: No autorizado - Token inválido o faltante
- *         content:
- *           application/json:
- *             example:
- *               error: "Acceso no autorizado"
- *               mensaje: "Token de sesión requerido"
- *       404:
- *         description: No se encontraron antecedentes
- *         content:
- *           application/json:
- *             example:
- *               error: "No encontrado"
- *               mensaje: "No existen antecedentes para el alumno especificado"
- *       500:
- *         description: Error interno del servidor
- *         content:
- *           application/json:
- *             example:
- *               error: "Error del servidor"
- *               mensaje: "Error al acceder a los registros médicos"
- *               detalles: "Base de datos no disponible"
+ *                   email: "juanfelipe.mendez@escuela.edu"
+ *                   personas:
+ *                     nombres: "Juan Felipe"
+ *                     apellidos: "Méndez Castillo"
+ *                     persona_id: 9
+ *                   alumno_id: 12
+ *                   url_foto_perfil: "https://randomuser.me/api/portraits/men/52.jpg"
+ *                   telefono_contacto1: "+56 9 3421 5678"
+ *                   telefono_contacto2: "+56 9 8765 2345"
  */
 router.get(ruta_alumnos_antecedentes_clinicos, sessionAuth, AlumnoAntecedenteClinicosService.obtener);
 
@@ -3248,4 +3212,117 @@ router.delete(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.el
  *       in: cookie
  *       name: session
  */
+
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AntecedenteClinicoInput:
+ *       type: object
+ *       properties:
+ *         historial_medico:
+ *           type: string
+ *           example: "Historial de asma infantil controlado con tratamiento"
+ *         alergias:
+ *           type: string
+ *           example: "Alergia al maní y penicilina"
+ *         enfermedades_cronicas:
+ *           type: string
+ *           example: "Asma"
+ *         condiciones_medicas_relevantes:
+ *           type: string
+ *           example: "Antecedentes familiares de hipertensión"
+ *         medicamentos_actuales:
+ *           type: string
+ *           example: "Salbutamol en inhalador"
+ *         diagnosticos_previos:
+ *           type: string
+ *           example: "Crisis asmáticas moderadas durante la infancia"
+ *         terapias_tratamiento_curso:
+ *           type: string
+ *           example: "Control mensual con neumólogo pediátrico"
+ * 
+ *     AntecedenteClinicoCompleto:
+ *       type: object
+ *       properties:
+ *         creado_por:
+ *           type: integer
+ *           example: 3
+ *         actualizado_por:
+ *           type: integer
+ *           example: 5
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T10:30:00.000Z"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T12:45:00.000Z"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *         alumno_id:
+ *           type: integer
+ *           example: 12
+ *         historial_medico:
+ *           type: string
+ *           example: "Historial de asma infantil controlado con tratamiento"
+ *         alergias:
+ *           type: string
+ *           example: "Alergia al maní y penicilina"
+ *         enfermedades_cronicas:
+ *           type: string
+ *           example: "Asma"
+ *         condiciones_medicas_relevantes:
+ *           type: string
+ *           example: "Antecedentes familiares de hipertensión"
+ *         medicamentos_actuales:
+ *           type: string
+ *           example: "Salbutamol en inhalador"
+ *         diagnosticos_previos:
+ *           type: string
+ *           example: "Crisis asmáticas moderadas durante la infancia"
+ *         terapias_tratamiento_curso:
+ *           type: string
+ *           example: "Control mensual con neumólogo pediátrico"
+ *         alumno:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
+ *               example: "juanfelipe.mendez@escuela.edu"
+ *             personas:
+ *               type: object
+ *               properties:
+ *                 nombres:
+ *                   type: string
+ *                   example: "Juan Felipe"
+ *                 apellidos:
+ *                   type: string
+ *                   example: "Méndez Castillo"
+ *                 persona_id:
+ *                   type: integer
+ *                   example: 9
+ *             alumno_id:
+ *               type: integer
+ *               example: 12
+ *             url_foto_perfil:
+ *               type: string
+ *               example: "https://randomuser.me/api/portraits/men/52.jpg"
+ *             telefono_contacto1:
+ *               type: string
+ *               example: "+56 9 3421 5678"
+ *             telefono_contacto2:
+ *               type: string
+ *               example: "+56 9 8765 2345"
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: session
+ */
+
 export default router;

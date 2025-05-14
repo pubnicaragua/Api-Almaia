@@ -1,7 +1,7 @@
 import { BaseModel } from "../BaseModel";
 
 export class AlumnoAntecedenteClinico extends BaseModel {
-    alumno_ant_clinico_id: number;
+    alumno_ant_clinico_id?: number;
     alumno_id: number;
     historial_medico?: string;
     alergias?: string;
@@ -12,7 +12,6 @@ export class AlumnoAntecedenteClinico extends BaseModel {
     terapias_tratamiento_curso?: string;
     constructor(){
         super();
-        this.alumno_ant_clinico_id = 0;
         this.alumno_id = 0;
         this.historial_medico = '';
         this.alergias = '';
