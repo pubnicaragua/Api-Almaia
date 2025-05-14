@@ -670,7 +670,7 @@ router.delete(
  * /api/v1/colegios/alumnos_tareas:
  *   get:
  *     summary: Obtener lista de tareas de alumnos
- *     description: Retorna todos los registros de tareas asignadas a alumnos
+ *     description: Retorna todos los registros de tareas asignadas a alumnos con información detallada de alumnos y materias
  *     tags: [Tareas]
  *     security:
  *       - sessionAuth: []
@@ -687,6 +687,103 @@ router.delete(
  *         description: No autorizado - Sesión no válida o no proporcionada
  *       500:
  *         description: Error interno del servidor
+ * 
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlumnoTarea:
+ *       type: object
+ *       properties:
+ *         alumno_tarea:
+ *           type: integer
+ *           example: 0
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         fecha_programacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-10-20T00:00:00"
+ *         materia_id:
+ *           type: integer
+ *           example: 3
+ *         color:
+ *           type: string
+ *           example: "#FF5733"
+ *         tipo_tarea:
+ *           type: string
+ *           example: "Proyecto"
+ *         descripcion_tarea:
+ *           type: string
+ *           example: "Investigación sobre ecosistemas"
+ *         estado_tarea:
+ *           type: string
+ *           example: "Pendiente"
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T22:15:14.763"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T22:15:14.763"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *         alumnos:
+ *           $ref: '#/components/schemas/AlumnoInfo'
+ *         materias:
+ *           $ref: '#/components/schemas/MateriaInfo'
+ * 
+ *     AlumnoInfo:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *           example: "alextest@colegio.cl"
+ *         personas:
+ *           $ref: '#/components/schemas/PersonaInfo'
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ *         telefono_contacto1:
+ *           type: string
+ *           example: "+56 9 1284 5678"
+ *         telefono_contacto2:
+ *           type: string
+ *           example: "+56 9 8765 4321"
+ * 
+ *     PersonaInfo:
+ *       type: object
+ *       properties:
+ *         nombres:
+ *           type: string
+ *           example: "Carlos"
+ *         apellidos:
+ *           type: string
+ *           example: "Muñoz"
+ *         persona_id:
+ *           type: integer
+ *           example: 2
+ * 
+ *     MateriaInfo:
+ *       type: object
+ *       properties:
+ *         nombre:
+ *           type: string
+ *           example: "Ciencias Naturales"
+ *         materia_id:
+ *           type: integer
+ *           example: 3
  */
 router.get(rutas_alumnos_tareas, sessionAuth, AlumnoTareasService.obtener);
 

@@ -1,71 +1,102 @@
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { AlumnoTarea } from "../../../core/modelo/colegio/AlumnoTarea";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+import Joi from "joi";
 
-const dataService: DataService<AlumnoTarea> = new DataService("alumnotareas");
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
+const AlumnoTareaSchema = Joi.object({
+  alumno_id: Joi.number().integer().required(),
+  fecha_programacion: Joi.string().required(),
+  materia_id: Joi.number().integer().required(),
+  color: Joi.string().max(50).required(),
+  tipo_tarea: Joi.string().max(6).required(),
+  descripcion_tarea: Joi.string().max(100).required(),
+  estado_tarea: Joi.string().max(11).required(),
+});
+const dataService: DataService<AlumnoTarea> = new DataService(
+  "alumnos_tareas",
+  "alumno_tarea_id"
+);
 export const AlumnoTareasService = {
   async obtener(req: Request, res: Response) {
     try {
-      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnotareas = await dataService.getAll(["*"], where);
-      res.json(alumnotareas);*/
-      const tareasAlumnos = [
-        {
-          alumno_tarea: 1,
-          alumno_id: 101,
-          fecha_programacion: new Date("2025-05-10T08:00:00"),
-          materia_id: 1,
-          color: "#FF5733",
-          tipo_tarea: "Trabajo Práctico",
-          descripcion_tarea: "Investigar sobre la fotosíntesis",
-          estado_tarea: "Pendiente"
-        },
-        {
-          alumno_tarea: 2,
-          alumno_id: 102,
-          fecha_programacion: new Date("2025-05-11T10:30:00"),
-          materia_id: 2,
-          color: "#33C1FF",
-          tipo_tarea: "Evaluación",
-          descripcion_tarea: "Examen de matemáticas unidad 2",
-          estado_tarea: "Completado"
-        },
-        {
-          alumno_tarea: 3,
-          alumno_id: 103,
-          fecha_programacion: new Date("2025-05-12T09:00:00"),
-          materia_id: 3,
-          color: "#8E44AD",
-          tipo_tarea: "Lectura",
-          descripcion_tarea: "Leer capítulo 5 del libro de historia",
-          estado_tarea: "Pendiente"
-        }
-      ];
-
-        res.json(tareasAlumnos);
+      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      const alumnotareas = await dataService.getAll(
+        [
+          "*",
+          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
+          "materias(materia_id,nombre)",
+        ],
+        where
+      );
+      res.json(alumnotareas);
     } catch (error) {
+     
       res.status(500).json(error);
     }
   },
 
   async guardar(req: Request, res: Response) {
     try {
-      const nuevoAlumnoTarea = req.body;
-      const resultado = await dataService.processData(nuevoAlumnoTarea);
-      res.status(201).json(resultado);
+      const nuevoAlumnoTarea = new AlumnoTarea();
+      Object.assign(nuevoAlumnoTarea, req.body);
+      nuevoAlumnoTarea.creado_por = req.creado_por;
+      nuevoAlumnoTarea.actualizado_por = req.actualizado_por;
+      nuevoAlumnoTarea.activo = true;
+      let responseSent = false;
+      const { error: validationError } = AlumnoTareaSchema.validate(req.body);
+      const { data: dataAlumno, error: errorAlumno } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", nuevoAlumnoTarea.alumno_id)
+        .single();
+      if (errorAlumno || !dataAlumno) {
+        throw new Error("El alumno no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        const resultado = await dataService.processData(nuevoAlumnoTarea);
+        res.status(201).json(resultado);
+      }
     } catch (error) {
+       console.log(error);
       res.status(500).json(error);
     }
   },
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const alumnoTareaActualizado = req.body;
-      const resultado = await dataService.updateById(
-        id,
-        alumnoTareaActualizado
-      );
-      res.json(resultado);
+      const alumnoTareaActualizado = new AlumnoTarea();
+      Object.assign(alumnoTareaActualizado, req.body);
+      alumnoTareaActualizado.actualizado_por = req.actualizado_por;
+      alumnoTareaActualizado.activo = true;
+      let responseSent = false;
+      const { error: validationError } = AlumnoTareaSchema.validate(req.body);
+      const { data: dataAlumno, error: errorAlumno } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumnoTareaActualizado.alumno_id)
+        .single();
+      if (errorAlumno || !dataAlumno) {
+        throw new Error("El alumno no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        const resultado = await dataService.updateById(
+          id,
+          alumnoTareaActualizado
+        );
+        res.json(resultado);
+      }
     } catch (error) {
       res.status(500).json(error);
     }
