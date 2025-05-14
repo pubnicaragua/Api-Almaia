@@ -78,6 +78,14 @@ export const AlumnoActividadService = {
       alumnoActividad.actualizado_por = req.actualizado_por;
       let responseSent = false;
       const { error: validationError } = AlumnoActividadSchema.validate(req.body);
+      const { data: dataAlumno, error: errorAlumno } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumnoActividad.alumno_id)
+        .single();
+      if (errorAlumno || !dataAlumno) {
+        throw new Error("El alumno no existe");
+      }
       const { data: dataActividad, error: errorActividad } = await client
         .from("actividades")
         .select("*")
