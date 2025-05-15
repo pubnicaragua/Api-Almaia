@@ -1,7 +1,7 @@
 import { BaseModel } from "./BaseModel";
 
 export class InformeGeneral extends BaseModel {
-    informe_id: number;
+    informe_id?: number;
     tipo: string;
     nivel: string;
     fecha_generacion: Date;
@@ -9,7 +9,6 @@ export class InformeGeneral extends BaseModel {
     colegio_id: number;
     constructor(){
         super();
-        this.informe_id = 0;
         this.tipo = "";
         this.nivel = "";
         this.fecha_generacion = new Date();

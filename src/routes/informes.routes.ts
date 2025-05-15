@@ -238,6 +238,71 @@ router.get(ruta_informes_generales + '/', sessionAuth, InformeGeneralService.obt
 
 /**
  * @swagger
+ * /api/v1/informes/generales:
+ *   post:
+ *     summary: Crear un nuevo informe general
+ *     description: Registra un nuevo informe general en el sistema
+ *     tags: [Informes Generales]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - tipo
+ *               - nivel
+ *               - colegio_id
+ *             properties:
+ *               tipo:
+ *                 type: string
+ *                 description: Tipo de informe (académico, conductual, asistencia, etc.)
+ *                 example: "académico"
+ *               nivel:
+ *                 type: string
+ *                 description: Nivel educativo al que aplica el informe
+ *                 example: "primaria"
+ *               fecha_generacion:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Fecha de generación del informe (opcional, por defecto fecha actual)
+ *                 example: "2025-05-20T10:30:00Z"
+ *               url_reporte:
+ *                 type: string
+ *                 description: URL donde se almacena el reporte generado
+ *                 example: "https://storage.colegio.com/informes/academico_primaria_20250520.pdf"
+ *               colegio_id:
+ *                 type: integer
+ *                 description: ID del colegio al que pertenece el informe
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Informe creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/InformeGeneral'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "El campo 'tipo' es requerido"
+ *       401:
+ *         description: No autorizado - Sesión no válida o no proporcionada
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Error al guardar el informe en la base de datos"
+ */
+router.post(ruta_informes_generales + '/', sessionAuth, InformeGeneralService.guardar);
+
+/**
+ * @swagger
  * /api/v1/informes/generales/{id}:
  *   put:
  *     summary: Actualizar un informe general
@@ -301,5 +366,55 @@ router.put(ruta_informes_generales + '/:id', sessionAuth, InformeGeneralService.
  *         description: Error interno del servidor
  */
 router.delete(ruta_informes_generales + '/:id', sessionAuth, InformeGeneralService.eliminar);
-
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     InformeGeneral:
+ *       type: object
+ *       properties:
+ *         informe_id:
+ *           type: integer
+ *           description: ID único del informe
+ *           example: 1
+ *         tipo:
+ *           type: string
+ *           description: Tipo de informe generado
+ *           example: "académico"
+ *         nivel:
+ *           type: string
+ *           description: Nivel educativo al que aplica
+ *           example: "primaria"
+ *         fecha_generacion:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha y hora de generación del informe
+ *           example: "2025-05-20T10:30:00Z"
+ *         url_reporte:
+ *           type: string
+ *           description: URL del informe generado
+ *           example: "https://storage.colegio.com/informes/academico_primaria_20250520.pdf"
+ *         colegio_id:
+ *           type: integer
+ *           description: ID del colegio relacionado
+ *           example: 1
+ *         colegio:
+ *           $ref: '#/components/schemas/ColegioInfo'
+ * 
+ *     ColegioInfo:
+ *       type: object
+ *       properties:
+ *         colegio_id:
+ *           type: integer
+ *           example: 1
+ *         nombre:
+ *           type: string
+ *           example: "Colegio Ejemplo"
+ *         nombre_fantasia:
+ *           type: string
+ *           example: "Colegio Ejemplo S.A."
+ *         direccion:
+ *           type: string
+ *           example: "Calle Principal 123"
+ */
 export default router;
