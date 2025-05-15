@@ -1,54 +1,26 @@
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { Aviso } from "../../../core/modelo/aviso/Aviso";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+import Joi from "joi";
 
-const dataService: DataService<Aviso> = new DataService("avisos");
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
+const dataService: DataService<Aviso> = new DataService("avisos", "aviso_id");
+const AvisoSchema = Joi.object({
+  docente_id: Joi.number().integer().required(),
+  mensaje: Joi.string().required(),
+  dirigido: Joi.string().required(),
+  fecha_programada: Joi.string().required(),
+  estado: Joi.string().max(20).required(),
+});
 export const AvisosService = {
   async obtener(req: Request, res: Response) {
     try {
-      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const aviso = await dataService.getAll(["*"], where);
-      res.json(aviso);*/
-      const avisos = [
-        {
-          aviso_id: 1,
-          mensaje: "Reunión de padres el próximo viernes",
-          dirigido: "3°A",
-          fecha_programada: "2023-06-15T10:00:00Z",
-          estado: "pendiente",
-          docente: {
-            docente_id: 123,
-            especialidad: "Lenguaje y Comunicación",
-            estado: "Activo",
-            persona: {
-              persona_id: 77,
-              nombres: "Carla",
-              apellidos: "Ramírez",
-              rut: "12345678-5",
-              fecha_nacimiento: "1985-08-12",
-              genero: "Femenino",
-              direccion: "Av. Central 456",
-              telefono: "+56 9 1234 5678",
-              correo: "carla.ramirez@colegio.cl"
-            },
-            colegio: {
-              colegio_id: 3,
-              nombre: "Colegio Bicentenario",
-              nombre_fantasia: "CB",
-              tipo_colegio: "Privado Subvencionado",
-              dependencia: "Particular Subvencionado",
-              sitio_web: "https://bicentenario.cl",
-              direccion: "Calle Educación 321",
-              telefono_contacto: "+56 9 9876 5432",
-              correo_electronico: "contacto@bicentenario.cl",
-              comuna_id: 12,
-              region_id: 2,
-              pais_id: 56
-            }
-          }
-        }
-      ];
-      res.json(avisos);      
+      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      const avisos = await dataService.getAll(["*","docentes(docente_id,especialidad,estado,personas(persona_id,nombres,apellidos))"], where);
+      res.json(avisos);
     } catch (error) {
       console.error("Error al obtener la aviso:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -56,20 +28,64 @@ export const AvisosService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
-      const aviso: Aviso = req.body;
-      const savedaviso = await dataService.processData(aviso);
-      res.status(201).json(savedaviso);
-    } catch (error) {
-      console.error("Error al guardar la aviso:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+      const aviso: Aviso = new Aviso();
+      Object.assign(aviso, req.body);
+      aviso.creado_por = req.creado_por;
+      aviso.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = AvisoSchema.validate(req.body);
+      const { data, error } = await client
+        .from("docentes")
+        .select("*")
+        .eq("docente_id", aviso.docente_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
+
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        console.log(aviso);
+
+        const savedAviso = await dataService.processData(aviso);
+        res.status(201).json(savedAviso);
+      }
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error al guardar el aviso:", error);
+      res.status(500).json({ message: error.message || "Error inesperado" });
     }
   },
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const aviso: Aviso = req.body;
-      await dataService.updateById(id, aviso);
-      res.status(200).json({ message: "aviso actualizada correctamente" });
+
+      const aviso: Aviso = new Aviso();
+      Object.assign(aviso, req.body);
+      aviso.creado_por = req.creado_por;
+      aviso.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = AvisoSchema.validate(req.body);
+      const { data, error } = await client
+        .from("docentes")
+        .select("*")
+        .eq("docente_id", aviso.docente_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
+
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        await dataService.updateById(id, aviso);
+        res.status(200).json({ message: "aviso actualizado correctamente" });
+      }
     } catch (error) {
       console.error("Error al actualizar la aviso:", error);
       res.status(500).json({ message: "Error interno del servidor" });

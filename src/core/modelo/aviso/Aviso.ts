@@ -1,7 +1,7 @@
 import { BaseModel } from "../BaseModel";
 
 export class Aviso extends BaseModel {
-    aviso_id: number;
+    aviso_id?: number;
     docente_id: number;
     mensaje: string;
     dirigido: string;
@@ -9,7 +9,6 @@ export class Aviso extends BaseModel {
     estado: string;
     constructor(){
         super();
-        this.aviso_id = 0;
         this.docente_id = 0;
         this.mensaje = "";
         this.dirigido = "";
