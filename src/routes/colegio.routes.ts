@@ -12,6 +12,7 @@ import { CalendarioFechaImportantesService } from "../infrestructure/server/cole
 import { CursosService } from "../infrestructure/server/colegio/CursoService";
 import { HistorialComunicacionsService } from "../infrestructure/server/colegio/HistorialComunicacionService";
 import { UsuarioColegiosService } from "../infrestructure/server/colegio/UsuarioColegioService";
+import { UsuarioCursosService } from "../infrestructure/server/colegio/UsuarioCursoService";
 
 const router = express.Router();
 const rutas_grados = "/grados";
@@ -25,6 +26,7 @@ const rutas_calendarios_fechas_importantes = "/calendarios_fechas_importantes";
 const rutas_cursos = "/cursos";
 const rutas_historiales_comunicaciones = "/historiales_comunicaciones";
 const rutas_usuarios_colegios = "/usuarios_colegios";
+const rutas_usuarios_cursos = "/usuarios_cursos";
 
 /**
  * @swagger
@@ -2026,7 +2028,7 @@ router.post(`${rutas_usuarios_colegios}/`, sessionAuth, UsuarioColegiosService.g
 
 /**
  * @swagger
- * /api/v1/colegio/usuarios_colegios/{id}:
+ * /api/v1/colegioS/usuarios_colegios/{id}:
  *   put:
  *     tags: [UsuarioColegios]
  *     summary: Actualizar una relación usuario-colegio
@@ -2091,6 +2093,265 @@ router.put(`${rutas_usuarios_colegios}/:id`, sessionAuth, UsuarioColegiosService
  *         description: Error interno del servidor
  */
 router.delete(`${rutas_usuarios_colegios}/:id`, sessionAuth, UsuarioColegiosService.eliminar);
+
+/**
+ * @swagger
+ * tags:
+ *   name: UsuarioCursos
+ *   description: Endpoints para gestionar la relación entre usuarios y cursos
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     UsuarioCurso:
+ *       type: object
+ *       properties:
+ *         usuario_curso_id:
+ *           type: integer
+ *           description: ID único de la relación usuario-curso
+ *         usuarios_colegio_id:
+ *           type: integer
+ *           description: ID de la relación usuario-colegio
+ *         curso_id:
+ *           type: integer
+ *           description: ID del curso asignado
+ *         fecha_asignacion:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de asignación del curso al usuario
+ *       required:
+ *         - usuarios_colegio_id
+ *         - curso_id
+ * 
+ *     UsuarioColegio:
+ *       type: object
+ *       properties:
+ *         usuarios_colegio_id:
+ *           type: integer
+ *           description: ID único de la relación usuario-colegio
+ *         usuario_id:
+ *           type: integer
+ *           description: ID del usuario
+ *         colegio_id:
+ *           type: integer
+ *           description: ID del colegio
+ *         rol_id:
+ *           type: integer
+ *           description: ID del rol del usuario en el colegio
+ *         fecha_asignacion:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de asignación del usuario al colegio
+ *       required:
+ *         - usuario_id
+ *         - colegio_id
+ *         - rol_id
+ * 
+ *     Curso:
+ *       type: object
+ *       properties:
+ *         curso_id:
+ *           type: integer
+ *           description: ID único del curso
+ *         nombre_curso:
+ *           type: string
+ *           description: Nombre del curso
+ *         colegio_id:
+ *           type: integer
+ *           description: ID del colegio al que pertenece el curso
+ *         grado_id:
+ *           type: integer
+ *           description: ID del grado asociado al curso
+ *         nivel_educativo_id:
+ *           type: integer
+ *           description: ID del nivel educativo asociado al curso
+ *       required:
+ *         - nombre_curso
+ *         - colegio_id
+ *         - grado_id
+ *         - nivel_educativo_id
+ */
+
+/**
+ * @swagger
+ * /api/v1/colegios/usuarios_cursos/:
+ *   get:
+ *     summary: Obtener todas las relaciones usuario-curso con información extendida
+ *     tags: [UsuarioCursos]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de relaciones usuario-curso con datos extendidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   usuario_curso_id:
+ *                     type: integer
+ *                     example: 0
+ *                   usuarios_colegio_id:
+ *                     type: integer
+ *                     example: 1
+ *                   curso_id:
+ *                     type: integer
+ *                     example: 2
+ *                   fecha_asignacion:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-05-12T00:00:00"
+ *                   creado_por:
+ *                     type: integer
+ *                     example: 1
+ *                   actualizado_por:
+ *                     type: integer
+ *                     example: 1
+ *                   fecha_creacion:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-05-15T22:22:37.135"
+ *                   fecha_actualizacion:
+ *                     type: string
+ *                     format: date-time
+ *                     example: "2025-05-15T22:22:37.135"
+ *                   activo:
+ *                     type: boolean
+ *                     example: true
+ *                   usuarios_colegios:
+ *                     type: object
+ *                     properties:
+ *                       usuarios:
+ *                         type: object
+ *                         properties:
+ *                           usuario_id:
+ *                             type: integer
+ *                             example: 1
+ *                           nombre_social:
+ *                             type: string
+ *                             example: "prueba"
+ *                       fecha_asignacion:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2025-05-15T17:17:32"
+ *                       usuarios_colegio_id:
+ *                         type: integer
+ *                         example: 1
+ *                   cursos:
+ *                     type: object
+ *                     properties:
+ *                       curso_id:
+ *                         type: integer
+ *                         example: 2
+ *                       nombre_curso:
+ *                         type: string
+ *                         example: "1° Medio - Jornada Tarde - Colegio 1"
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
+router.get(`${rutas_usuarios_cursos}/`, sessionAuth, UsuarioCursosService.obtener);
+/**
+ * @swagger
+ * /api/v1/colegios/usuarios_cursos/:
+ *   post:
+ *     summary: Crear una nueva relación usuario-curso
+ *     tags: [UsuarioCursos]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UsuarioCurso'
+ *     responses:
+ *       201:
+ *         description: Relación usuario-curso creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UsuarioCurso'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
+router.post(`${rutas_usuarios_cursos}/`, sessionAuth, UsuarioCursosService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/colegios/usuarios_cursos/{id}:
+ *   put:
+ *     summary: Actualizar una relación usuario-curso existente
+ *     tags: [UsuarioCursos]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la relación usuario-curso a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UsuarioCurso'
+ *     responses:
+ *       200:
+ *         description: Relación usuario-curso actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UsuarioCurso'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Relación usuario-curso no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
+router.put(`${rutas_usuarios_cursos}/:id`, sessionAuth, UsuarioCursosService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/colegios/usuarios_cursos/{id}:
+ *   delete:
+ *     summary: Eliminar una relación usuario-curso
+ *     tags: [UsuarioCursos]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la relación usuario-curso a eliminar
+ *     responses:
+ *       204:
+ *         description: Relación usuario-curso eliminada exitosamente
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Relación usuario-curso no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
+router.delete(`${rutas_usuarios_cursos}/:id`, sessionAuth, UsuarioCursosService.eliminar);
+
 
 /**
  * @swagger
