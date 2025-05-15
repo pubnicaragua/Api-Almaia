@@ -1,7 +1,7 @@
 import { BaseModel } from "../BaseModel";
 
 export class AlumnoNotificacion extends BaseModel {
-    alumno_notificacion_id: number;
+    alumno_notificacion_id?: number;
     alumno_id: number;
     tipo: string;
     asunto: string;
@@ -10,7 +10,6 @@ export class AlumnoNotificacion extends BaseModel {
     fecha_envio: Date;
     constructor(){
         super();
-        this.alumno_notificacion_id = 0;
         this.alumno_id = 0;
         this.tipo = "";
         this.asunto = "";

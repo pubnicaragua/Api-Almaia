@@ -1,46 +1,35 @@
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { AlumnoNotificacion } from "../../../core/modelo/alumno/AlumnoNotificacion";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+import Joi from "joi";
 
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<AlumnoNotificacion> = new DataService(
-  "alumnos_alertas"
+  "alumnos_notificaciones","alumno_notificacion_id"
 );
+const AlumnoNotificacionSchema = Joi.object({
+  alumno_id: Joi.number().integer().required(),
+  tipo: Joi.string().max(20).required(),
+  asunto: Joi.string().max(150).required(),
+  cuerpo: Joi.string().required(),
+  enviada: Joi.boolean().required(),
+  fecha_envio: Joi.string().required(),
+});
 export const AlumnoNotificacionService = {
   async obtener(req: Request, res: Response) {
     try {
-      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-            const alumnoNotificacion = await dataService.getAll(["*"], where);
-            res.json(alumnoNotificacion);*/
-      const alumnos_notificaciones = [
-        {
-          notificacion_id: 1,
-          alumno_id: 101,
-          tipo: "academica",
-          titulo: "Nueva evaluación publicada",
-          mensaje:
-            "Se ha publicado la evaluación de Matemáticas para el día 15/05",
-          fecha_envio: "2023-05-10T08:30:00Z",
-          estado: "no_leida",
-          alumno: {
-            nombre: "Juan Pérez",
-            curso: "4° Básico A",
-          },
-        },
-        {
-          notificacion_id: 2,
-          alumno_id: 101,
-          tipo: "conductual",
-          titulo: "Felicitaciones",
-          mensaje: "El alumno ha sido destacado por buen comportamiento",
-          fecha_envio: "2023-05-08T16:45:00Z",
-          estado: "leida",
-          alumno: {
-            nombre: "Juan Pérez",
-            curso: "4° Básico A",
-          },
-        },
-      ];
-      res.json(alumnos_notificaciones);
+      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      const alumnoNotificacion = await dataService.getAll(
+        [
+          "*",
+          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos,fecha_nacimiento))",
+        ],
+        where
+      );
+      res.json(alumnoNotificacion);
     } catch (error) {
       console.error("Error al obtener la notificación del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -48,11 +37,32 @@ export const AlumnoNotificacionService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
-      const alumnoNotificacion: AlumnoNotificacion = req.body;
-      const savedAlumnoNotificacion = await dataService.processData(
-        alumnoNotificacion
+      const alumnoNotificacion: AlumnoNotificacion = new AlumnoNotificacion();
+      Object.assign(alumnoNotificacion, req.body);
+      alumnoNotificacion.creado_por = req.creado_por;
+      alumnoNotificacion.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = AlumnoNotificacionSchema.validate(
+        req.body
       );
-      res.status(201).json(savedAlumnoNotificacion);
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumnoNotificacion.alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El colegio no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        const savedAlumnoNotificacion = await dataService.processData(
+          alumnoNotificacion
+        );
+        res.status(201).json(savedAlumnoNotificacion);
+      }
     } catch (error) {
       console.error("Error al guardar la notificación del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -62,10 +72,30 @@ export const AlumnoNotificacionService = {
     try {
       const id = parseInt(req.params.id);
       const alumnoNotificacion: AlumnoNotificacion = req.body;
-      await dataService.updateById(id, alumnoNotificacion);
-      res
-        .status(200)
-        .json({ message: "Notificación del alumno actualizada correctamente" });
+      Object.assign(alumnoNotificacion, req.body);
+      alumnoNotificacion.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = AlumnoNotificacionSchema.validate(
+        req.body
+      );
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumnoNotificacion.alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El colegio no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        await dataService.updateById(id, alumnoNotificacion);
+        res.status(200).json({
+          message: "Notificación del alumno actualizada correctamente",
+        });
+      }
     } catch (error) {
       console.error("Error al actualizar la notificación del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });

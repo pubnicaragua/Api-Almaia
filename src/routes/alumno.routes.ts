@@ -2831,19 +2831,18 @@ router.delete(ruta_alumnos_monitoreos + '/:id', sessionAuth, AlumnoMonitoreoServ
  * /api/v1/alumnos/notificaciones:
  *   get:
  *     summary: Obtener notificaciones de alumnos
- *     description: Retorna todas las notificaciones registradas para alumnos, incluyendo detalles del alumno, tipo de notificación y estado
+ *     description: Retorna todas las notificaciones registradas para alumnos, incluyendo detalles del alumno y datos de creación/actualización
  *     tags: [Notificaciones]
  *     security:
  *       - sessionAuth: []
  *     parameters:
- *       - name: estado
+ *       - name: enviada
  *         in: query
- *         description: Filtro por estado de notificación (leída/no leída)
+ *         description: Filtro por estado de envío (true/false)
  *         required: false
  *         schema:
- *           type: string
- *           enum: [leida, no_leida]
- *           example: "no_leida"
+ *           type: boolean
+ *           example: true
  *       - name: limit
  *         in: query
  *         description: Límite de resultados a devolver (para paginación)
@@ -2864,53 +2863,102 @@ router.delete(ruta_alumnos_monitoreos + '/:id', sessionAuth, AlumnoMonitoreoServ
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 total:
- *                   type: integer
- *                   description: Total de notificaciones disponibles
- *                   example: 25
- *                 notificaciones:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/AlumnoNotificacion'
- *             example:
- *               total: 3
- *               notificaciones:
- *                 - notificacion_id: 1
- *                   alumno_id: 101
- *                   tipo: "academica"
- *                   titulo: "Nueva evaluación publicada"
- *                   mensaje: "Se ha publicado la evaluación de Matemáticas para el día 15/05"
- *                   fecha_envio: "2023-05-10T08:30:00Z"
- *                   estado: "no_leida"
- *                   alumno:
- *                     nombre: "Juan Pérez"
- *                     curso: "4° Básico A"
- *                 - notificacion_id: 2
- *                   alumno_id: 101
- *                   tipo: "conductual"
- *                   titulo: "Felicitaciones"
- *                   mensaje: "El alumno ha sido destacado por buen comportamiento"
- *                   fecha_envio: "2023-05-08T16:45:00Z"
- *                   estado: "leida"
- *                   alumno:
- *                     nombre: "Juan Pérez"
- *                     curso: "4° Básico A"
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AlumnoNotificacion'
  *       401:
  *         description: No autorizado - Sesión no válida o no proporcionada
- *         content:
- *           application/json:
- *             example:
- *               error: "Token de autenticación no válido o expirado"
  *       403:
  *         description: Acceso prohibido - El usuario no tiene permisos para ver estas notificaciones
  *       500:
  *         description: Error interno del servidor
- *         content:
- *           application/json:
- *             example:
- *               error: "Error al recuperar las notificaciones de la base de datos"
+ * 
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlumnoNotificacion:
+ *       type: object
+ *       properties:
+ *         alumno_notificacion_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         tipo:
+ *           type: string
+ *           example: "string"
+ *         asunto:
+ *           type: string
+ *           example: "string"
+ *         cuerpo:
+ *           type: string
+ *           example: "string"
+ *         enviada:
+ *           type: boolean
+ *           example: true
+ *         fecha_envio:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-15T02:25:18.132"
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-15T02:28:30.57"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-15T02:28:30.57"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *         alumnos:
+ *           $ref: '#/components/schemas/AlumnoDetalle'
+ * 
+ *     AlumnoDetalle:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *           example: "alextest@colegio.cl"
+ *         personas:
+ *           $ref: '#/components/schemas/PersonaInfo'
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ *         telefono_contacto1:
+ *           type: string
+ *           example: "+56 9 1284 5678"
+ *         telefono_contacto2:
+ *           type: string
+ *           example: "+56 9 8765 4321"
+ * 
+ *     PersonaInfo:
+ *       type: object
+ *       properties:
+ *         nombres:
+ *           type: string
+ *           example: "Carlos"
+ *         apellidos:
+ *           type: string
+ *           example: "Muñoz"
+ *         persona_id:
+ *           type: integer
+ *           example: 2
+ *         fecha_nacimiento:
+ *           type: string
+ *           format: date
+ *           nullable: true
+ *           example: null
  */
 router.get(ruta_alumnos_notificaciones, sessionAuth, AlumnoNotificacionService.obtener);
 
