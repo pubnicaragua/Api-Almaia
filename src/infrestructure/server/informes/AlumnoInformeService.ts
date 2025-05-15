@@ -1,10 +1,21 @@
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { AlumnoInforme } from "../../../core/modelo/alumno/AlumnoInforme";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+import Joi from "joi";
 
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<AlumnoInforme> = new DataService(
-  "alumnos_informes"
+  "alumnos_informes",
+  "alumno_informe_id"
 );
+const AlumnoInformeSchema = Joi.object({
+  alumno_id: Joi.number().integer().required(),
+  fecha: Joi.string().required(),
+  url_reporte: Joi.string().max(255).required(),
+});
 export const AlumnoInformeService = {
   async obtener(req: Request, res: Response) {
     try {
@@ -24,9 +35,29 @@ export const AlumnoInformeService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
-      const alumnoInforme: AlumnoInforme = req.body;
-      const savedAlumnoInforme = await dataService.processData(alumnoInforme);
-      res.status(201).json(savedAlumnoInforme);
+      const alumnoInforme: AlumnoInforme = new AlumnoInforme();
+      Object.assign(alumnoInforme, req.body);
+      alumnoInforme.creado_por = req.creado_por;
+      alumnoInforme.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = AlumnoInformeSchema.validate(req.body);
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumnoInforme.alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
+
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        const savedAlumnoInforme = await dataService.processData(alumnoInforme);
+        res.status(201).json(savedAlumnoInforme);
+      }
     } catch (error) {
       console.error("Error al guardar el informe del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -35,11 +66,31 @@ export const AlumnoInformeService = {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const alumnoInforme: AlumnoInforme = req.body;
-      await dataService.updateById(id, alumnoInforme);
-      res
-        .status(200)
-        .json({ message: "Informe del alumno actualizado correctamente" });
+      const alumnoInforme: AlumnoInforme = new AlumnoInforme();
+      Object.assign(alumnoInforme, req.body);
+      alumnoInforme.creado_por = req.creado_por;
+      alumnoInforme.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = AlumnoInformeSchema.validate(req.body);
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumnoInforme.alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
+
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        await dataService.updateById(id, alumnoInforme);
+        res
+          .status(200)
+          .json({ message: "Informe del alumno actualizado correctamente" });
+      }
     } catch (error) {
       console.error("Error al actualizar el informe del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
