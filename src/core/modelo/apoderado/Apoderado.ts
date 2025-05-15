@@ -1,7 +1,7 @@
 import { BaseModel } from "../BaseModel";
 
 export class Apoderado  extends BaseModel {
-    apoderado_id: number;
+    apoderado_id?: number;
     persona_id: number;
     colegio_id: number;
     telefono_contacto1: string;
@@ -12,7 +12,6 @@ export class Apoderado  extends BaseModel {
     tipo_oficio_id: number;
     constructor(){
         super();
-        this.apoderado_id = 0;
         this.persona_id = 0;
         this.colegio_id = 0;
         this.telefono_contacto1 = "";
