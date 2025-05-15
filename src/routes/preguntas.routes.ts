@@ -57,7 +57,7 @@ const ruta_tipos_preguntas = '/tipos_preguntas';
 router.get('/', sessionAuth, PreguntaService.obtener);
 /**
  * @swagger
- * /api/v1/preguntas/{id}:
+ * /api/v1/preguntas/ddetalle/{id}:
  *   get:
  *     summary: Obtener detalle completo de una pregunta con respuestas posibles
  *     description: Retorna toda la información de una pregunta específica incluyendo su tipo, nivel educativo, detalles de diagnóstico y respuestas posibles asociadas con sus nombres
@@ -213,7 +213,7 @@ router.get('/', sessionAuth, PreguntaService.obtener);
  *           example: "Nunca"
  *           description: Texto de la respuesta posible
  */
-router.get('/:id', sessionAuth, PreguntaService.detalle);
+router.get('/detalle/:id', sessionAuth, PreguntaService.detalle);
 
 /**
  * @swagger
