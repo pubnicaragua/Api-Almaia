@@ -11,6 +11,7 @@ import { AlumnoDireccionService } from '../infrestructure/server/alumno/AlumnoDi
 import { AlumnoNotificacionService } from '../infrestructure/server/alumno/AlumnoNotificacionService';
 import { AlumnoMonitoreoService } from '../infrestructure/server/alumno/AlumnoMonitoreoService';
 import { AlumnoActividadService } from '../infrestructure/server/alumno/AlumnoActividadService';
+import { AlumnoPermisoAutorsService } from '../infrestructure/server/alumno/AlumnoPermisoAutorService';
 
 const router = express.Router();
 
@@ -24,6 +25,7 @@ const ruta_alumnos_direcciones = '/direcciones';
 const ruta_alumnos_monitoreos = '/monitoreos';
 const ruta_alumnos_notificaciones = '/notificaciones';
 const ruta_alumnos_actividades = '/alumnos_actividades';
+const ruta_alumnos_permisos = '/permisos';
 
 /**
  * @swagger
@@ -3213,6 +3215,291 @@ router.put(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.actua
  *         description: Error interno del servidor
  */
 router.delete(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.eliminar)
+/**
+ * @swagger
+ * /api/v1/alumnos/permisos:
+ *   get:
+ *     summary: Obtener todos los permisos/autorizaciones
+ *     description: Retorna una lista de permisos/autorizaciones de alumnos con información relacionada
+ *     tags: [Alumnos - Permisos/Autorizaciones]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - name: estado
+ *         in: query
+ *         description: Filtrar por estado (pendiente/aprobado/rechazado)
+ *         schema:
+ *           type: string
+ *           enum: [pendiente, aprobado, rechazado]
+ *           example: "pendiente"
+ *       - name: alumno_id
+ *         in: query
+ *         description: Filtrar por ID de alumno
+ *         schema:
+ *           type: integer
+ *           example: 7
+ *       - name: apoderado_id
+ *         in: query
+ *         description: Filtrar por ID de apoderado
+ *         schema:
+ *           type: integer
+ *           example: 3
+ *     responses:
+ *       200:
+ *         description: Lista de permisos/autorizaciones
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AlumnoPermisoAutor'
+ *       401:
+ *         description: No autorizado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.get(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.obtener)
+/**
+ * @swagger
+ * /api/v1/alumnos/permisos:
+ *   post:
+ *     summary: Crear un nuevo permiso/autorización
+ *     description: Registra un nuevo permiso/autorización para un alumno
+ *     tags: [Alumnos - Permisos/Autorizaciones]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - alumno_id
+ *               - apoderado_id
+ *               - tipo
+ *               - descripcion
+ *             properties:
+ *               alumno_id:
+ *                 type: integer
+ *                 example: 7
+ *               apoderado_id:
+ *                 type: integer
+ *                 example: 3
+ *               tipo:
+ *                 type: string
+ *                 enum: [salida, actividad, viaje, medicamento, otro]
+ *                 example: "actividad"
+ *               descripcion:
+ *                 type: string
+ *                 example: "Autorización para excursión al museo"
+ *               fecha_autorizacion:
+ *                 type: string
+ *                 format: date-time
+ *                 nullable: true
+ *                 example: null
+ *               estado:
+ *                 type: string
+ *                 enum: [pendiente, aprobado, rechazado]
+ *                 example: "pendiente"
+ *     responses:
+ *       201:
+ *         description: Permiso/autorización creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoPermisoAutor'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.guardar)
+/**
+ * @swagger
+ * /api/v1/alumnos/permisos:
+ *   put:
+ *     summary: Actualizar un permiso/autorización
+ *     description: Actualiza los datos de un permiso/autorización existente
+ *     tags: [Alumnos - Permisos/Autorizaciones]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - alumno_permiso_autor_id
+ *             properties:
+ *               alumno_permiso_autor_id:
+ *                 type: integer
+ *                 example: 1
+ *               alumno_id:
+ *                 type: integer
+ *                 example: 7
+ *               apoderado_id:
+ *                 type: integer
+ *                 example: 3
+ *               tipo:
+ *                 type: string
+ *                 enum: [salida, actividad, viaje, medicamento, otro]
+ *                 example: "salida"
+ *               descripcion:
+ *                 type: string
+ *                 example: "Permiso para salir temprano el viernes"
+ *               fecha_autorizacion:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2025-05-16T11:00:00Z"
+ *               estado:
+ *                 type: string
+ *                 enum: [pendiente, aprobado, rechazado]
+ *                 example: "aprobado"
+ *     responses:
+ *       200:
+ *         description: Permiso/autorización actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoPermisoAutor'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Permiso no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.actualizar)
+/**
+ * @swagger
+ * /api/v1/alumnos/permisos:
+ *   delete:
+ *     summary: Eliminar un permiso/autorización
+ *     description: Elimina un permiso/autorización del sistema (eliminación lógica)
+ *     tags: [Alumnos - Permisos/Autorizaciones]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - name: alumno_permiso_autor_id
+ *         in: query
+ *         description: ID del permiso/autorización a eliminar
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *     responses:
+ *       200:
+ *         description: Permiso/autorización eliminado exitosamente
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Permiso no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.eliminar)
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlumnoPermisoAutor:
+ *       type: object
+ *       properties:
+ *         alumno_permiso_autor_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         apoderado_id:
+ *           type: integer
+ *           example: 3
+ *         tipo:
+ *           type: string
+ *           enum: [salida, actividad, viaje, medicamento, otro]
+ *           example: "salida"
+ *         descripcion:
+ *           type: string
+ *           example: "Permiso para salir temprano el viernes"
+ *         fecha_solicitud:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-15T10:30:00Z"
+ *         fecha_autorizacion:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: "2025-05-15T11:15:00Z"
+ *         estado:
+ *           type: string
+ *           enum: [pendiente, aprobado, rechazado]
+ *           example: "pendiente"
+ *         alumnos:
+ *           $ref: '#/components/schemas/AlumnoInfo'
+ *         apoderados:
+ *           $ref: '#/components/schemas/ApoderadoInfo'
+ * 
+ *     AlumnoInfo:
+ *       type: object
+ *       properties:
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         personas:
+ *           $ref: '#/components/schemas/PersonaInfo'
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://ejemplo.com/fotos/7.jpg"
+ * 
+ *     ApoderadoInfo:
+ *       type: object
+ *       properties:
+ *         apoderado_id:
+ *           type: integer
+ *           example: 3
+ *         personas:
+ *           $ref: '#/components/schemas/PersonaInfo'
+ *         telefono_contacto:
+ *           type: string
+ *           example: "+56987654321"
+ * 
+ *     PersonaInfo:
+ *       type: object
+ *       properties:
+ *         persona_id:
+ *           type: integer
+ *           example: 2
+ *         nombres:
+ *           type: string
+ *           example: "Carlos"
+ *         apellidos:
+ *           type: string
+ *           example: "Muñoz"
+ *         rut:
+ *           type: string
+ *           example: "12345678-9"
+ * 
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ *           example: "Mensaje de error descriptivo"
+ */
 /**
  * @swagger
  * components:
