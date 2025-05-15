@@ -2650,7 +2650,7 @@ router.delete(ruta_alumnos_direcciones + '/:id', sessionAuth, AlumnoDireccionSer
  * /api/v1/alumnos/monitoreos:
  *   get:
  *     summary: Obtener monitoreos de alumnos
- *     description: Retorna todos los monitoreos registrados para alumnos, incluyendo información del alumno y su colegio
+ *     description: Retorna todos los monitoreos registrados para alumnos, incluyendo información detallada del alumno y sus datos personales
  *     tags: [Monitoreos]
  *     security:
  *       - sessionAuth: []
@@ -2663,30 +2663,74 @@ router.delete(ruta_alumnos_direcciones + '/:id', sessionAuth, AlumnoDireccionSer
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/AlumnoMonitoreo'
- *             example:
- *               - monitoreo_id: 1
- *                 fecha: "2023-05-15T10:30:00Z"
- *                 observaciones: "El alumno mostró mejoría en su rendimiento"
- *                 alumno:
- *                   alumno_id: 101
- *                   nombre: "Juan Pérez"
- *                   url_foto_perfil: "https://ejemplo.com/fotos/101.jpg"
- *                   telefono_contacto1: "+56912345678"
- *                   email: "juan.perez@ejemplo.com"
- *                   colegio:
- *                     colegio_id: 201
- *                     nombre: "Colegio Ejemplo"
- *                     nombre_fantasia: "Colegio Ejemplo S.A."
- *                     direccion: "Calle Principal 123"
- *                     telefono_contacto: "+56223456789"
  *       401:
  *         description: No autorizado - Sesión no válida o no proporcionada
  *       500:
  *         description: Error interno del servidor
- *         content:
- *           application/json:
- *             example:
- *               error: "Error al conectar con la base de datos"
+ * 
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlumnoMonitoreo:
+ *       type: object
+ *       properties:
+ *         alumno_monitoreo_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         fecha_accion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-15T00:33:57.083"
+ *         tipo_accion:
+ *           type: string
+ *           example: "string"
+ *         descripcion_accion:
+ *           type: string
+ *           example: "string"
+ *         alumnos:
+ *           $ref: '#/components/schemas/AlumnoDetalle'
+ * 
+ *     AlumnoDetalle:
+ *       type: object
+ *       properties:
+ *         email:
+ *           type: string
+ *           example: "alextest@colegio.cl"
+ *         personas:
+ *           $ref: '#/components/schemas/PersonaInfo'
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ *         telefono_contacto1:
+ *           type: string
+ *           example: "+56 9 1284 5678"
+ *         telefono_contacto2:
+ *           type: string
+ *           example: "+56 9 8765 4321"
+ * 
+ *     PersonaInfo:
+ *       type: object
+ *       properties:
+ *         nombres:
+ *           type: string
+ *           example: "Carlos"
+ *         apellidos:
+ *           type: string
+ *           example: "Muñoz"
+ *         persona_id:
+ *           type: integer
+ *           example: 2
+ *         fecha_nacimiento:
+ *           type: string
+ *           format: date
+ *           nullable: true
+ *           example: null
  */
 router.get(ruta_alumnos_monitoreos, sessionAuth, AlumnoMonitoreoService.obtener);
 
