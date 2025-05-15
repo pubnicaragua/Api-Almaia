@@ -8,8 +8,8 @@ export class Apoderado  extends BaseModel {
     telefono_contacto2: string;
     email_contacto1: string;
     email_contacto2: string;
-    profesion_id: number;
-    tipo_oficio_id: number;
+    profesion_id?: number;
+    tipo_oficio_id?: number;
     constructor(){
         super();
         this.persona_id = 0;
@@ -18,7 +18,5 @@ export class Apoderado  extends BaseModel {
         this.telefono_contacto2 = "";
         this.email_contacto1 = "";
         this.email_contacto2 = "";
-        this.profesion_id = 0;
-        this.tipo_oficio_id = 0;
     }
   }

@@ -20,8 +20,8 @@ const ApoderadoSchema = Joi.object({
   email_contacto1: Joi.string().max(128).required(),
   email_contacto2: Joi.string().max(128).required(),
   estado: Joi.string().max(20).required(),
-  profesion_id: Joi.number().integer().required(),
-  tipo_oficio_id: Joi.number().integer().required(),
+  profesion_id: Joi.number().integer().optional(),
+  tipo_oficio_id: Joi.number().integer().optional(),
 });
 export const ApoderadoService = {
   async obtener(req: Request, res: Response) {

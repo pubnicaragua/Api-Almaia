@@ -66,7 +66,7 @@ const ruta_docentes_cursos = '/docentes_cursos';
 router.get('/', sessionAuth, DocentesService.obtener);
 /**
  * @swagger
- * /api/v1/docentes/{id}:
+ * /api/v1/docentes/detalle/{id}:
  *   get:
  *     summary: Obtener lista de docentes
  *     description: Retorna todos los docentes registrados en el sistema con sus datos asociados
@@ -211,7 +211,7 @@ router.get('/', sessionAuth, DocentesService.obtener);
  *               description: Lista de cursos asignados al docente
  *           description: Información de los cursos asignados al docente
  */
-router.get('/:id', sessionAuth, DocentesService.detalle);
+router.get('/detalle/:id', sessionAuth, DocentesService.detalle);
 
 
 /**
@@ -403,7 +403,7 @@ router.post(ruta_docentes_cursos, sessionAuth, DocenteCursosService.guardar);
 
 /**
  * @swagger
- * /api/v1/docentes/docentes_cursos/{id}:
+ * /api/v1/docentes/docentes_cursos/detalle/{id}:
  *   put:
  *     summary: Actualizar asignación de curso a docente
  *     description: Modifica una asignación existente de curso a docente
@@ -448,7 +448,7 @@ router.post(ruta_docentes_cursos, sessionAuth, DocenteCursosService.guardar);
  *       500:
  *         description: Error interno del servidor
  */
-router.put(`${ruta_docentes_cursos}/:id`, sessionAuth, DocenteCursosService.actualizar);
+router.put(`${ruta_docentes_cursos}/detalle/:id`, sessionAuth, DocenteCursosService.actualizar);
 
 /**
  * @swagger
