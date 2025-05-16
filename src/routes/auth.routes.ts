@@ -7,6 +7,7 @@ import { FuncionalidadRolService } from '../infrestructure/server/auth/Funcional
 import { UsuariosService } from '../infrestructure/server/auth/UsuarioService';
 import { AuditoriaesService } from '../infrestructure/server/auth/AuditoriaService';
 import { AuditoriaPermisoesService } from '../infrestructure/server/auth/AuditoriaPermisoService';
+import { RegistroInteraccionesService } from '../infrestructure/server/auth/RegistroInteracccionService';
 
 const router = express.Router();
 const ruta_roles = '/roles';
@@ -15,6 +16,7 @@ const ruta_funcionalidades = '/funcionalidades';
 const ruta_funcionalidades_roles = '/funcionalidades_roles';
 const ruta_auditorias = '/auditorias';
 const ruta_auditorias_permisos = '/auditorias_permisos';
+const ruta_registros_interacciones = '/registros_interacciones';
 
 /**
  * @swagger
@@ -864,8 +866,101 @@ router.get(ruta_auditorias_permisos+'/', sessionAuth, AuditoriaPermisoesService.
  *       500:
  *         description: Error interno del servidor
  */
-router.post(ruta_auditorias_permisos+'/', sessionAuth, AuditoriaPermisoesService.guardar);
+router.post(ruta_auditorias_permisos+'/', sessionAuth, RegistroInteraccionesService.guardar);
 
+/**
+ * @swagger
+ * /api/v1/auth/registros_interacciones/:
+ *   get:
+ *     summary: Obtiene todos los registros de interacción
+ *     description: Retorna una lista completa de todos los registros de interacciones del sistema
+ *     tags: [Registros de Interacción]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de registros de interacción obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/RegistroInteraccion'
+ *       401:
+ *         description: No autorizado, sesión inválida o sin permisos
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(ruta_registros_interacciones+'/', sessionAuth, RegistroInteraccionesService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/auth/registros_interacciones/:
+ *   post:
+ *     summary: Crea un nuevo registro de interacción
+ *     description: Registra una nueva interacción en el sistema
+ *     tags: [Registros de Interacción]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegistroInteraccion'
+ *     responses:
+ *       201:
+ *         description: Registro de interacción creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegistroInteraccion'
+ *       400:
+ *         description: Datos de entrada inválidos o incompletos
+ *       401:
+ *         description: No autorizado, sesión inválida o sin permisos
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(ruta_registros_interacciones+'/', sessionAuth, RegistroInteraccionesService.guardar);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     RegistroInteraccion:
+ *       type: object
+ *       properties:
+ *         registro_interaccion_id:
+ *           type: integer
+ *           description: ID único del registro de interacción
+ *           example: 1
+ *           readOnly: true
+ *         timestamp:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha y hora exacta de la interacción (ISO 8601)
+ *           example: "2023-05-16T14:30:45.000Z"
+ *         tipo_evento:
+ *           type: string
+ *           description: Tipo de evento/interacción registrada
+ *           example: "LOGIN"
+ *           enum: ["LOGIN", "LOGOUT", "ACCESO_DENEGADO", "CONSULTA", "MODIFICACION"]
+ *         datos_evento:
+ *           type: string
+ *           description: Datos adicionales en formato JSON sobre la interacción
+ *           example: "{\"ip\":\"192.168.1.100\",\"navegador\":\"Chrome 112\"}"
+ *         sesion_id:
+ *           type: integer
+ *           description: ID de la sesión asociada a la interacción
+ *           example: 789
+ *       required:
+ *         - timestamp
+ *         - tipo_evento
+ *         - datos_evento
+ *         - creado_por
+ *         - sesion_id
+ */
 /**
  * @swagger
  * components:
