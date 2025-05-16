@@ -6,6 +6,7 @@ import { FuncionalidadesService } from '../infrestructure/server/auth/Funcionali
 import { FuncionalidadRolService } from '../infrestructure/server/auth/FuncionalidadRolService';
 import { UsuariosService } from '../infrestructure/server/auth/UsuarioService';
 import { AuditoriaesService } from '../infrestructure/server/auth/AuditoriaService';
+import { AuditoriaPermisoesService } from '../infrestructure/server/auth/AuditoriaPermisoService';
 
 const router = express.Router();
 const ruta_roles = '/roles';
@@ -13,6 +14,7 @@ const ruta_usuarios = '/usuarios';
 const ruta_funcionalidades = '/funcionalidades';
 const ruta_funcionalidades_roles = '/funcionalidades_roles';
 const ruta_auditorias = '/auditorias';
+const ruta_auditorias_permisos = '/auditorias_permisos';
 
 /**
  * @swagger
@@ -807,6 +809,89 @@ router.post(ruta_auditorias+'/', sessionAuth, AuditoriaesService.guardar);
  *         description: Error interno del servidor
  */
 router.delete(ruta_usuarios+'/:id', sessionAuth, UsuariosService.eliminar);
+
+/**
+ * @swagger
+ * /api/v1/auth/auditorias-permisos/:
+ *   get:
+ *     summary: Obtiene todos los registros de auditoría de permisos
+ *     description: Retorna una lista de todos los registros de auditoría de permisos del sistema
+ *     tags: [Auditoría de Permisos]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de auditorías de permisos obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AuditoriaPermiso'
+ *       401:
+ *         description: No autorizado, sesión inválida o sin permisos
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(ruta_auditorias_permisos+'/', sessionAuth, AuditoriaPermisoesService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/auth/auditorias-permisos/:
+ *   post:
+ *     summary: Crea un nuevo registro de auditoría de permisos
+ *     description: Registra un nuevo permiso auditado en el sistema
+ *     tags: [Auditoría de Permisos]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AuditoriaPermiso'
+ *     responses:
+ *       201:
+ *         description: Registro de auditoría de permisos creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuditoriaPermiso'
+ *       400:
+ *         description: Datos de entrada inválidos o incompletos
+ *       401:
+ *         description: No autorizado, sesión inválida o sin permisos
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(ruta_auditorias_permisos+'/', sessionAuth, AuditoriaPermisoesService.guardar);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AuditoriaPermiso:
+ *       type: object
+ *       properties:
+ *         auditoria_permiso_id:
+ *           type: integer
+ *           description: ID único del registro de auditoría de permiso
+ *           example: 1
+ *           readOnly: true
+ *         auditoria_id:
+ *           type: integer
+ *           description: ID de la auditoría principal relacionada
+ *           example: 15
+ *           required: true
+ *         nombre_permiso:
+ *           type: string
+ *           description: Nombre del permiso que fue auditado
+ *           example: "documents.edit"
+ *           required: true
+ *       required:
+ *         - auditoria_id
+ *         - nombre_permiso
+ */
 
 /**
  * @swagger
