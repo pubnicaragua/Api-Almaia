@@ -2,27 +2,30 @@ import { Request, Response } from "express";
 
 import { DataService } from "../DataService";
 import { RespuestaPosiblePregunta } from "../../../core/modelo/preguntasRespuestas/RespuestaPosiblePregunta";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+import Joi from "joi";
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
+const RespuestaPosiblePreguntaSchema = Joi.object({
+  respuesta_posible_id: Joi.number().integer().required(),
+  pregunta_id: Joi.number().integer().required(),
+});
 const dataService: DataService<RespuestaPosiblePregunta> = new DataService(
-  "respuestas_posibles_has_preguntas"
+  "respuestas_posibles_has_preguntas", "respuesta_posible_id"
 );
 export const RespuestaPosiblePreguntaService = {
   async obtener(req: Request, res: Response) {
     try {
-      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-            const respuestaposible = await dataService.getAll(["*"],where);
-            res.json(respuestaposible);*/
-      const respuestasPosiblesPorPregunta = [
-        {
-          respuesta_posible: {
-            respuesta_posible_id: 1,
-            nombre: "Siempre",
-          },
-          pregunta: {
-            pregunta_id: 5,
-            texto_pregunta: "¿Con qué frecuencia participa en clase?",
-          },
-        },
-      ];
+      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      const respuestasPosiblesPorPregunta = await dataService.getAll(
+        [
+          "*",
+          "preguntas(pregunta_id,texto_pregunta)",
+          "respuestas_posibles(respuesta_posible_id,nombre)",
+        ],
+        where
+      );
       res.json(respuestasPosiblesPorPregunta);
     } catch (error) {
       console.error("Error al obtener la respuestaposible:", error);
@@ -30,25 +33,84 @@ export const RespuestaPosiblePreguntaService = {
     }
   },
   guardar: async (req: Request, res: Response) => {
-    try {
-      const respuestaposible: RespuestaPosiblePregunta = req.body;
-      const savedRespuestaPosible = await dataService.processData(
-        respuestaposible
-      );
-      res.status(201).json(savedRespuestaPosible);
-    } catch (error) {
-      console.error("Error al guardar la respuestaposible:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
-    }
-  },
+     try {
+       const respuestaposible: RespuestaPosiblePregunta = new RespuestaPosiblePregunta();
+       Object.assign(respuestaposible, req.body);
+       respuestaposible.creado_por = req.creado_por;
+       respuestaposible.actualizado_por = req.actualizado_por;
+       let responseSent = false;
+       const { error: validationError } = RespuestaPosiblePreguntaSchema.validate(req.body);
+       const { data, error } = await client
+         .from("respuestas_posibles")
+         .select("*")
+         .eq("respuesta_posible_id", respuestaposible.respuesta_posible_id)
+         .single();
+       if (error || !data) {
+         throw new Error("La respuesta no existe");
+       }
+       const { data: dataNivelesEducativos, error: errorNilesEducativos } =
+         await client
+           .from("preguntas")
+           .select("*")
+           .eq("pregunta_id", respuestaposible.pregunta_id)
+           .single();
+       if (errorNilesEducativos || !dataNivelesEducativos) {
+         throw new Error("La pregunta no existe");
+       }
+       if (validationError) {
+         responseSent = true;
+         throw new Error(validationError.details[0].message);
+       }
+       if (!responseSent) {
+         const savedPregunta = await dataService.processData(respuestaposible);
+         res.status(201).json(savedPregunta);
+       }
+     } catch (error) {
+       console.error("Error al guardar el pregunta:", error);
+       res.status(500).json({ message: "Error interno del servidor" });
+     }
+   },
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const respuestaposible: RespuestaPosiblePregunta = req.body;
+
+      const respuestaposible: RespuestaPosiblePregunta = new RespuestaPosiblePregunta();
+       Object.assign(respuestaposible, req.body);
+       respuestaposible.creado_por = req.creado_por;
+       respuestaposible.actualizado_por = req.actualizado_por;
+       let responseSent = false;
+       const { error: validationError } = RespuestaPosiblePreguntaSchema.validate(req.body);
+       const { data, error } = await client
+         .from("respuestas_posibles")
+         .select("*")
+         .eq("respuesta_posible_id", respuestaposible.respuesta_posible_id)
+         .single();
+       if (error || !data) {
+         throw new Error("La respuesta no existe");
+       }
+       const { data: dataNivelesEducativos, error: errorNilesEducativos } =
+         await client
+           .from("preguntas")
+           .select("*")
+           .eq("pregunta_id", respuestaposible.pregunta_id)
+           .single();
+       if (errorNilesEducativos || !dataNivelesEducativos) {
+         throw new Error("La pregunta no existe");
+       }
+       if (validationError) {
+         responseSent = true;
+         throw new Error(validationError.details[0].message);
+       }
+       if (!responseSent) {
       await dataService.updateById(id, respuestaposible);
       res
         .status(200)
         .json({ message: "RespuestaPosible actualizada correctamente" });
+       }
+
+
+
+
     } catch (error) {
       console.error("Error al actualizar la respuestaposible:", error);
       res.status(500).json({ message: "Error interno del servidor" });
