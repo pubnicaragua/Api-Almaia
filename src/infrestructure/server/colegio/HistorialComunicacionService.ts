@@ -1,83 +1,150 @@
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { HistorialComunicacion } from "../../../core/modelo/colegio/HistorialComunicacion";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+import Joi from "joi";
 
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
+const HistorialComunicacionSchema = Joi.object({
+    alumno_id: Joi.number().integer().required(),
+    usuario_id: Joi.number().integer().required(),
+    apoderado_id: Joi.number().integer().required(),
+    asunto: Joi.string().max(50).required(),
+    descripcion: Joi.string().max(150).required(),
+    acciones_acuerdos_tomados: Joi.string().max(150).required(),
+});
 const dataService: DataService<HistorialComunicacion> = new DataService(
-  "historialcomunicacions"
+  "historiales_comunicaciones" ,"historial_comunicacion_id"
 );
 export const HistorialComunicacionsService = {
-    async obtener(req: Request, res: Response) {
-        try {
-            /*const historialComunicacion = await dataService.getAll(["*"], req.query);
-            res.json(historialComunicacion);*/
-            const historialComunicaciones = [
-                {
-                  historial_comunicacion_id: 1,
-                  alumno_id: 101,
-                  apoderado_id: 201,
-                  usuario_id: 301,
-                  fecha_hora: new Date("2025-04-12T10:30:00"),
-                  asunto: "Rendimiento Académico",
-                  descripcion: "Se informa al apoderado sobre el bajo rendimiento del alumno en matemáticas.",
-                  acciones_acuerdos_tomados: "Refuerzo escolar dos veces por semana y seguimiento mensual."
-                },
-                {
-                  historial_comunicacion_id: 2,
-                  alumno_id: 102,
-                  apoderado_id: 202,
-                  usuario_id: 302,
-                  fecha_hora: new Date("2025-05-03T14:15:00"),
-                  asunto: "Problemas de Conducta",
-                  descripcion: "Incidente de mal comportamiento en clase reportado por el docente.",
-                  acciones_acuerdos_tomados: "Reunión con orientador escolar y compromiso de mejora por parte del alumno."
-                },
-                {
-                  historial_comunicacion_id: 3,
-                  alumno_id: 103,
-                  apoderado_id: 203,
-                  usuario_id: 303,
-                  fecha_hora: new Date("2025-06-07T09:00:00"),
-                  asunto: "Asistencia Irregular",
-                  descripcion: "Se notifica la inasistencia frecuente del alumno sin justificación.",
-                  acciones_acuerdos_tomados: "Entrega de certificados médicos en futuras ausencias y monitoreo por parte del tutor."
-                }
-              ];
-              res.json(historialComunicaciones)
-              
-        } catch (error) {
-            res.status(500).json(error);
-        }
-    },
+  async obtener(req: Request, res: Response) {
+    try {
+      const historialComunicaciones = await dataService.getAll(
+        [
+          "*",
+          "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
+          "apoderados(apoderado_id,personas(persona_id,nombres,apellidos),telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2)",
+          "usuarios(usuario_id,nombre_social)"
+        ],
+        req.query
+      );
+      res.json(historialComunicaciones);
+    } catch (error) {
+        console.log(error);
+        
+      res.status(500).json(error);
+    }
+  },
 
-    async guardar(req: Request, res: Response) {
-        try {
-            const nuevoHistorialComunicacion = req.body;
-            const historialComunicacionCreado = await dataService.processData(nuevoHistorialComunicacion);
-            res.status(201).json(historialComunicacionCreado);
-        } catch (error) {
-            res.status(500).json(error);
-        }
-    },
+  async guardar(req: Request, res: Response) {
+    try {
+      const historialcomunicacion = new HistorialComunicacion();
+      Object.assign(historialcomunicacion, req.body);
+      historialcomunicacion.creado_por = req.creado_por;
+      historialcomunicacion.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = HistorialComunicacionSchema.validate(req.body);
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", historialcomunicacion.alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
+      const { data:dataUsuario, error:errorUsuario } = await client
+        .from("usuarios")
+        .select("*")
+        .eq("usuario_id", historialcomunicacion.usuario_id)
+        .single();
+      if (errorUsuario || !dataUsuario) {
+        throw new Error("El Usuario no existe");
+      } 
+      const { data:dataApoderado, error:errorApoderado} = await client
+        .from("apoderados")
+        .select("*")
+        .eq("apoderado_id", historialcomunicacion.apoderado_id)
+        .single();
+      if (errorApoderado || !dataApoderado) {
+        throw new Error("El apoderado no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        const historialcomunicacionCreado = await dataService.processData(historialcomunicacion);
+        res.status(201).json(historialcomunicacionCreado);
+      }
+    } catch (error) {
+        console.log(error);
+        
+      res.status(500).json(error);
+    }
+  },
 
-     async actualizar(req: Request, res: Response) {
-            try {
-                const historialComunicacionId = parseInt(req.params.id);
-                const historialActualizado = req.body;
-                const resultado = await dataService.updateById(historialComunicacionId, historialActualizado);
-                res.status(200).json(resultado);
-               
-            } catch (error) {
-                res.status(500).json(error);
-            }
-        },
-        async eliminar(req: Request, res: Response) {
-            try {
-                const historialComunicacionId = parseInt(req.params.id);
-                await dataService.deleteById(historialComunicacionId);
-                res.status(200).json({ message: "Curso eliminado" });
-            }
-            catch (error) {
-                res.status(500).json(error);
-            }
-        }    
-}
+  async actualizar(req: Request, res: Response) {
+    try {
+      const historialComunicacionId = parseInt(req.params.id);
+
+const historialActualizado = new HistorialComunicacion();
+      Object.assign(historialActualizado, req.body);
+      historialActualizado.creado_por = req.creado_por;
+      historialActualizado.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = HistorialComunicacionSchema.validate(req.body);
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", historialActualizado.alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
+      const { data:dataUsuario, error:errorUsuario } = await client
+        .from("usuarios")
+        .select("*")
+        .eq("usuario_id", historialActualizado.usuario_id)
+        .single();
+      if (errorUsuario || !dataUsuario) {
+        throw new Error("El Usuario no existe");
+      } 
+      const { data:dataApoderado, error:errorApoderado} = await client
+        .from("apoderados")
+        .select("*")
+        .eq("apoderdo_id", historialActualizado.apoderado_id)
+        .single();
+      if (errorApoderado || !dataApoderado) {
+        throw new Error("El apoderado no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+      const resultado = await dataService.updateById(
+        historialComunicacionId,
+        historialActualizado
+      );
+      res.status(200).json(resultado);
+      }
+
+
+
+
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+  async eliminar(req: Request, res: Response) {
+    try {
+      const historialComunicacionId = parseInt(req.params.id);
+      await dataService.deleteById(historialComunicacionId);
+      res.status(200).json({ message: "Curso eliminado" });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
+};
