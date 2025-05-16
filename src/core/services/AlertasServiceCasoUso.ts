@@ -2,6 +2,7 @@ import SupabaseClient from "@supabase/supabase-js/dist/module/SupabaseClient";
 import { SupabaseClientService } from "./supabaseClient";
 import { addDays, differenceInCalendarDays, isAfter, isBefore } from "date-fns";
 import { AlertStats } from "../modelo/home/AlertStats";
+import { AlertaMapeada } from "../modelo/alerta/AlertaMapeada";
 
 export class AlertasServicioCasoUso {
   private supabaseService: SupabaseClientService;
@@ -71,4 +72,15 @@ export class AlertasServicioCasoUso {
 
     return stats;
   }
+  
 }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function mapearAlertas(alertas: any[]): AlertaMapeada[] {
+    return alertas.map((alerta) => {
+      const { ...rest } = alerta;
+      return {
+        ...rest,
+        persona_responsable_actual: alerta.personas,
+      };
+    });
+  }

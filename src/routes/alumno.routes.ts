@@ -1082,12 +1082,14 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *             $ref: '#/components/schemas/Apoderado'
  */
 
+
 /**
  * @swagger
  * /api/v1/alumnos/detalle/{alumnoId}:
  *   get:
  *     summary: Obtiene los detalles completos de un alumno
- *     description: Retorna información detallada del alumno, incluyendo datos personales, ficha clínica, alertas, informes, emociones y apoderados
+ *     description: Retorna información detallada del alumno incluyendo datos personales, ficha clínica, alertas, informes, emociones, datos comparativos y apoderados
+ *     tags: [Alumnos]
  *     parameters:
  *       - in: path
  *         name: alumnoId
@@ -1095,17 +1097,416 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *         description: ID único del alumno
  *         schema:
  *           type: integer
+ *           example: 7
  *     responses:
  *       200:
  *         description: Detalles del alumno obtenidos correctamente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AlumnoDetalle'
+ *               type: object
+ *               properties:
+ *                 alumno:
+ *                   $ref: '#/components/schemas/AlumnoDetalle'
+ *                 ficha:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/FichaClinica'
+ *                 alertas:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/AlertaAlumno'
+ *                 informes:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/InformeAlumno'
+ *                 emociones:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/EmocionAlumno'
+ *                 datosComparativa:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/DatosComparativa'
+ *                 apoderados:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ApoderadoAlumno'
  *       404:
  *         description: Alumno no encontrado
  *       500:
  *         description: Error interno del servidor
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlumnoDetalle:
+ *       type: object
+ *       properties:
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         colegio_id:
+ *           type: integer
+ *           example: 1
+ *         url_foto_perfil:
+ *           type: string
+ *           example: "https://www.rainbowschoolnellore.com/images/student-profile-1.jpg"
+ *         telefono_contacto1:
+ *           type: string
+ *           example: "+56 9 1284 5678"
+ *         email:
+ *           type: string
+ *           example: "alextest@colegio.cl"
+ *         telefono_contacto2:
+ *           type: string
+ *           example: "+56 9 8765 4321"
+ *         creado_por:
+ *           type: integer
+ *           example: 0
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-10T19:37:38.661"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-10T19:37:38.661"
+ *         activo:
+ *           type: boolean
+ *           example: false
+ *         persona_id:
+ *           type: integer
+ *           example: 2
+ *         personas:
+ *           type: object
+ *           properties:
+ *             generos:
+ *               type: object
+ *               properties:
+ *                 nombre:
+ *                   type: string
+ *                   example: "Masculino"
+ *                 genero_id:
+ *                   type: integer
+ *                   example: 1
+ *             nombres:
+ *               type: string
+ *               example: "Carlos"
+ *             apellidos:
+ *               type: string
+ *               example: "Muñoz"
+ *             persona_id:
+ *               type: integer
+ *               example: 2
+ *             fecha_nacimiento:
+ *               type: string
+ *               nullable: true
+ *               example: null
+ *         colegios:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Colegio Bicentenario Santiago Centro"
+ *             colegio_id:
+ *               type: integer
+ *               example: 1
+ *         cursos:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               grados:
+ *                 type: object
+ *                 properties:
+ *                   nombre:
+ *                     type: string
+ *                     example: "Quinto Básico"
+ *                   grado_id:
+ *                     type: integer
+ *                     example: 9
+ *               niveles_educativos:
+ *                 type: object
+ *                 properties:
+ *                   nombre:
+ *                     type: string
+ *                     example: "Educación Básica"
+ *                   nivel_educativo_id:
+ *                     type: integer
+ *                     example: 1
+ * 
+ *     FichaClinica:
+ *       type: object
+ *       properties:
+ *         alumno_ant_clinico_id:
+ *           type: integer
+ *           example: 1
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         historial_medico:
+ *           type: string
+ *           example: "prueba"
+ *         alergias:
+ *           type: string
+ *           example: "generales"
+ *         enfermedades_cronicas:
+ *           type: string
+ *           example: "ninguna"
+ *         condiciones_medicas_relevantes:
+ *           type: string
+ *           example: "ninguna"
+ *         medicamentos_actuales:
+ *           type: string
+ *           example: "nn"
+ *         diagnosticos_previos:
+ *           type: string
+ *           example: " "
+ *         terapias_tratamiento_curso:
+ *           type: string
+ *           example: "nn"
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T11:53:31.993"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-14T11:53:31.993"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ * 
+ *     AlertaAlumno:
+ *       type: object
+ *       properties:
+ *         alumno_alerta_id:
+ *           type: integer
+ *           example: 20
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         alerta_regla_id:
+ *           type: integer
+ *           example: 3
+ *         fecha_generada:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T23:19:15.916283"
+ *         fecha_resolucion:
+ *           type: string
+ *           format: date-time
+ *           nullable: true
+ *           example: null
+ *         alerta_origen_id:
+ *           type: integer
+ *           example: 1
+ *         prioridad_id:
+ *           type: integer
+ *           example: 3
+ *         severidad_id:
+ *           type: integer
+ *           example: 2
+ *         accion_tomada:
+ *           type: string
+ *           nullable: true
+ *           example: null
+ *         leida:
+ *           type: boolean
+ *           example: false
+ *         responsable_actual_id:
+ *           type: integer
+ *           example: 5
+ *         estado:
+ *           type: string
+ *           example: "pendiente"
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T23:19:15.916283"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-12T23:19:15.916283"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *         alertas_tipo_alerta_tipo_id:
+ *           type: integer
+ *           example: 3
+ *         alertas_reglas:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Regla Orgullo Recurrente"
+ *             alerta_regla_id:
+ *               type: integer
+ *               example: 3
+ *         alertas_origenes:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Alumno"
+ *             alerta_origen_id:
+ *               type: integer
+ *               example: 1
+ *         alertas_severidades:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Media"
+ *             alerta_severidad_id:
+ *               type: integer
+ *               example: 2
+ * 
+ *     InformeAlumno:
+ *       type: object
+ *       properties:
+ *         alumno_informe_id:
+ *           type: integer
+ *           example: 0
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         fecha:
+ *           type: string
+ *           format: date-time
+ *           example: "2023-06-15T00:00:00"
+ *         url_reporte:
+ *           type: string
+ *           example: "https://storage.colegio.com/informes/801.pdf"
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-15T04:56:59.736"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-15T04:56:59.736"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ * 
+ *     EmocionAlumno:
+ *       type: object
+ *       properties:
+ *         nombre:
+ *           type: string
+ *           example: "Felicidad"
+ *         valor:
+ *           type: integer
+ *           example: 3100
+ * 
+ *     DatosComparativa:
+ *       type: object
+ *       properties:
+ *         emocion:
+ *           type: string
+ *           example: "Feliz"
+ *         alumno:
+ *           type: number
+ *           example: 2
+ *         promedio:
+ *           type: number
+ *           example: 1.5
+ * 
+ *     ApoderadoAlumno:
+ *       type: object
+ *       properties:
+ *         alumno_apoderado_id:
+ *           type: integer
+ *           example: 11
+ *         alumno_id:
+ *           type: integer
+ *           example: 7
+ *         apoderado_id:
+ *           type: integer
+ *           example: 1
+ *         tipo_apoderado:
+ *           type: string
+ *           example: "titular"
+ *         observaciones:
+ *           type: string
+ *           example: "Sin observaciones"
+ *         estado_usuario:
+ *           type: string
+ *           example: "activo"
+ *         creado_por:
+ *           type: integer
+ *           example: 1
+ *         actualizado_por:
+ *           type: integer
+ *           example: 1
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-13T20:57:14.09499"
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *           example: "2025-05-13T20:57:14.09499"
+ *         activo:
+ *           type: boolean
+ *           example: true
+ *         apoderados:
+ *           type: object
+ *           properties:
+ *             personas:
+ *               type: object
+ *               properties:
+ *                 nombres:
+ *                   type: string
+ *                   example: "Camila"
+ *                 apellidos:
+ *                   type: string
+ *                   example: "Gómez"
+ *                 persona_id:
+ *                   type: integer
+ *                   example: 1
+ *             apoderado_id:
+ *               type: integer
+ *               example: 1
+ *             email_contacto1:
+ *               type: string
+ *               example: "apo1@mail.com"
+ *             email_contacto2:
+ *               type: string
+ *               nullable: true
+ *               example: null
+ *             telefono_contacto1:
+ *               type: string
+ *               example: "987654321"
+ *             telefono_contacto2:
+ *               type: string
+ *               nullable: true
+ *               example: null
  */
 router.get('/detalle/:alumnoId', AlumnosService.getAlumnoDetalle);
 

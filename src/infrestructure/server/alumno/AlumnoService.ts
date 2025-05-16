@@ -46,7 +46,7 @@ export const AlumnosService = {
     const data_alumno = await dataService.getAll(
       [
         "*",
-        "personas(persona_id,nombres,apellidos,fecha_nacimiento)",
+        "personas(persona_id,nombres,apellidos,fecha_nacimiento,generos(genero_id,nombre))",
         "colegios(colegio_id,nombre)",
         "cursos(grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
       ],
@@ -79,7 +79,7 @@ export const AlumnosService = {
     const { data: apoderados, error: error_apoderados } = await client
       .from("alumnos_apoderados")
       .select(
-        "*,apoderados(apoderado_id,personas(persona_id,nombres,apellidos))"
+        "*,apoderados(apoderado_id,telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2,personas(persona_id,nombres,apellidos))"
       )
       .eq("alumno_id", alumno.alumno_id);
     if (error_apoderados) {
