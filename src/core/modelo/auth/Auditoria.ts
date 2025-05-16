@@ -1,5 +1,5 @@
 export class Auditoria {
-    auditoria_id: number;
+    auditoria_id?: number;
     tipo_auditoria_id: number;
     colegio_id: number;
     fecha: Date;
@@ -11,7 +11,6 @@ export class Auditoria {
     referencia_id: number;
     model: string;
     constructor(){
-        this.auditoria_id = 0;
         this.tipo_auditoria_id = 0;
         this.colegio_id = 0;
         this.fecha = new Date();
