@@ -4,7 +4,7 @@ import { MotorInforme } from "../../../core/modelo/alerta/MotorInforme";
 import Joi from "joi";
 
 const dataService: DataService<MotorInforme> = new DataService(
-  "motores_informes"
+  "motores_informes","motor_informe_id"
 );
 const MotorInformeSchema = Joi.object({
   freq_meses: Joi.number().integer().required(),
