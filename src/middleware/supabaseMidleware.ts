@@ -38,9 +38,11 @@ export const sessionAuth = async (
     if (error_user) {
       console.error("Error al obtener usuarios:", error_user);
     }
+
     req.creado_por = data_user?.[0]?.usuario_id;
     req.actualizado_por = data_user?.[0]?.usuario_id;
     req.fecha_creacion = new Date().toISOString()
+    req.user=  data_user?.[0]
     next();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

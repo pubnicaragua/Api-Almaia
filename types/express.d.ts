@@ -6,5 +6,7 @@ declare module 'express-serve-static-core' {
     creado_por: number; // o number, según tu caso
     actualizado_por:number
     fecha_creacion:string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    user:any
   }
 }

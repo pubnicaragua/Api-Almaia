@@ -1,51 +1,57 @@
 import { Request, Response } from "express";
-import { Usuario } from "../../../core/modelo/auth/Usuario";
-import { Persona } from "../../../core/modelo/Persona";
-import { Rol } from "../../../core/modelo/auth/Rol";
 import { Funcionalidad } from "../../../core/modelo/auth/Funcionalidad";
-
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { mapearDatos } from "../../../core/services/PerfilServiceCasoUso";
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
 export const PerfilService = {
-    obtenerPerfil  (req: Request, res: Response)  {
-        // Datos simulados del usuario
-        const usuario = new Usuario();
-        usuario.usuario_id = 1;
-        usuario.nombre_social = "Juan Pérez";
-        usuario.email = "juan.perez@example.com";
-        usuario.telefono_contacto = "+123456789";
-        usuario.ultimo_inicio_sesion = new Date().toISOString();
-        usuario.estado_usuario = "ACTIVO";
-        usuario.url_foto_perfil = "https://avatar.iran.liara.run/public";
-        usuario.persona_id = 1;
-        usuario.rol_id = 1;
-        usuario.idioma_id = 1;
-      
-        // Datos de la persona
-        const persona = new Persona();
-        persona.persona_id = 1;
-        persona.tipo_documento = "DNI";
-        persona.numero_documento = "12345678";
-        persona.nombres = "Juan";
-        persona.apellidos = "Pérez";
-        persona.genero_id = 1;
-        persona.estado_civil_id = 2;
-      
-        // Datos del rol
-        const rol = new Rol();
-        rol.rol_id = 1;
-        rol.nombre = "Administrador";
-        rol.descripcion = "Acceso completo al sistema";
-      
-        // Funcionalidades del rol
-        const funcionalidades: Funcionalidad[] = [
-          { funcionalidad_id: 1, nombre: "Dashboard", descripcion: "Acceso al panel principal", creado_por:22, actualizado_por:2,fecha_creacion: new Date().toISOString(), fecha_actualizacion: new Date().toISOString(), activo: true },
-          { funcionalidad_id: 2, nombre: "Gestión de Usuarios", descripcion: "Administrar usuarios del sistema",creado_por:22, actualizado_por:2,fecha_creacion: new Date().toISOString(), fecha_actualizacion: new Date().toISOString(), activo: true },
-        ];
-      
-         res.json({
-          usuario,
-          persona,
-          rol,
-          funcionalidades,
-        });
-      }
-}
+  async obtenerPerfil(req: Request, res: Response) {
+    // Datos simulados del usuario
+
+    const { data: usuario_data, error: error_usuario } = await client
+      .from("usuarios")
+      .select(
+        "*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id),roles(rol_id,nombre,descripcion)"
+      )
+      .eq("usuario_id", req.user.usuario_id)
+      .single();
+    if (error_usuario) {
+      throw new Error(error_usuario.message);
+    }
+    const data = mapearDatos(usuario_data);
+    // Funcionalidades del rol
+    const funcionalidades: Funcionalidad[] = [
+      {
+        funcionalidad_id: 1,
+        nombre: "Dashboard",
+        descripcion: "Acceso al panel principal",
+        creado_por: 22,
+        actualizado_por: 2,
+        fecha_creacion: new Date().toISOString(),
+        fecha_actualizacion: new Date().toISOString(),
+        activo: true,
+      },
+      {
+        funcionalidad_id: 2,
+        nombre: "Gestión de Usuarios",
+        descripcion: "Administrar usuarios del sistema",
+        creado_por: 22,
+        actualizado_por: 2,
+        fecha_creacion: new Date().toISOString(),
+        fecha_actualizacion: new Date().toISOString(),
+        activo: true,
+      },
+    ];
+    const usuario = data.usuario;
+    const persona = data.persona;
+    const rol = data.rol;
+
+    res.json({
+      usuario,
+      persona,
+      rol,
+      funcionalidades,
+    });
+  },
+};
