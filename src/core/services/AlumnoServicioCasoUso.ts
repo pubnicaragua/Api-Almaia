@@ -6,11 +6,11 @@ import { formatISO, startOfDay } from "date-fns";
 export class AlumnoServicioCasoUso {
   private supabaseService: SupabaseClientService;
   private client: SupabaseClient;
-  private id_colegio =0;
-  constructor(id_colegio:number) {
+  private id_colegio = 0;
+  constructor(id_colegio: number) {
     this.supabaseService = new SupabaseClientService();
     this.client = this.supabaseService.getClient();
-    this.id_colegio= id_colegio
+    this.id_colegio = id_colegio;
   }
   async obtenerAlumnosColegio() {
     const query = this.client
@@ -19,20 +19,19 @@ export class AlumnoServicioCasoUso {
       .eq("colegio_id", this.id_colegio);
     const { data, error } = await query;
     if (error) {
-      throw new Error(`Error obteniendo count de alumnos: ${error.message}`);
+      throw new Error(`Error obteniendo  alumnos por colegio: ${error.message}`);
     }
     return data;
   }
   async obtenerCantidadAlumnos(colegioId: number) {
-    const query = this.client
+    const { count, error } = await this.client
       .from("alumnos")
       .select("*", { count: "exact", head: true })
       .eq("colegio_id", colegioId);
-    const { count, error } = await query;
-
     if (error) {
       throw new Error(`Error obteniendo count de alumnos: ${error.message}`);
     }
+
     return count ?? 0;
   }
   async obntenerConteoporTabla(table: string, dateFilter: string) {

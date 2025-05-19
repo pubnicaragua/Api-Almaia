@@ -4,7 +4,7 @@ import { AlumnoAlerta } from "../../../core/modelo/alumno/AlumnoAlerta";
 import Joi from "joi";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
+import { mapearAlertaDetalle, mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
 const AlumnoAlertaSchema = Joi.object({
   alumno_id: Joi.number().integer().required(),
   alerta_regla_id: Joi.number().integer().required(),
@@ -44,13 +44,14 @@ export const AlumnoAlertaService = {
         try {
             const id = parseInt(req.params.id);
             const where = { alumno_alerta_id: id }; // Convertir los parámetros de consulta en filtros
-            const alumnoalertaAlerta = await dataService.getAll(["*",
-              "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
-              "alertas_reglas(alerta_regla_id,nombre)",
+            const alumnoalertaAlerta_data = await dataService.getAll(["*",
+              "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos),alumnos_cursos(alumno_curso_id,ano_escolar,cursos(curso_id,nombre_curso,colegios(colegio_id,nombre),grados(grado_id,nombre))))",              "alertas_reglas(alerta_regla_id,nombre)",
               "alertas_origenes(alerta_origen_id,nombre)",
               "alertas_severidades(alerta_severidad_id,nombre)",
               "alertas_prioridades(alerta_prioridad_id,nombre)",
-              "alertas_tipos(alerta_tipo_id,nombre)"], where);
+              "alertas_tipos(alerta_tipo_id,nombre)", 
+              "personas(persona_id,nombres,apellidos,usuarios(usuario_id,nombre_social,url_foto_perfil,roles(rol_id,nombre)))"], where);
+              const alumnoalertaAlerta = mapearAlertaDetalle(alumnoalertaAlerta_data)
             res.json(alumnoalertaAlerta);
         } catch (error) {
             console.error("Error al obtener la alerta del alumnoalerta:", error);

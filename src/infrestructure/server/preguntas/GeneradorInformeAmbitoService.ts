@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { GeneradorInformeAmbito } from "../../../core/modelo/preguntasRespuestas/GeneradorInformeAmbito";
 
-const dataService:DataService<GeneradorInformeAmbito> = new DataService("generadores_informes");
+const dataService:DataService<GeneradorInformeAmbito> = new DataService("generadores_informes_ambitos","generador_informe_ambito_id");
 export const GeneradorInformeAmbitoService = {
 async obtener(req: Request, res: Response) {
         try {
