@@ -10,6 +10,18 @@ export class AlumnoServicioCasoUso {
     this.supabaseService = new SupabaseClientService();
     this.client = this.supabaseService.getClient();
   }
+  async obtenerCantidadAlumnos(colegioId: number) {
+    const query = this.client
+      .from("alumnos")
+      .select("*", { count: "exact", head: true })
+      .eq("colegio_id", colegioId);
+    const { count, error } = await query;
+
+    if (error) {
+      throw new Error(`Error obteniendo count de alumnos: ${error.message}`);
+    }
+    return count ?? 0;
+  }
   async obntenerConteoporTabla(table: string, dateFilter: string) {
     const { count, error } = await this.client
       .from(table)
@@ -67,7 +79,7 @@ export class AlumnoServicioCasoUso {
     return {
       alumnos: {
         activos: alumnosActivos,
-        inactivos:  alumnosActivos-totalAlumnos,
+        inactivos: alumnosActivos - totalAlumnos,
         frecuentes: alumnosFrecuentes,
         totales: totalAlumnos + alumnosSeleccion,
       },

@@ -25,9 +25,18 @@ export const DashboardHomeService = {
     try {
       const sevenDaysAgo = startOfDay(subDays(new Date(), 7)).toISOString();
       const alumnoServicioCasoUso = new AlumnoServicioCasoUso();
+      const { data: usuario_colegio, error: errorUsuario_colegio } =
+        await client
+          .from("usuarios_colegios")
+          .select("colegio_id")
+          .eq("usuario_id", req.user.usuario_id)
+          .single();
+      if (errorUsuario_colegio) {
+        throw new Error(errorUsuario_colegio.message);
+      }
       const [totalAlumnos, alumnosActivos, alumnosSeleccion] =
         await Promise.all([
-          alumnoServicioCasoUso.obntenerConteoporTabla("alumnos", sevenDaysAgo),
+          alumnoServicioCasoUso.obtenerCantidadAlumnos( usuario_colegio.colegio_id),
           alumnoServicioCasoUso.obntenerConteoporTabla(
             "alumnos_respuestas",
             sevenDaysAgo
@@ -42,21 +51,28 @@ export const DashboardHomeService = {
         sevenDaysAgo
       );
       const alertas_services_caso_uso = new AlertasServicioCasoUso();
-      const [sosStats, denunciaStats, amarillaStats,naranjaStats,rojaStats] = await Promise.all([
-        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.SOS),
-        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.DENUNCIA),
-        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMARILLA),
-        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.NARANJA),
-        alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ROJA),
-      ]);
+      const [sosStats, denunciaStats, amarillaStats, naranjaStats, rojaStats] =
+        await Promise.all([
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.SOS),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.DENUNCIA),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMARILLA),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.NARANJA),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ROJA),
+        ]);
       const alumnosFrecuentes =
         alumnoServicioCasoUso.calcularAlumnosFrecuentes(responses);
-        const almaStats :AlertStats = {
-              totales: amarillaStats.totales+naranjaStats.totales+rojaStats.totales,
-              activos: amarillaStats.activos+naranjaStats.activos+rojaStats.activos,
-              vencidos: amarillaStats.vencidos+naranjaStats.vencidos+rojaStats.vencidos,
-              por_vencer: amarillaStats.por_vencer+naranjaStats.por_vencer+rojaStats.por_vencer,
-            }
+      const almaStats: AlertStats = {
+        totales:
+          amarillaStats.totales + naranjaStats.totales + rojaStats.totales,
+        activos:
+          amarillaStats.activos + naranjaStats.activos + rojaStats.activos,
+        vencidos:
+          amarillaStats.vencidos + naranjaStats.vencidos + rojaStats.vencidos,
+        por_vencer:
+          amarillaStats.por_vencer +
+          naranjaStats.por_vencer +
+          rojaStats.por_vencer,
+      };
       const response = {
         alumnos: {
           activos: alumnosActivos ?? 0,
@@ -156,11 +172,13 @@ export const DashboardHomeService = {
   async getRecentAlerts(req: Request, res: Response) {
     const { data, error } = await client
       .from("alumnos_alertas")
-      .select("*,alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos)),alertas_reglas(alerta_regla_id,nombre),alertas_origenes(alerta_origen_id,nombre),alertas_severidades(alerta_severidad_id,nombre),alertas_prioridades(alerta_prioridad_id,nombre),alertas_tipos(alerta_tipo_id,nombre)")
+      .select(
+        "*,alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos)),alertas_reglas(alerta_regla_id,nombre),alertas_origenes(alerta_origen_id,nombre),alertas_severidades(alerta_severidad_id,nombre),alertas_prioridades(alerta_prioridad_id,nombre),alertas_tipos(alerta_tipo_id,nombre)"
+      )
       .gte(
         "fecha_generada",
         new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      ) 
+      )
       .eq("activo", true) // Solo alertas activas
       .order("fecha_generada", { ascending: false }) // Más recientes primero
       .order("prioridad_id", { ascending: false }); // Prioridad alta primero

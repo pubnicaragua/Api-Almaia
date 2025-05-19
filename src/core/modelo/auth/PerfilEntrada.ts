@@ -7,6 +7,7 @@ interface PersonaEntrada {
   apellidos: string;
   genero_id: number;
   estado_civil_id: number;
+  fecha_nacimiento:string;
 }
 
 interface RolEntrada {
