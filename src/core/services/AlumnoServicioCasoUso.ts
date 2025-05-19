@@ -6,9 +6,22 @@ import { formatISO, startOfDay } from "date-fns";
 export class AlumnoServicioCasoUso {
   private supabaseService: SupabaseClientService;
   private client: SupabaseClient;
-  constructor() {
+  private id_colegio =0;
+  constructor(id_colegio:number) {
     this.supabaseService = new SupabaseClientService();
     this.client = this.supabaseService.getClient();
+    this.id_colegio= id_colegio
+  }
+  async obtenerAlumnosColegio() {
+    const query = this.client
+      .from("alumnos")
+      .select("*")
+      .eq("colegio_id", this.id_colegio);
+    const { data, error } = await query;
+    if (error) {
+      throw new Error(`Error obteniendo count de alumnos: ${error.message}`);
+    }
+    return data;
   }
   async obtenerCantidadAlumnos(colegioId: number) {
     const query = this.client

@@ -13,6 +13,8 @@ import { ALERT_TYPES } from "../../../core/modelo/home/AlertType";
 import { CalendarioFechaImportante } from "../../../core/modelo/colegio/CalendarioFechaImportante";
 import { DataService } from "../DataService";
 import { AlertStats } from "../../../core/modelo/home/AlertStats";
+import { obtenerCalendarioPorColegio } from "../../../core/services/CalendarioEscolarCasoUso";
+import { obtenerIdColegio } from "../../../core/services/ColegioServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -23,29 +25,24 @@ const dataService: DataService<CalendarioFechaImportante> = new DataService(
 export const DashboardHomeService = {
   async getStatsCards(req: Request, res: Response, next: NextFunction) {
     try {
+      const { colegio_id_bd } = req.params;
+      let colegio_id = parseInt(colegio_id_bd);
       const sevenDaysAgo = startOfDay(subDays(new Date(), 7)).toISOString();
-      const alumnoServicioCasoUso = new AlumnoServicioCasoUso();
-      const { data: usuario_colegio, error: errorUsuario_colegio } =
-        await client
-          .from("usuarios_colegios")
-          .select("colegio_id")
-          .eq("usuario_id", req.user.usuario_id)
-          .single();
-      if (errorUsuario_colegio) {
-        throw new Error(errorUsuario_colegio.message);
-      }
-      const [totalAlumnos, alumnosActivos, alumnosSeleccion] =
-        await Promise.all([
-          alumnoServicioCasoUso.obtenerCantidadAlumnos( usuario_colegio.colegio_id),
-          alumnoServicioCasoUso.obntenerConteoporTabla(
-            "alumnos_respuestas",
-            sevenDaysAgo
-          ),
-          alumnoServicioCasoUso.obntenerConteoporTabla(
-            "alumno_respuesta_seleccion",
-            sevenDaysAgo
-          ),
-        ]);
+      const alumnoServicioCasoUso = new AlumnoServicioCasoUso(colegio_id);
+      colegio_id = await obtenerIdColegio(colegio_id, req.user.usuario_id);
+      const calendario_escolar = obtenerCalendarioPorColegio(colegio_id);
+      const alumnnos = alumnoServicioCasoUso.obtenerAlumnosColegio();
+      const [totalAlumnos, alumnosActivos] = await Promise.all([
+        alumnoServicioCasoUso.obtenerCantidadAlumnos(colegio_id),
+        alumnoServicioCasoUso.obntenerConteoporTabla(
+          "alumnos_respuestas",
+          sevenDaysAgo
+        ),
+        alumnoServicioCasoUso.obntenerConteoporTabla(
+          "alumno_respuesta_seleccion",
+          sevenDaysAgo
+        ),
+      ]);
       // Obtener datos de actividad
       const responses = await alumnoServicioCasoUso.calcularAlumnosActivos(
         sevenDaysAgo
