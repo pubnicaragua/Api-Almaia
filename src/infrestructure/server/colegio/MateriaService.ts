@@ -24,9 +24,7 @@ export const MateriasService = {
       const materias = await dataService.getAll(
         [
           "*",
-          "personas(persona_id,nombres,apellidos,fecha_nacimiento)",
-          "colegios(colegio_id,nombre)",
-          "cursos(grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
+          "colegios(colegio_id,nombre)"
         ],
         where
       );
