@@ -19,7 +19,9 @@ export class AlumnoServicioCasoUso {
       .eq("colegio_id", this.id_colegio);
     const { data, error } = await query;
     if (error) {
-      throw new Error(`Error obteniendo  alumnos por colegio: ${error.message}`);
+      throw new Error(
+        `Error obteniendo  alumnos por colegio: ${error.message}`
+      );
     }
     return data;
   }
@@ -34,13 +36,20 @@ export class AlumnoServicioCasoUso {
 
     return count ?? 0;
   }
-  async obntenerConteoporTabla(table: string, dateFilter: string) {
+  async obntenerConteoporTabla(
+    table: string,
+    dateFilter: string,
+    alumnos: any
+  ) {
+    const arrayAlumnoIds: number[] = alumnos.map(
+      (alumno: { alumno_id: number }) => alumno.alumno_id
+    );
     const { count, error } = await this.client
       .from(table)
       .select("*", { count: "exact", head: true })
+      .in("alumno_id", arrayAlumnoIds)
       .gte("fecha_creacion", dateFilter);
-
-    if (error) throw new Error(`Error obteniendo count de ${table}`);
+    if (error) throw new Error(error.message);
     return count ?? 0;
   }
 

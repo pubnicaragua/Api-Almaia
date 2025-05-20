@@ -31,16 +31,16 @@ export const DashboardHomeService = {
       colegio_id = await obtenerIdColegio(colegio_id, req.user.usuario_id);
       const alumnoServicioCasoUso = new AlumnoServicioCasoUso(colegio_id);
       const calendario_escolar = obtenerCalendarioPorColegio(colegio_id);
-      const alumnnos = alumnoServicioCasoUso.obtenerAlumnosColegio();
+      const alumnnos = await alumnoServicioCasoUso.obtenerAlumnosColegio();
       const [totalAlumnos, alumnosActivos] = await Promise.all([
         alumnoServicioCasoUso.obtenerCantidadAlumnos(colegio_id),
         alumnoServicioCasoUso.obntenerConteoporTabla(
           "alumnos_respuestas",
-          sevenDaysAgo
+          sevenDaysAgo,alumnnos
         ),
         alumnoServicioCasoUso.obntenerConteoporTabla(
           "alumno_respuesta_seleccion",
-          sevenDaysAgo
+          sevenDaysAgo,alumnnos
         ),
       ]);
       // Obtener datos de actividad

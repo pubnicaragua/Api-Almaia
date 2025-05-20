@@ -123,7 +123,7 @@ router.get('/emotions/course', sessionAuth, DashboardComparativaService.getEmoti
 
 /**
  * @swagger
- * /api/v1/home/comparativa/alerts/totales:
+ * /api/v1/comparativa/alerts/totales:
  *   get:
  *     summary: Obtener datos comparativos de alertas para gráfico de líneas
  *     description: Retorna datos estadísticos de alertas comparando diferentes cursos por mes
