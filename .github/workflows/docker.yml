@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: alexmedel/api-almaia
+  IMAGE_NAME: pubnicaragua/api-almaia
 
 jobs:
   test-and-build:
@@ -76,12 +76,17 @@ jobs:
       if: github.ref == 'refs/heads/main'
       run: sleep 15
 
+    - name: Confirm image push
+      if: github.ref == 'refs/heads/main'
+      run: docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
     - name: Scan image for vulnerabilities
+      if: github.ref == 'refs/heads/main'
       uses: anchore/scan-action@v3
       with:
-        image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
         fail-build: true
-        severity-cutoff: high # Solo falla para vulnerabilidades high/critical
+        severity-cutoff: high
 
   deploy:
     needs: docker-build
