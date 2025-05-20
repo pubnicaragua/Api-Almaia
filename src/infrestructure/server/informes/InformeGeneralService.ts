@@ -4,6 +4,7 @@ import { InformeGeneral } from "../../../core/modelo/InformeGeneral";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { mapearInformesConNombres } from "../../../core/services/InformeServicioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -21,7 +22,15 @@ export const InformeGeneralService = {
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const informesGenerales = await dataService.getAll(["*"], where);
+      const informesGenerales_data = await dataService.getAll(
+        [
+          "*",
+          "creado_por:usuarios!informes_generales_creado_por_fkey(usuario_id,personas(persona_id,nombres,apellidos))",
+          "actualizado_por:usuarios!informes_generales_actualizado_por_fkey(usuario_id,personas(persona_id,nombres,apellidos))",
+        ],
+        where
+      );
+      const informesGenerales= mapearInformesConNombres(informesGenerales_data)
       res.json(informesGenerales);
     } catch (error) {
       console.error("Error al obtener el informe general:", error);
