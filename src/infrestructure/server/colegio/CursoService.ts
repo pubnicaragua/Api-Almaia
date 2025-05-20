@@ -4,7 +4,6 @@ import { Curso } from "../../../core/modelo/colegio/Curso";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
-import { obtenerIdColegio } from "../../../core/services/ColegioServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -18,11 +17,7 @@ const dataService: DataService<Curso> = new DataService("cursos");
 export const CursosService = {
   async obtener(req: Request, res: Response) {
     try {
-      const { colegio_id_bd } = req.params;
-      let colegio_id = parseInt(colegio_id_bd);
-      colegio_id = await obtenerIdColegio(colegio_id, req.user.usuario_id);
-      const where = { ...req.query, colegio_id: colegio_id }; // Convertir los parámetros de consulta en filtros
-
+      const where = { ...req.query}; // Convertir los parámetros de consulta en filtros
       const cursos = await dataService.getAll(
         [
           "*",

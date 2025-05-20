@@ -13,6 +13,7 @@ import { CursosService } from "../infrestructure/server/colegio/CursoService";
 import { HistorialComunicacionsService } from "../infrestructure/server/colegio/HistorialComunicacionService";
 import { UsuarioColegiosService } from "../infrestructure/server/colegio/UsuarioColegioService";
 import { UsuarioCursosService } from "../infrestructure/server/colegio/UsuarioCursoService";
+import { MateriasService } from "../infrestructure/server/colegio/MateriaService";
 
 const router = express.Router();
 const rutas_grados = "/grados";
@@ -20,6 +21,7 @@ const rutas_nivel_educativo = "/niveles_educativos";
 const rutas_alumnos_asistencias = "/alumnos_asistencias";
 const rutas_alumnos_tareas = "/alumnos_tareas";
 const rutas_aulas = "/aulas";
+const rutas_materias = "/materias";
 const rutas_dias_festivos = "/dias_festivos";
 const rutas_calendarios_escolares = "/calendarios_escolares";
 const rutas_calendarios_fechas_importantes = "/calendarios_fechas_importantes";
@@ -2351,6 +2353,164 @@ router.put(`${rutas_usuarios_cursos}/:id`, sessionAuth, UsuarioCursosService.act
  *         description: Error del servidor
  */
 router.delete(`${rutas_usuarios_cursos}/:id`, sessionAuth, UsuarioCursosService.eliminar);
+
+
+/**
+ * @swagger
+ * /api/v1/materias/:
+ *   get:
+ *     summary: Obtiene todas las materias
+ *     description: Retorna una lista de todas las materias registradas en el sistema
+ *     tags: [Materias]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de materias obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Materia'
+ *       401:
+ *         description: No autorizado, sesión inválida
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(`${rutas_materias}/`, sessionAuth, MateriasService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/materias/:
+ *   post:
+ *     summary: Crea una nueva materia
+ *     description: Registra una nueva materia en el sistema
+ *     tags: [Materias]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Materia'
+ *     responses:
+ *       201:
+ *         description: Materia creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Materia'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado, sesión inválida
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(`${rutas_materias}/`, sessionAuth, MateriasService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/materias/{id}:
+ *   put:
+ *     summary: Actualiza una materia existente
+ *     description: Modifica los datos de una materia específica
+ *     tags: [Materias]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de la materia a actualizar
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Materia'
+ *     responses:
+ *       200:
+ *         description: Materia actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Materia'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado, sesión inválida
+ *       404:
+ *         description: Materia no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(`${rutas_materias}/:id`, sessionAuth, MateriasService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/materias/{id}:
+ *   delete:
+ *     summary: Elimina una materia
+ *     description: Elimina una materia específica del sistema
+ *     tags: [Materias]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID de la materia a eliminar
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Materia eliminada exitosamente
+ *       401:
+ *         description: No autorizado, sesión inválida
+ *       404:
+ *         description: Materia no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(`${rutas_materias}/:id`, sessionAuth, MateriasService.eliminar);
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Materia:
+ *       type: object
+ *       properties:
+ *         materia_id:
+ *           type: integer
+ *           description: ID único de la materia
+ *           example: 1
+ *           readOnly: true
+ *         colegio_id:
+ *           type: integer
+ *           description: ID del colegio al que pertenece la materia
+ *           example: 5
+ *           required: true
+ *         nombre:
+ *           type: string
+ *           description: Nombre de la materia
+ *           example: "Matemáticas Avanzadas"
+ *           required: true
+ *         codigo:
+ *           type: string
+ *           description: Código único identificador de la materia
+ *           example: "MAT-202"
+ *           required: true
+ *       required:
+ *         - colegio_id
+ *         - nombre
+ *         - codigo
+ */
 
 
 /**
