@@ -4,6 +4,7 @@ import { AlumnoAntecedenteFamiliar } from "../../../core/modelo/alumno/AlumnoAnt
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -29,15 +30,38 @@ const AlumnoAntecedenteFamiliarSchema = Joi.object({
   otros_antecedentes_relevantes: Joi.string().max(50).optional(),
 });
 const dataService: DataService<AlumnoAntecedenteFamiliar> = new DataService(
-  "alumnos_ant_familiares","alumno_ent_familiar_id"
+  "alumnos_ant_familiares",
+  "alumno_ent_familiar_id"
 );
 export const AlumnoAntecedenteFamiliarsService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const antecedentes = await dataService.getAll(["*",
-        "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))"], where);
-      res.json(antecedentes);
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const antecedentes = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_ant_familiares",
+          inField: "alumno_id",
+          selectFields: `*,                      
+                        alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",`,
+        });
+        respuestaEnviada = true;
+        res.json(antecedentes);
+      }
+      if (!respuestaEnviada) {
+        const antecedentes = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
+          ],
+          where
+        );
+        res.json(antecedentes);
+      }
     } catch (error) {
       console.error("Error al obtener los antecedentes clínicos:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -78,8 +102,9 @@ export const AlumnoAntecedenteFamiliarsService = {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const antecedente: AlumnoAntecedenteFamiliar = new AlumnoAntecedenteFamiliar();
-       Object.assign(antecedente, req.body);
+      const antecedente: AlumnoAntecedenteFamiliar =
+        new AlumnoAntecedenteFamiliar();
+      Object.assign(antecedente, req.body);
       antecedente.actualizado_por = req.actualizado_por;
       antecedente.activo = true;
       let responseSent = false;
@@ -98,10 +123,10 @@ export const AlumnoAntecedenteFamiliarsService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-      await dataService.updateById(id, antecedente);
-      res
-        .status(200)
-        .json({ message: "Antecedente clínico actualizado correctamente" });
+        await dataService.updateById(id, antecedente);
+        res
+          .status(200)
+          .json({ message: "Antecedente clínico actualizado correctamente" });
       }
     } catch (error) {
       console.error("Error al actualizar el antecedente clínico:", error);
