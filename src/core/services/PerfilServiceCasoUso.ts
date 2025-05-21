@@ -22,7 +22,8 @@ export function mapearDatos(data: PerfilEntrada): Perfil {
       nombres: data.personas.nombres,
       apellidos: data.personas.apellidos,
       genero_id: data.personas.genero_id,
-      estado_civil_id: data.personas.estado_civil_id
+      estado_civil_id: data.personas.estado_civil_id,
+      fecha_nacimiento:data.personas.fecha_nacimiento
     },
     rol: {
       rol_id: data.roles.rol_id,

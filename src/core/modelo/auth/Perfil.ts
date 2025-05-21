@@ -20,6 +20,7 @@ export type Perfil = {
     apellidos: string;
     genero_id: number;
     estado_civil_id: number;
+    fecha_nacimiento:string;
   };
   rol: {
     rol_id: number;
