@@ -4,6 +4,7 @@ import { AlumnoPermisoAutor } from "../../../core/modelo/alumno/AlumnoPermisoAut
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -24,16 +25,34 @@ const AlumnoPermisoAutorSchema = Joi.object({
 export const AlumnoPermisoAutorsService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnopermisoautor = await dataService.getAll(
-        [
-          "*",
-          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
-          "apoderados(apoderado_id,personas(persona_id,nombres,apellidos),telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2)",
-        ],
-        where
-      );
-      res.json(alumnopermisoautor);
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnopermisoautor = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_permisos_autores",
+          inField: "alumno_id",
+          selectFields: `*,                      
+                         alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos)),
+                         apoderados(apoderado_id,personas(persona_id,nombres,apellidos),telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2)`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnopermisoautor);
+      }
+      if (!respuestaEnviada) {
+        const alumnopermisoautor = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
+            "apoderados(apoderado_id,personas(persona_id,nombres,apellidos),telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2)",
+          ],
+          where
+        );
+        res.json(alumnopermisoautor);
+      }
     } catch (error) {
       console.error("Error al obtener la alumnopermisoautor:", error);
       res.status(500).json({ message: "Error interno del servidor" });
