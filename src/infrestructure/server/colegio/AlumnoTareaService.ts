@@ -4,6 +4,7 @@ import { AlumnoTarea } from "../../../core/modelo/colegio/AlumnoTarea";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -23,18 +24,35 @@ const dataService: DataService<AlumnoTarea> = new DataService(
 export const AlumnoTareasService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnotareas = await dataService.getAll(
-        [
-          "*",
-          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
-          "materias(materia_id,nombre)",
-        ],
-        where
-      );
-      res.json(alumnotareas);
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnotareas = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_tareas",
+          inField: "alumno_id",
+          selectFields: `*,                      
+                              alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos)),
+                              materias(materia_id,nombre)`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnotareas);
+      }
+      if (!respuestaEnviada) {
+        const alumnotareas = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
+            "materias(materia_id,nombre)",
+          ],
+          where
+        );
+        res.json(alumnotareas);
+      }
     } catch (error) {
-     
       res.status(500).json(error);
     }
   },
@@ -65,7 +83,7 @@ export const AlumnoTareasService = {
         res.status(201).json(resultado);
       }
     } catch (error) {
-       console.log(error);
+      console.log(error);
       res.status(500).json(error);
     }
   },
@@ -99,7 +117,7 @@ export const AlumnoTareasService = {
       }
     } catch (error) {
       console.log(error);
-      
+
       res.status(500).json(error);
     }
   },
