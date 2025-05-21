@@ -32,7 +32,7 @@ export const AlumnoDireccionService = {
           tableIn: "alumnos_direcciones",
           inField: "alumno_id",
           selectFields: `*,
-                                alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)
+                                alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email),
                                 comunas(comuna_id,nombre,regiones(region_id,nombre))`,
         });
         respuestaEnviada = true;
