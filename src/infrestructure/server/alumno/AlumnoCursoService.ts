@@ -25,7 +25,7 @@ export const AlumnoCursoService = {
       const { colegio_id, ...where } = req.query;
       let respuestaEnviada = false;
       if (colegio_id !== undefined) {
-        const alumnos_apoderados = await obtenerRelacionados({
+        const alumnos_cursos = await obtenerRelacionados({
           tableFilter: "alumnos",
           filterField: "colegio_id",
           filterValue: colegio_id,
@@ -37,7 +37,7 @@ export const AlumnoCursoService = {
                           cursos(curso_id,nombre_curso,colegios(colegio_id,nombre),grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))`,
         });
         respuestaEnviada = true;
-        res.json(alumnos_apoderados);
+        res.json(alumnos_cursos);
       }
       if (!respuestaEnviada) {
         const alumnoCurso = await dataService.getAll(

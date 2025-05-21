@@ -4,6 +4,7 @@ import { AlumnoDireccion } from "../../../core/modelo/alumno/AlumnoDireccion";
 import Joi from "joi";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 const AlumnoDireccionSchema = Joi.object({
   descripcion: Joi.string().max(50).required(),
   alumno_id: Joi.number().integer().required(),
@@ -12,72 +13,42 @@ const AlumnoDireccionSchema = Joi.object({
   region_id: Joi.number().integer().required(),
 });
 const dataService: DataService<AlumnoDireccion> = new DataService(
-  "alumnos_direcciones","alumno_direccion_id"
+  "alumnos_direcciones",
+  "alumno_direccion_id"
 );
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 export const AlumnoDireccionService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnoDireccion = await dataService.getAll(
-        [
-          "*",
-          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
-          "comunas(comuna_id,nombre,regiones(region_id,nombre))",
-        ],
-        where
-      );
-      res.json(alumnoDireccion);
-      /*const alumnos_direcciones= [
-                {
-                  "alumno_direccion_id": 701,
-                  "alumno_id": 101,
-                  "descripcion": "Av. Principal 1234, Depto 501",
-                  "es_principal": true,
-                  "ubicaciones_mapa": "-33.45694, -70.64827",
-                  "comuna_id": 125,
-                  "region_id": 13,
-                  "pais_id": 1,
-                  "fecha_actualizacion": "2023-06-15T10:30:00Z",
-                  "alumno": {
-                    "alumno_id": 101,
-                    "nombre": "Juan Pérez",
-                    "curso_actual": "4° Básico A"
-                  },
-                  "comuna": {
-                    "comuna_id": 125,
-                    "nombre": "Santiago",
-                    "region": {
-                      "region_id": 13,
-                      "nombre": "Metropolitana",
-                      "pais": {
-                        "pais_id": 1,
-                        "nombre": "Chile"
-                      }
-                    }
-                  }
-                },
-                {
-                  "alumno_direccion_id": 702,
-                  "alumno_id": 102,
-                  "descripcion": "Calle Secundaria 567, Casa B",
-                  "es_principal": false,
-                  "ubicaciones_mapa": "-33.45872, -70.65011",
-                  "comuna_id": 126,
-                  "region_id": 13,
-                  "pais_id": 1,
-                  "alumno": {
-                    "alumno_id": 102,
-                    "nombre": "María González"
-                  },
-                  "comuna": {
-                    "comuna_id": 126,
-                    "nombre": "Providencia"
-                  }
-                }
-              ]
-            res.json(alumnos_direcciones);*/
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnos_direcciones = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_direcciones",
+          inField: "alumno_id",
+          selectFields: `*,
+                                alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)
+                                comunas(comuna_id,nombre,regiones(region_id,nombre))`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnos_direcciones);
+      }
+      if (!respuestaEnviada) {
+        const alumnoDireccion = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
+            "comunas(comuna_id,nombre,regiones(region_id,nombre))",
+          ],
+          where
+        );
+        res.json(alumnoDireccion);
+      }
     } catch (error) {
       console.error("Error al obtener la dirección del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
