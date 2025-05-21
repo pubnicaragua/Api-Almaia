@@ -4,6 +4,7 @@ import { Aviso } from "../../../core/modelo/aviso/Aviso";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -18,9 +19,32 @@ const AvisoSchema = Joi.object({
 export const AvisosService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const avisos = await dataService.getAll(["*","docentes(docente_id,especialidad,estado,personas(persona_id,nombres,apellidos))"], where);
-      res.json(avisos);
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const avisos = await obtenerRelacionados({
+          tableFilter: "docentes",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "docente_id",
+          tableIn: "avisos",
+          inField: "docente_id",
+          selectFields: `*,                      
+                        docentes(docente_id,especialidad,estado,personas(persona_id,nombres,apellidos))`,
+        });
+        respuestaEnviada = true;
+        res.json(avisos);
+      }
+      if (!respuestaEnviada) {
+        const avisos = await dataService.getAll(
+          [
+            "*",
+            "docentes(docente_id,especialidad,estado,personas(persona_id,nombres,apellidos))",
+          ],
+          where
+        );
+        res.json(avisos);
+      }
     } catch (error) {
       console.error("Error al obtener la aviso:", error);
       res.status(500).json({ message: "Error interno del servidor" });
