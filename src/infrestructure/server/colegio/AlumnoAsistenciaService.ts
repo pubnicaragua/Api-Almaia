@@ -4,6 +4,7 @@ import { AlumnoAsistencia } from "../../../core/modelo/colegio/AlumnoAsistencia"
 import Joi from "joi";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -15,20 +16,38 @@ const AlumnoAsistenciaSchema = Joi.object({
   usuario_justifica: Joi.number().integer().required(),
 });
 const dataService: DataService<AlumnoAsistencia> = new DataService(
-  "alumnos_asistencias", "alumno_asistencia"
+  "alumnos_asistencias",
+  "alumno_asistencia"
 );
 export const AlumnoAsistenciasService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnoasistencias = await dataService.getAll(
-        [
-          "*",
-          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
-        ],
-        where
-      );
-      res.json(alumnoasistencias);
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnoasistencias = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_asistencias",
+          inField: "alumno_id",
+          selectFields: `*,                      
+                        alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnoasistencias);
+      }
+      if (!respuestaEnviada) {
+        const alumnoasistencias = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
+          ],
+          where
+        );
+        res.json(alumnoasistencias);
+      }
     } catch (error) {
       res.status(500).json(error);
     }
@@ -62,10 +81,8 @@ export const AlumnoAsistenciasService = {
         res.status(201).json(resultado);
       }
     } catch (error) {
-      console.log(
-        error
-      );
-      
+      console.log(error);
+
       res.status(500).json(error);
     }
   },
@@ -94,8 +111,8 @@ export const AlumnoAsistenciasService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-      const resultado = await dataService.updateById(id, datosActualizados);
-      res.json(resultado);
+        const resultado = await dataService.updateById(id, datosActualizados);
+        res.json(resultado);
       }
     } catch (error) {
       res.status(500).json(error);
