@@ -4,11 +4,13 @@ import { AlumnoNotificacion } from "../../../core/modelo/alumno/AlumnoNotificaci
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<AlumnoNotificacion> = new DataService(
-  "alumnos_notificaciones","alumno_notificacion_id"
+  "alumnos_notificaciones",
+  "alumno_notificacion_id"
 );
 const AlumnoNotificacionSchema = Joi.object({
   alumno_id: Joi.number().integer().required(),
@@ -21,15 +23,32 @@ const AlumnoNotificacionSchema = Joi.object({
 export const AlumnoNotificacionService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnoNotificacion = await dataService.getAll(
-        [
-          "*",
-          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos,fecha_nacimiento))",
-        ],
-        where
-      );
-      res.json(alumnoNotificacion);
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnoNotificacion = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_notificaciones",
+          inField: "alumno_id",
+          selectFields: `*,                      
+                        alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnoNotificacion);
+      }
+      if (!respuestaEnviada) {
+        const alumnoNotificacion = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos,fecha_nacimiento))",
+          ],
+          where
+        );
+        res.json(alumnoNotificacion);
+      }
     } catch (error) {
       console.error("Error al obtener la notificación del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
