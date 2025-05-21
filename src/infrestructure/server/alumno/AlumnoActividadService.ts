@@ -4,9 +4,11 @@ import { AlumnoActividad } from "../../../core/modelo/alumno/AlumnoActividad";
 import Joi from "joi";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const dataService: DataService<AlumnoActividad> = new DataService(
-  "alumnos_actividades","alumno_actividad_id"
+  "alumnos_actividades",
+  "alumno_actividad_id"
 );
 const AlumnoActividadSchema = Joi.object({
   alumno_id: Joi.number().integer().required(),
@@ -17,17 +19,35 @@ const client: SupabaseClient = supabaseService.getClient();
 export const AlumnoActividadService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnoActividad = await dataService.getAll(
-        [
-          "*",
-          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)"
-          ,"actividades(actividad_id,nombre)",
-        ],
-        where
-      );
-      res.json(alumnoActividad);
-     } catch (error) {
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnoActividad = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_actividades",
+          inField: "alumno_id",
+          selectFields: `*,
+                         alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)"
+                        ,"actividades(actividad_id,nombre)`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnoActividad);
+      }
+      if (!respuestaEnviada) {
+        const alumnoActividad = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
+            "actividades(actividad_id,nombre)",
+          ],
+          where
+        );
+        res.json(alumnoActividad);
+      }
+    } catch (error) {
       console.error("Error al obtener el curso del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
     }
@@ -38,9 +58,11 @@ export const AlumnoActividadService = {
       Object.assign(alumnoActividad, req.body);
       alumnoActividad.creado_por = req.creado_por;
       alumnoActividad.actualizado_por = req.actualizado_por;
-      alumnoActividad.activo=true
+      alumnoActividad.activo = true;
       let responseSent = false;
-      const { error: validationError } = AlumnoActividadSchema.validate(req.body);
+      const { error: validationError } = AlumnoActividadSchema.validate(
+        req.body
+      );
       const { data: dataAlumno, error: errorAlumno } = await client
         .from("alumnos")
         .select("*")
@@ -48,7 +70,8 @@ export const AlumnoActividadService = {
         .single();
       if (errorAlumno || !dataAlumno) {
         throw new Error("El alumno no existe");
-      } const { data: dataActividad, error: errorActividad } = await client
+      }
+      const { data: dataActividad, error: errorActividad } = await client
         .from("actividades")
         .select("*")
         .eq("actividad_id", alumnoActividad.actividad_id)
@@ -61,7 +84,9 @@ export const AlumnoActividadService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        const savedAlumnoActividad = await dataService.processData(alumnoActividad);
+        const savedAlumnoActividad = await dataService.processData(
+          alumnoActividad
+        );
         res.status(201).json(savedAlumnoActividad);
       }
     } catch (error) {
@@ -77,7 +102,9 @@ export const AlumnoActividadService = {
       alumnoActividad.creado_por = req.creado_por;
       alumnoActividad.actualizado_por = req.actualizado_por;
       let responseSent = false;
-      const { error: validationError } = AlumnoActividadSchema.validate(req.body);
+      const { error: validationError } = AlumnoActividadSchema.validate(
+        req.body
+      );
       const { data: dataAlumno, error: errorAlumno } = await client
         .from("alumnos")
         .select("*")
