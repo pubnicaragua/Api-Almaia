@@ -5,6 +5,7 @@ import { AlumnoRespuesta } from "../../../core/modelo/preguntasRespuestas/Alumno
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -22,17 +23,36 @@ const AlumnoRespuestaSchema = Joi.object({
 export const AlumnoRespuestaService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnorespuesta = await dataService.getAll(
-        [
-          "*",
-          "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
-          "preguntas(pregunta_id,texto_pregunta)",
-          "tipos_preguntas(tipo_pregunta_id,nombre)"
-        ],
-        where
-      );
-      res.json(alumnorespuesta);
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnorespuesta = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_respuestas",
+          inField: "alumno_id",
+          selectFields: `*,                      
+                        alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos)),
+                        preguntas(pregunta_id,texto_pregunta),
+                        tipos_preguntas(tipo_pregunta_id,nombre)`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnorespuesta);
+      }
+      if (!respuestaEnviada) {
+        const alumnorespuesta = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
+            "preguntas(pregunta_id,texto_pregunta)",
+            "tipos_preguntas(tipo_pregunta_id,nombre)",
+          ],
+          where
+        );
+        res.json(alumnorespuesta);
+      }
     } catch (error) {
       console.error("Error al obtener la alumnorespuesta:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -71,7 +91,7 @@ export const AlumnoRespuestaService = {
         .single();
       if (errorTipoPregunta || !dataTipoPregunta) {
         console.log(errorTipoPregunta);
-        
+
         throw new Error("El tipo de pregunta no existe");
       }
       if (validationError) {
