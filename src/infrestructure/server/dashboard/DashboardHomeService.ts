@@ -25,10 +25,10 @@ const dataService: DataService<CalendarioFechaImportante> = new DataService(
 export const DashboardHomeService = {
   async getStatsCards(req: Request, res: Response, next: NextFunction) {
     try {
-      const { colegio_id_bd } = req.params;
-      let colegio_id = parseInt(colegio_id_bd);
+      const { colegio_id:colegio_id_query } = req.query;
+      let colegio_id=0;
       const sevenDaysAgo = startOfDay(subDays(new Date(), 7)).toISOString();
-      colegio_id = await obtenerIdColegio(colegio_id, req.user.usuario_id);
+      colegio_id = await obtenerIdColegio(colegio_id_query, req.user.usuario_id);
       const alumnoServicioCasoUso = new AlumnoServicioCasoUso(colegio_id);
       const calendario_escolar = obtenerCalendarioPorColegio(colegio_id);
       const alumnnos = await alumnoServicioCasoUso.obtenerAlumnosColegio();
