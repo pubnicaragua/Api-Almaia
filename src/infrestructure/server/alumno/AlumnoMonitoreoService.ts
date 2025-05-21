@@ -4,10 +4,12 @@ import { AlumnoMonitoreo } from "../../../core/modelo/alumno/AlumnoMonitoreo";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<AlumnoMonitoreo> = new DataService(
-  "alumnos_monitoreos"
+  "alumnos_monitoreos",
+  "alumno_monitoreo_id"
 );
 const AlumnoMonitoreoSchema = Joi.object({
   alumno_id: Joi.number().integer().required(),
@@ -18,15 +20,32 @@ const AlumnoMonitoreoSchema = Joi.object({
 export const AlumnoMonitoreoService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnoMonitoreo = await dataService.getAll(
-        [
-          "*",
-          "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos,fecha_nacimiento))",
-        ],
-        where
-      );
-      res.json(alumnoMonitoreo);
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnoMonitoreo = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_monitoreos",
+          inField: "alumno_id",
+          selectFields: `*,                      
+                        alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnoMonitoreo);
+      }
+      if (!respuestaEnviada) {
+        const alumnoMonitoreo = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos,fecha_nacimiento))",
+          ],
+          where
+        );
+        res.json(alumnoMonitoreo);
+      }
     } catch (error) {
       console.error("Error al obtener el monitoreo del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
