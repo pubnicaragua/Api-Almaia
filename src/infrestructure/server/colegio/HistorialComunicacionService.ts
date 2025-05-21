@@ -4,6 +4,7 @@ import { HistorialComunicacion } from "../../../core/modelo/colegio/HistorialCom
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -21,16 +22,44 @@ const dataService: DataService<HistorialComunicacion> = new DataService(
 export const HistorialComunicacionsService = {
   async obtener(req: Request, res: Response) {
     try {
-      const historialComunicaciones = await dataService.getAll(
+ const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const historialComunicaciones = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "historiales_comunicaciones",
+          inField: "alumno_id",
+          selectFields: `*,
+          alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos)),
+          apoderados(apoderado_id,personas(persona_id,nombres,apellidos),telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2),
+          usuarios(usuario_id,nombre_social)`,
+        });
+        respuestaEnviada = true;
+        res.json(historialComunicaciones);
+      }
+      if (!respuestaEnviada) {
+        const historialComunicaciones = await dataService.getAll(
         [
           "*",
           "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
           "apoderados(apoderado_id,personas(persona_id,nombres,apellidos),telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2)",
           "usuarios(usuario_id,nombre_social)"
         ],
-        req.query
+       where
       );
       res.json(historialComunicaciones);
+      }
+
+
+
+
+
+
+
+     
     } catch (error) {
         console.log(error);
         
