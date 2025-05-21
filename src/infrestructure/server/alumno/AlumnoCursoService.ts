@@ -4,9 +4,11 @@ import { AlumnoCurso } from "../../../core/modelo/alumno/AlumnoCurso";
 import Joi from "joi";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 
 const dataService: DataService<AlumnoCurso> = new DataService(
-  "alumnos_cursos","alumno_curso_id"
+  "alumnos_cursos",
+  "alumno_curso_id"
 );
 const AlumnoCursoSchema = Joi.object({
   fecha_egreso: Joi.string().required(),
@@ -20,62 +22,34 @@ const client: SupabaseClient = supabaseService.getClient();
 export const AlumnoCursoService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const alumnoCurso = await dataService.getAll(
-        [
-          "*","alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)"
-          ,"cursos(curso_id,nombre_curso,colegios(colegio_id,nombre),grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
-        ],
-        where
-      );
-      res.json(alumnoCurso);
-      /*  const alumnos_cursos= [
-                {
-                  "alumno_curso_id": 601,
-                  "alumno_id": 101,
-                  "curso_id": 5,
-                  "ano_escolar": 2023,
-                  "fecha_ingreso": "2023-03-01",
-                  "fecha_egreso": "2023-12-15",
-                  "estado_matricula": "Activa",
-                  "promedio_general": 6.2,
-                  "alumno": {
-                    "alumno_id": 101,
-                    "nombre": "Juan Pérez",
-                    "url_foto_perfil": "https://ejemplo.com/fotos/alumno101.jpg"
-                  },
-                  "curso": {
-                    "curso_id": 5,
-                    "nombre_curso": "4°",
-                    "nivel_educativo": "Básica",
-                    "profesor_jefe": "María González",
-                    "colegio": {
-                      "colegio_id": 1,
-                      "nombre": "Colegio Ejemplo"
-                    }
-                  }
-                },
-                {
-                  "alumno_curso_id": 602,
-                  "alumno_id": 102,
-                  "curso_id": 8,
-                  "ano_escolar": 2023,
-                  "fecha_ingreso": "2023-03-01",
-                  "fecha_egreso": null,
-                  "estado_matricula": "Transferido",
-                  "promedio_general": 5.8,
-                  "alumno": {
-                    "alumno_id": 102,
-                    "nombre": "Ana Sánchez"
-                  },
-                  "curso": {
-                    "curso_id": 8,
-                    "nombre_curso": "7° B",
-                    "nivel_educativo": "Básica"
-                  }
-                }
-              ]
-            res.json(alumnos_cursos);*/
+      const { colegio_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (colegio_id !== undefined) {
+        const alumnos_apoderados = await obtenerRelacionados({
+          tableFilter: "alumnos",
+          filterField: "colegio_id",
+          filterValue: colegio_id,
+          idField: "alumno_id",
+          tableIn: "alumnos_cursos",
+          inField: "alumno_id",
+          selectFields: `*,
+                          alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)
+                          cursos(curso_id,nombre_curso,colegios(colegio_id,nombre),grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))`,
+        });
+        respuestaEnviada = true;
+        res.json(alumnos_apoderados);
+      }
+      if (!respuestaEnviada) {
+        const alumnoCurso = await dataService.getAll(
+          [
+            "*",
+            "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
+            "cursos(curso_id,nombre_curso,colegios(colegio_id,nombre),grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
+          ],
+          where
+        );
+        res.json(alumnoCurso);
+      }
     } catch (error) {
       console.error("Error al obtener el curso del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -87,7 +61,7 @@ export const AlumnoCursoService = {
       Object.assign(alumnoCurso, req.body);
       alumnoCurso.creado_por = req.creado_por;
       alumnoCurso.actualizado_por = req.actualizado_por;
-      alumnoCurso.activo=true
+      alumnoCurso.activo = true;
       let responseSent = false;
       const { error: validationError } = AlumnoCursoSchema.validate(req.body);
       const { data, error } = await client
