@@ -7,9 +7,17 @@ import Joi from "joi";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
-const dataService: DataService<Docente> = new DataService("docentes","docente_id");
+const dataService: DataService<Docente> = new DataService(
+  "docentes",
+  "docente_id"
+);
 const DocenteSchema = Joi.object({
-  persona_id: Joi.number().integer().required(),
+  tipo_documento: Joi.string().max(50).required(),
+  numero_documento: Joi.string().max(16).required(),
+  nombres: Joi.string().max(50).required(),
+  apellidos: Joi.string().max(30).required(),
+  genero_id: Joi.number().integer().required(),
+  estado_civil_id: Joi.number().integer().required(),
   colegio_id: Joi.number().integer().required(),
   especialidad: Joi.string().max(100).required(),
   estado: Joi.string().max(20).required(),

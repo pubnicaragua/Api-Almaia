@@ -88,10 +88,8 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
   
   return alertas.map((alerta) => {
     const { ...rest } = alerta;
-    console.log(rest.alumnos?.alumnos_cursos[0]?.cursos?.nombre_curso);
-    
     return {
-      id: "14",
+      id: rest.alumno_alerta_id,
       student: {
         name: `${rest.alumnos.personas.nombres} ${rest.alumnos.personas.apellidos}`,
         course: rest.alumnos?.alumnos_cursos[0]?.cursos?.nombre_curso, // Este dato no está en la estructura original, se asume
@@ -103,9 +101,9 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
         { hour: "2-digit", minute: "2-digit" }
       ),
       responsible: {
-        name: `${rest.personas.nombres} ${rest.personas.apellidos}`,
-        role: rest.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
-        image: rest.personas?.usuarios[0]?.url_foto_perfil||"https://www.rainbowschoolnellore.com/images/school_philosophy.jpg", // Este dato no está en la estructura original, se asume
+        name: `${rest?.personas?.nombres || " "} ${rest?.personas?.apellidos|| " "}`,
+        role: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
+        image: rest.personas?.usuarios[0]?.url_foto_perfil||" ", // Este dato no está en la estructura original, se asume
       },
       isAnonymous: rest.alerta_origen_id === 1, // Asumiendo que 1 significa anónimo
       description: `Alerta generada por ${rest.alertas_reglas.nombre} con severidad ${rest.alertas_severidades.nombre}`,
