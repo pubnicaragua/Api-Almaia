@@ -50,11 +50,11 @@ export const DashboardHomeService = {
       const alertas_services_caso_uso = new AlertasServicioCasoUso();
       const [sosStats, denunciaStats, amarillaStats, naranjaStats, rojaStats] =
         await Promise.all([
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.SOS),
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.DENUNCIA),
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMARILLA),
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.NARANJA),
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ROJA),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.SOS,colegio_id),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.DENUNCIA,colegio_id),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMARILLA,colegio_id),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.NARANJA,colegio_id),
+          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ROJA,colegio_id),
         ]);
       const alumnosFrecuentes =
         alumnoServicioCasoUso.calcularAlumnosFrecuentes(responses);
@@ -128,7 +128,9 @@ export const DashboardHomeService = {
   // Función para datos de gráfico circular
   async getDonutData(req: Request, res: Response) {
     const alertas_services_caso_uso = new AlertasServicioCasoUso();
-    const data: DonutData[] = await alertas_services_caso_uso.getAlertasDonutData()
+          const { colegio_id } = req.query;
+
+    const data: DonutData[] = await alertas_services_caso_uso.getAlertasDonutData(colegio_id)
     res.json(data);
   },
 

@@ -5,6 +5,7 @@ import { addDays, differenceInCalendarDays, isAfter, isBefore } from "date-fns";
 import { AlertStats } from "../modelo/home/AlertStats";
 import { AlertaMapeada } from "../modelo/alerta/AlertaMapeada";
 import { DonutData } from "../modelo/dashboard/DonutData";
+import { obtenerRelacionados } from "./ObtenerTablasColegioCasoUso";
 
 export class AlertasServicioCasoUso {
   private supabaseService: SupabaseClientService;
@@ -15,8 +16,7 @@ export class AlertasServicioCasoUso {
   }
   async getAlertStatsByType(
     alertTypeId: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    daysToExpire: number = 3
+    colegio_id: number = 0
   ): Promise<AlertStats> {
     const now = new Date();
     const { data: alertas_tipos, error: error_alertas_tipos } =
@@ -29,15 +29,27 @@ export class AlertasServicioCasoUso {
     if (error_alertas_tipos)
       throw new Error(`Error obteniendo alertas tipo ${alertTypeId}`);
     const expirationThreshold = addDays(now, tiempo_gestion);
-
+    let alertas;
     // Obtener todas las alertas del tipo especificado
-    const { data: alertas, error } = await this.client
-      .from("alumnos_alertas")
-      .select("*")
-      .eq("alertas_tipo_alerta_tipo_id", alertTypeId);
-
-    if (error) throw new Error(`Error obteniendo alertas tipo ${alertTypeId}`);
-
+    if (colegio_id !== 0) {
+      alertas = await obtenerRelacionados({
+        tableFilter: "alumnos",
+        filterField: "colegio_id",
+        filterValue: colegio_id,
+        idField: "alumno_id",
+        tableIn: "alumnos_alertas",
+        inField: "alumno_id",
+        selectFields: `estado`,
+      });
+    } else {
+      const { data: alertas_data, error } = await this.client
+        .from("alumnos_alertas")
+        .select("*")
+        .eq("alertas_tipo_alerta_tipo_id", alertTypeId);
+      alertas = alertas_data;
+      if (error)
+        throw new Error(`Error obteniendo alertas tipo ${alertTypeId}`);
+    }
     const stats: AlertStats = {
       totales: 0,
       activos: 0,
@@ -75,12 +87,26 @@ export class AlertasServicioCasoUso {
     return stats;
   }
 
-  async getAlertasDonutData(): Promise<DonutData[]> {
-    const { data, error } = await this.client
-      .from("alumnos_alertas")
-      .select("estado");
+  async getAlertasDonutData(colegio_id: any = 0): Promise<DonutData[]> {
+    let data = null;
+    if (colegio_id !== 0) {
+      data = await obtenerRelacionados({
+        tableFilter: "alumnos",
+        filterField: "colegio_id",
+        filterValue: colegio_id,
+        idField: "alumno_id",
+        tableIn: "alumnos_alertas",
+        inField: "alumno_id",
+        selectFields: `estado`,
+      });
+    } else {
+      const { data: data_alertas, error } = await this.client
+        .from("alumnos_alertas")
+        .select("estado");
 
-    if (error) throw error;
+      if (error) throw error;
+      data = data_alertas;
+    }
 
     // Contar ocurrencias por estado
     const counts: Record<string, number> = {};

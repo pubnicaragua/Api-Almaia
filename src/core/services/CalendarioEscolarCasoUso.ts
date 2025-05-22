@@ -9,7 +9,8 @@ export async function obtenerCalendarioPorColegio(colegio_id:number){
           .from("calendarios_escolares")
           .select("*")
           .eq("colegio_id", colegio_id)
-          .single();
+          ;
+          
       if (errorcalendario_escolar) {
         throw new Error(errorcalendario_escolar.message);
       }

@@ -10,6 +10,10 @@ export async function obtenerIdColegio(colegio_id: any, usuario_id: number) {
       .from("usuarios_colegios")
       .select("colegio_id")
       .eq("usuario_id", usuario_id); // Permite que no haya ningún resultado
+    if (usuario_colegio?.length === 0) {
+      throw new Error("El usuario no posee colegio designado");
+    }
+
     if (error) {
       throw new Error(error.message);
     }
@@ -18,7 +22,7 @@ export async function obtenerIdColegio(colegio_id: any, usuario_id: number) {
       colegio_id = usuario_colegio[0]?.colegio_id;
     }
   }
-console.log(colegio_id);
+  console.log(colegio_id);
 
   return colegio_id;
 }
