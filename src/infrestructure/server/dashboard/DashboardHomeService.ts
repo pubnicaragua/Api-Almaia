@@ -127,27 +127,8 @@ export const DashboardHomeService = {
 
   // Función para datos de gráfico circular
   async getDonutData(req: Request, res: Response) {
-    const data: DonutData[] = [
-      {
-        label: "10 Pendientes",
-        value: 10,
-        percentage: "22.8%",
-        color: "#facc15",
-      },
-      { label: "07 Nuevos", value: 7, percentage: "13.9%", color: "#22c55e" },
-      {
-        label: "39 Atendidos",
-        value: 39,
-        percentage: "52.1%",
-        color: "#3b82f6",
-      },
-      {
-        label: "05 Aplazados",
-        value: 5,
-        percentage: "11.2%",
-        color: "#a855f7",
-      },
-    ];
+    const alertas_services_caso_uso = new AlertasServicioCasoUso();
+    const data: DonutData[] = await alertas_services_caso_uso.getAlertasDonutData()
     res.json(data);
   },
 

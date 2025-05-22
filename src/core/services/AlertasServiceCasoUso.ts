@@ -4,6 +4,7 @@ import { SupabaseClientService } from "./supabaseClient";
 import { addDays, differenceInCalendarDays, isAfter, isBefore } from "date-fns";
 import { AlertStats } from "../modelo/home/AlertStats";
 import { AlertaMapeada } from "../modelo/alerta/AlertaMapeada";
+import { DonutData } from "../modelo/dashboard/DonutData";
 
 export class AlertasServicioCasoUso {
   private supabaseService: SupabaseClientService;
@@ -73,6 +74,34 @@ export class AlertasServicioCasoUso {
 
     return stats;
   }
+
+  async getAlertasDonutData(): Promise<DonutData[]> {
+    const { data, error } = await this.client
+      .from("alumnos_alertas")
+      .select("estado");
+
+    if (error) throw error;
+
+    // Contar ocurrencias por estado
+    const counts: Record<string, number> = {};
+    data.forEach(({ estado }) => {
+      const key = estado.toLowerCase();
+      counts[key] = (counts[key] || 0) + 1;
+    });
+
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+
+    const donutData: DonutData[] = Object.entries(counts).map(
+      ([estado, value]) => ({
+        label: `${String(value).padStart(2, "0")} ${estadoLabels[estado]}`,
+        value,
+        percentage: `${((value / total) * 100).toFixed(1)}%`,
+        color: colores[estado] || "#000000",
+      })
+    );
+
+    return donutData;
+  }
 }
 export function mapearAlertas(alertas: any[]): AlertaMapeada[] {
   return alertas.map((alerta) => {
@@ -85,7 +114,7 @@ export function mapearAlertas(alertas: any[]): AlertaMapeada[] {
 }
 export function mapearAlertaDetalle(alertas: any[]): any[] {
   console.log(alertas);
-  
+
   return alertas.map((alerta) => {
     const { ...rest } = alerta;
     return {
@@ -101,9 +130,11 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
         { hour: "2-digit", minute: "2-digit" }
       ),
       responsible: {
-        name: `${rest?.personas?.nombres || " "} ${rest?.personas?.apellidos|| " "}`,
+        name: `${rest?.personas?.nombres || " "} ${
+          rest?.personas?.apellidos || " "
+        }`,
         role: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
-        image: rest.personas?.usuarios[0]?.url_foto_perfil||" ", // Este dato no está en la estructura original, se asume
+        image: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
       },
       isAnonymous: rest.alerta_origen_id === 1, // Asumiendo que 1 significa anónimo
       description: `Alerta generada por ${rest.alertas_reglas.nombre} con severidad ${rest.alertas_severidades.nombre}`,
@@ -121,7 +152,7 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
               accionRealizada: new Date(rest.accion_tomada).toLocaleDateString(
                 "es-CL"
               ),
-              fechaCompromiso:rest.fecha_generada,
+              fechaCompromiso: rest.fecha_generada,
               observaciones: "Acción registrada en el sistema",
             },
           ]
@@ -129,3 +160,16 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
     };
   });
 }
+const colores: Record<string, string> = {
+  pendiente: "#facc15",
+  nuevo: "#22c55e",
+  atendido: "#3b82f6",
+  aplazado: "#a855f7",
+};
+
+const estadoLabels: Record<string, string> = {
+  pendiente: "Pendientes",
+  nuevo: "Nuevos",
+  atendido: "Atendidos",
+  aplazado: "Aplazados",
+};
