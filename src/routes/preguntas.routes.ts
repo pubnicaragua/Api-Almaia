@@ -7,6 +7,7 @@ import { RespuestaPosibleService } from '../infrestructure/server/preguntas/Resp
 import { RespuestaPosiblePreguntaService } from '../infrestructure/server/preguntas/RespuestaPosibllePreguntaService';
 import { TipoOficioService } from '../infrestructure/server/preguntas/TipoOficioService';
 import { TipoPreguntaService } from '../infrestructure/server/preguntas/TipoPreguntaService';
+import { AlumnoRespuestaSeleccionService } from '../infrestructure/server/alumno/AlumnoRespuestaSeleccionService';
 
 const router = express.Router();
 
@@ -14,6 +15,7 @@ const ruta_alumno_respuesta = '/alumnos_respuestas';
 const ruta_generador_informe = '/generadores_informes';
 const ruta_respuestas_posibles = '/respuestas_posibles';
 const ruta_respuestas_posibles_preguntas = '/respuestas_posibles_preguntas';
+const ruta_respuestas_seleccion = '/respuestas_selecccion';
 const ruta_tipos_oficios = '/tipos_oficios';
 const ruta_tipos_preguntas = '/tipos_preguntas';
 
@@ -30,6 +32,8 @@ const ruta_tipos_preguntas = '/tipos_preguntas';
  *     description: Endpoints para respuestas predefinidas
  *   - name: Tipos
  *     description: Endpoints para tipos de preguntas y oficios
+ *   - name: RespuestasSeleccion
+ *     description: Endpoints para gestionar respuestas de selección de alumnos
  */
 
 // Preguntas
@@ -969,6 +973,202 @@ router.post( ruta_tipos_preguntas, sessionAuth, TipoPreguntaService.guardar);
  *         description: Error interno del servidor
  */
 router.put( ruta_tipos_preguntas + '/:id', sessionAuth, TipoPreguntaService.actualizar);
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     RespuestaSeleccion:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: integer
+ *           description: ID de la respuesta de selección
+ *         alumno_id:
+ *           type: integer
+ *           description: ID del alumno que respondió
+ *         pregunta_id:
+ *           type: integer
+ *           description: ID de la pregunta respondida
+ *         respuesta_posible_id:
+ *           type: integer
+ *           description: ID de la respuesta posible seleccionada
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de creación del registro
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de última actualización
+ *         alumnos:
+ *           type: object
+ *           properties:
+ *             alumno_id:
+ *               type: integer
+ *             url_foto_perfil:
+ *               type: string
+ *             telefono_contacto1:
+ *               type: string
+ *             telefono_contacto2:
+ *               type: string
+ *             email:
+ *               type: string
+ *         preguntas:
+ *           type: object
+ *           properties:
+ *             pregunta_id:
+ *               type: integer
+ *             texto_pregunta:
+ *               type: string
+ *         respuestas_posibles:
+ *           type: object
+ *           properties:
+ *             respuesta_posible_id:
+ *               type: integer
+ *             nombre:
+ *               type: string
+ */
+
+/**
+ * @swagger
+ * /api/v1/preguntas/respuestas_seleccion/:
+ *   get:
+ *     summary: Obtener todas las respuestas de selección
+ *     tags: [RespuestasSeleccion]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de respuestas de selección
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/RespuestaSeleccion'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
+router.get( ruta_respuestas_seleccion + '/', sessionAuth, AlumnoRespuestaSeleccionService.obtener);
+/**
+ * @swagger
+ * /api/v1/preguntas/respuestas_seleccion/:
+ *   post:
+ *     summary: Crear una nueva respuesta de selección
+ *     tags: [RespuestasSeleccion]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               alumno_id:
+ *                 type: integer
+ *                 description: ID del alumno
+ *               pregunta_id:
+ *                 type: integer
+ *                 description: ID de la pregunta
+ *               respuesta_posible_id:
+ *                 type: integer
+ *                 description: ID de la respuesta posible seleccionada
+ *             required:
+ *               - alumno_id
+ *               - pregunta_id
+ *               - respuesta_posible_id
+ *     responses:
+ *       201:
+ *         description: Respuesta de selección creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RespuestaSeleccion'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
+router.post( ruta_respuestas_seleccion + '/', sessionAuth, AlumnoRespuestaSeleccionService.guardar);
+/**
+ * @swagger
+ * /api/v1/preguntas/respuestas_seleccion/{id}:
+ *   put:
+ *     summary: Actualizar una respuesta de selección existente
+ *     tags: [RespuestasSeleccion]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la respuesta de selección a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               alumno_id:
+ *                 type: integer
+ *                 description: ID del alumno
+ *               pregunta_id:
+ *                 type: integer
+ *                 description: ID de la pregunta
+ *               respuesta_posible_id:
+ *                 type: integer
+ *                 description: ID de la respuesta posible seleccionada
+ *     responses:
+ *       200:
+ *         description: Respuesta de selección actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RespuestaSeleccion'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Respuesta de selección no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
+router.put( ruta_respuestas_seleccion + '/:id', sessionAuth, AlumnoRespuestaSeleccionService.actualizar);
+/**
+ * @swagger
+ * /api/v1/preguntas/respuestas_seleccion/{id}:
+ *   delete:
+ *     summary: Eliminar una respuesta de selección
+ *     tags: [RespuestasSeleccion]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la respuesta de selección a eliminar
+ *     responses:
+ *       204:
+ *         description: Respuesta de selección eliminada exitosamente
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Respuesta de selección no encontrada
+ *       500:
+ *         description: Error del servidor
+ */
+router.delete( ruta_respuestas_seleccion + '/:id', sessionAuth, AlumnoRespuestaSeleccionService.eliminar);
 
 /**
  * @swagger

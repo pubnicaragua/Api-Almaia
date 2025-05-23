@@ -102,7 +102,7 @@ export class AlertasServicioCasoUso {
     } else {
       const { data: data_alertas, error } = await this.client
         .from("alumnos_alertas")
-        .select("estado");
+        .select("*");
 
       if (error) throw error;
       data = data_alertas;
@@ -110,8 +110,8 @@ export class AlertasServicioCasoUso {
 
     // Contar ocurrencias por estado
     const counts: Record<string, number> = {};
-    data.forEach(({ estado }) => {
-      const key = estado.toLowerCase();
+   data.forEach((item) => {
+  const key = String(item.estado).toLowerCase();
       counts[key] = (counts[key] || 0) + 1;
     });
 
