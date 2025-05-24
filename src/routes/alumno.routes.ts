@@ -12,6 +12,7 @@ import { AlumnoNotificacionService } from '../infrestructure/server/alumno/Alumn
 import { AlumnoMonitoreoService } from '../infrestructure/server/alumno/AlumnoMonitoreoService';
 import { AlumnoActividadService } from '../infrestructure/server/alumno/AlumnoActividadService';
 import { AlumnoPermisoAutorsService } from '../infrestructure/server/alumno/AlumnoPermisoAutorService';
+import { AlumnoDiarioService } from '../infrestructure/server/alumno/AlumnoDiarioService';
 
 const router = express.Router();
 
@@ -26,6 +27,7 @@ const ruta_alumnos_monitoreos = '/monitoreos';
 const ruta_alumnos_notificaciones = '/notificaciones';
 const ruta_alumnos_actividades = '/alumnos_actividades';
 const ruta_alumnos_permisos = '/permisos';
+const ruta_alumnos_diarios = '/diarios';
 
 /**
  * @swagger
@@ -46,6 +48,8 @@ const ruta_alumnos_permisos = '/permisos';
  *     description: Gestión de monitoreos de alumnos
  *   - name: Notificaciones
  *     description: Gestión de notificaciones de alumnos
+ *   - name: AlumnoDiario
+ *     description: Endpoints para gestionar los registros diarios de alumnos
  */
 /**
  * @swagger
@@ -3312,7 +3316,134 @@ router.post(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.gua
  *       500:
  *         description: Error interno del servidor
  */
-router.put(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.actualizar)
+router.put(ruta_alumnos_permisos+'/:id',sessionAuth,AlumnoPermisoAutorsService.actualizar)
+
+
+/**
+ * @swagger
+ * /api/v1/alumnos/diarios/:
+ *   get:
+ *     summary: Obtener todos los registros diarios de alumnos
+ *     tags: [AlumnoDiario]
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de registros diarios
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AlumnoDiario'
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
+router.get(ruta_alumnos_diarios+'/',sessionAuth,AlumnoDiarioService.obtener)
+/**
+ * @swagger
+ * /api/v1/alumnos/diarios/:
+ *   post:
+ *     summary: Crear un nuevo registro diario para un alumno
+ *     tags: [AlumnoDiario]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlumnoDiario'
+ *           example:
+ *             alumno_id: 123
+ *             titulo: "Seguimiento mensual"
+ *             descripcion: "El alumno completó todos los ejercicios asignados"
+ *             fecha: "2023-05-20T14:00:00Z"
+ *     responses:
+ *       201:
+ *         description: Registro diario creado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoDiario'
+ *       400:
+ *         description: Datos de entrada inválidos o faltantes
+ *       401:
+ *         description: No autorizado
+ *       500:
+ *         description: Error del servidor
+ */
+router.post(ruta_alumnos_diarios+'/',sessionAuth,AlumnoDiarioService.guardar)
+/**
+ * @swagger
+ * /api/v1/alumnos/diarios/{id}:
+ *   put:
+ *     summary: Actualizar un registro diario existente
+ *     tags: [AlumnoDiario]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del registro diario a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlumnoDiario'
+ *           example:
+ *             titulo: "Seguimiento mensual actualizado"
+ *             descripcion: "El alumno mostró mejoría significativa"
+ *             fecha: "2023-05-20T15:30:00Z"
+ *     responses:
+ *       200:
+ *         description: Registro diario actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AlumnoDiario'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Registro diario no encontrado
+ *       500:
+ *         description: Error del servidor
+ */
+router.put(ruta_alumnos_diarios+'/:id',sessionAuth,AlumnoDiarioService.actualizar)
+/**
+ * @swagger
+ * /api/v1/alumnos/diarios/{id}:
+ *   delete:
+ *     summary: Eliminar un registro diario
+ *     tags: [AlumnoDiario]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del registro diario a eliminar
+ *     responses:
+ *       204:
+ *         description: Registro diario eliminado exitosamente
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Registro diario no encontrado
+ *       500:
+ *         description: Error del servidor
+ */
+router.delete(ruta_alumnos_diarios+'/:id',sessionAuth,AlumnoDiarioService.eliminar)
 /**
  * @swagger
  * /api/v1/alumnos/permisos:
@@ -3340,7 +3471,6 @@ router.put(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.actu
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.eliminar)
 /**
  * @swagger
  * components:
@@ -3795,5 +3925,48 @@ router.delete(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.e
  *       type: apiKey
  *       in: cookie
  *       name: session
+ */
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     AlumnoDiario:
+ *       type: object
+ *       properties:
+ *         alumno_diario_id:
+ *           type: integer
+ *           description: ID único del registro diario
+ *         alumno_id:
+ *           type: integer
+ *           description: ID del alumno asociado
+ *         titulo:
+ *           type: string
+ *           description: Título del registro diario
+ *         descripcion:
+ *           type: string
+ *           description: Descripción detallada del registro
+ *         fecha:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha del registro (ISO 8601)
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de creación del registro
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ *           description: Fecha de última actualización
+ *       required:
+ *         - alumno_id
+ *         - titulo
+ *         - descripcion
+ *         - fecha
+ *       example:
+ *         alumno_diario_id: 1
+ *         alumno_id: 123
+ *         titulo: "Progreso semanal"
+ *         descripcion: "El alumno mostró mejoría en los ejercicios prácticos"
+ *         fecha: "2023-05-15T10:30:00Z"
  */
 export default router;
