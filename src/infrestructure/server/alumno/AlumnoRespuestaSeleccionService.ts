@@ -32,19 +32,18 @@ export const AlumnoRespuestaSeleccionService = {
           inField: "alumno_id",
           selectFields: `*,
                           alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)
-                          preguntas(pregunta_id,texto_pregunta,grupo_preguntas),
+                          preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id),
                           respuestas_posibles(respuesta_posible_id,nombre)`,
         });
         respuestaEnviada = true;
         res.json(alumnos_cursos);
       }
       if (!respuestaEnviada) {
-      console.log('entro aqui')
         const alumnoRespuestaSeleccion = await dataService.getAll(
           [
             "*",
             "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
-            "preguntas(pregunta_id,texto_pregunta,grupo_preguntas)",
+            "preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id)",
             "respuestas_posibles(respuesta_posible_id,nombre)",
           ],
           where
