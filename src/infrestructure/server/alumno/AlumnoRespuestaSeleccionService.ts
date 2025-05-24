@@ -32,7 +32,7 @@ export const AlumnoRespuestaSeleccionService = {
           inField: "alumno_id",
           selectFields: `*,
                           alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)
-                          preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code),
+                          preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono)),
                           respuestas_posibles(respuesta_posible_id,nombre)`,
         });
         respuestaEnviada = true;
@@ -43,7 +43,7 @@ export const AlumnoRespuestaSeleccionService = {
           [
             "*",
             "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
-            "preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre))",
+            "preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono))",
             "respuestas_posibles(respuesta_posible_id,nombre)",
           ],
           where
