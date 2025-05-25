@@ -127,6 +127,7 @@ router.post('/registro', AuthService.register);
  *         description: Error del servidor
  */
 router.post('/change-password', sessionAuth, AuthService.changePassword);
+router.post('/update-password', sessionAuth, AuthService.updatePassword);
 
 // Roles
 
@@ -560,7 +561,7 @@ router.delete(ruta_funcionalidades_roles+'/:id', sessionAuth, FuncionalidadRolSe
 
 /**
  * @swagger
- * /api/v1/usuarios/:
+ * /api/v1/auth/usuarios/:
  *   get:
  *     tags: [Usuarios]
  *     summary: Obtener todos los usuarios
@@ -585,7 +586,7 @@ router.get(ruta_usuarios+'/', sessionAuth, UsuariosService.obtener);
 
 /**
  * @swagger
- * /api/v1/usuarios/:
+ * /api/v1/auth/usuarios/:
  *   post:
  *     tags: [Usuarios]
  *     summary: Crear un nuevo usuario
@@ -618,7 +619,7 @@ router.post(ruta_usuarios+'/', sessionAuth, UsuariosService.guardar);
 
 /**
  * @swagger
- * /api/v1/usuarios/{id}:
+ * /api/v1/auth/usuarios/{id}:
  *   put:
  *     tags: [Usuarios]
  *     summary: Actualizar un usuario existente
@@ -786,7 +787,7 @@ router.post(ruta_auditorias+'/', sessionAuth, AuditoriaesService.guardar);
 
 /**
  * @swagger
- * /api/v1/usuarios/{id}:
+ * /api/v1/auth/usuarios/{id}:
  *   delete:
  *     tags: [Usuarios]
  *     summary: Eliminar un usuario
