@@ -30,7 +30,13 @@ const UsuarioUpdateSchema = Joi.object({
   persona_id: Joi.number().integer().optional(),
   idioma_id: Joi.number().integer().required(),
 });
-const dataService: DataService<Usuario> = new DataService("usuarios","usuario_id");
+const dataService: DataService<Usuario> = new DataService(
+  "usuarios",
+  "usuario_id"
+);const dataPersonaService: DataService<Persona> = new DataService(
+  "personas",
+  "persona_id"
+);
 export const UsuariosService = {
   async obtener(req: Request, res: Response) {
     try {
@@ -165,6 +171,7 @@ export const UsuariosService = {
       }
       if (!responseSent) {
         const resultado = await dataService.updateById(usuarioId, usuario);
+         await dataPersonaService.updateById(usuario.persona_id, persona);
         res.status(200).json(resultado);
       }
     } catch (error) {
@@ -173,6 +180,30 @@ export const UsuariosService = {
       res.status(500).json(error);
     }
   },
+  async generar_clave(req: Request, res: Response) {
+    try {
+      const usuarioId = parseInt(req.params.id);
+      const {clave} = req.body ;
+      if (!clave) {
+        throw new Error("La clave es requerida.");
+      }
+      const {error } = await client
+        .from("usuarios")
+        .update({ clave_generada: clave })
+        .eq("usuario_id", usuarioId);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      res.status(200).json({message:"clave generada con exito"});
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error al guardar el motoralerta:", error);
+      res.status(500).json({ message: error.message || "Error inesperado" });
+    }
+  },
+
   async eliminar(req: Request, res: Response) {
     try {
       const usuarioId = parseInt(req.params.id);

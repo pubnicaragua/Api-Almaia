@@ -14,6 +14,7 @@ export class Usuario extends BaseModel {
     persona_id: number;
     idioma_id: number;
     auth_id?:string;
+    clave_generada?:string;
     constructor(){
         super();
         this.nombre_social = "";

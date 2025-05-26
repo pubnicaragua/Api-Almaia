@@ -656,6 +656,53 @@ router.post(ruta_usuarios+'/', sessionAuth, UsuariosService.guardar);
  *         description: Error interno del servidor
  */
 router.put(ruta_usuarios+'/:id', sessionAuth, UsuariosService.actualizar);
+/**
+ * @swagger
+ * /api/v1/auth/usuarios/generar_clave/{id}:
+ *   put:
+ *     summary: Generar nueva clave para un usuario
+ *     tags:
+ *       - Usuarios
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del usuario
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - clave
+ *             properties:
+ *               clave:
+ *                 type: integer
+ *                 example: 456789
+ *     responses:
+ *       200:
+ *         description: Clave generada con éxito
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: clave generada con exito
+ *       400:
+ *         description: Petición inválida
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.put('/api/v1/auth/usuarios/generar_clave/:id', sessionAuth, UsuariosService.generar_clave);
 
 /**
  * @swagger

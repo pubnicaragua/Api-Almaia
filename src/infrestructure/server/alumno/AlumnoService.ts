@@ -39,7 +39,29 @@ export const AlumnosService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
+ async establecer_consentimiento(req: Request, res: Response) {
+    try {
+      const alumnoId = parseInt(req.params.id);
+      const {consentimiento} = req.body ;
+      if (!consentimiento && consentimiento === false) {
+        throw new Error("El consentimiento es requerido.");
+      }
+      const {error } = await client
+        .from("alumnos")
+        .update({ consentimiento: consentimiento })
+        .eq("alumno_id", alumnoId);
 
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      res.status(200).json({message:"Acepto consentimiento y asentamiento"});
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error al guardar el motoralerta:", error);
+      res.status(500).json({ message: error.message || "Error inesperado" });
+    }
+  },
   async getAlumnoDetalle(req: Request, res: Response) {
     const { alumnoId } = req.params;
     const where = { alumno_id: alumnoId }; // Convertir los parámetros de consulta en filtros

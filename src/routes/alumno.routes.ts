@@ -3420,6 +3420,55 @@ router.post(ruta_alumnos_diarios+'/',sessionAuth,AlumnoDiarioService.guardar)
 router.put(ruta_alumnos_diarios+'/:id',sessionAuth,AlumnoDiarioService.actualizar)
 /**
  * @swagger
+ * /api/v1/alumnos/consentimiento/{id}:
+ *   put:
+ *     summary: Establecer consentimiento para un alumno (menor)
+ *     tags:
+ *       - Alumnos
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del alumno
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - consentimiento
+ *             properties:
+ *               consentimiento:
+ *                 type: boolean
+ *                 example: true
+ *                 description: Valor booleano que indica si el alumno consiente
+ *     responses:
+ *       200:
+ *         description: Consentimiento establecido exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: se ha consentido usuario
+ *       400:
+ *         description: Solicitud inválida
+ *       401:
+ *         description: No autorizado
+ *       404:
+ *         description: Alumno no encontrado
+ */
+router.put('/consentimiento/:id', sessionAuth, AlumnosService.establecer_consentimiento);
+
+/**
+ * @swagger
  * /api/v1/alumnos/diarios/{id}:
  *   delete:
  *     summary: Eliminar un registro diario
