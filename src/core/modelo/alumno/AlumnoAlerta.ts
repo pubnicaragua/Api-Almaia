@@ -3,7 +3,8 @@ import { BaseModel } from "../BaseModel";
 export class AlumnoAlerta extends BaseModel {
   alumno_alerta_id?: number;
   alumno_id: number;
-  alerta_regla_id: number;
+  alerta_regla_id?: number;
+  mensaje: string;
   fecha_generada: Date;
   fecha_resolucion: Date;
   alerta_origen_id: number;
@@ -17,7 +18,7 @@ export class AlumnoAlerta extends BaseModel {
   constructor() {
     super();
     this.alumno_id = 0;
-    this.alerta_regla_id = 0;
+    this.mensaje ="";
     this.fecha_generada = new Date();
     this.fecha_resolucion = new Date();
     this.alerta_origen_id = 0;

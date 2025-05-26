@@ -4,6 +4,7 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { Usuario } from "../../../core/modelo/auth/Usuario";
 import { DataService } from "../DataService";
 import { Request, Response } from "express";
+import { Persona } from "../../../core/modelo/Persona";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -17,7 +18,19 @@ const UsuarioSchema = Joi.object({
   persona_id: Joi.number().integer().required(),
   idioma_id: Joi.number().integer().required(),
 });
-const dataService: DataService<Usuario> = new DataService("usuarios");
+const UsuarioUpdateSchema = Joi.object({
+  nombre_social: Joi.string().max(50).required(),
+  email: Joi.string().max(150).required(),
+  encripted_password: Joi.string().max(35).optional(),
+  nombres: Joi.string().max(35).optional(),
+  apellidos: Joi.string().max(35).optional(),
+  rol_id: Joi.number().integer().required(),
+  telefono_contacto: Joi.string().max(150).required(),
+  url_foto_perfil: Joi.string().max(255).required(),
+  persona_id: Joi.number().integer().optional(),
+  idioma_id: Joi.number().integer().required(),
+});
+const dataService: DataService<Usuario> = new DataService("usuarios","usuario_id");
 export const UsuariosService = {
   async obtener(req: Request, res: Response) {
     try {
@@ -42,17 +55,17 @@ export const UsuariosService = {
       Object.assign(usuario, req.body);
       usuario.creado_por = req.creado_por;
       usuario.actualizado_por = req.actualizado_por;
-      const email = usuario.email
-      const password = usuario.encripted_password
-       const { data:dataAuth, error:errorAuth } = await client.auth.signUp({
-       email,
+      const email = usuario.email;
+      const password = usuario.encripted_password;
+      const { data: dataAuth, error: errorAuth } = await client.auth.signUp({
+        email,
         password,
       });
 
       if (errorAuth) {
-         res.status(400).json({ message: errorAuth.message });
+        res.status(400).json({ message: errorAuth.message });
       }
-      usuario.auth_id= dataAuth.user?.id
+      usuario.auth_id = dataAuth.user?.id;
       let responseSent = false;
       const { error: validationError } = UsuarioSchema.validate(req.body);
       const { data, error } = await client
@@ -94,12 +107,25 @@ export const UsuariosService = {
   async actualizar(req: Request, res: Response) {
     try {
       const usuarioId = parseInt(req.params.id);
-
       const usuario = new Usuario();
-      Object.assign(usuario, req.body);
+      const persona = new Persona();
+      // Asignar directamente las propiedades correspondientes
+      Object.assign(persona, {
+        nombres: req.body.nombres,
+        apellidos: req.body.apellidos,
+      });
+
+      Object.assign(usuario, {
+        rol_id: req.body.rol_id,
+        nombre_social: req.body.nombre_social,
+        email: req.body.email,
+        telefono_contacto: req.body.telefono_contacto,
+        url_foto_perfil: req.body.url_foto_perfil,
+        idioma_id: req.body.idioma_id,
+      });
       usuario.actualizado_por = req.actualizado_por;
       let responseSent = false;
-      const { error: validationError } = UsuarioSchema.validate(req.body);
+      const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
       const { data, error } = await client
         .from("roles")
         .select("*")
@@ -108,6 +134,15 @@ export const UsuariosService = {
       if (error || !data) {
         throw new Error("El rol no existe");
       }
+      const { data: dataUsuario, error: errorUsuario } = await client
+        .from("usuarios")
+        .select("*")
+        .eq("usuario_id", usuarioId)
+        .single();
+      if (errorUsuario || !dataUsuario) {
+        throw new Error("El usuario no existe");
+      }
+      usuario.persona_id = dataUsuario.persona_id;
       const { data: dataPersona, error: errorPersona } = await client
         .from("personas")
         .select("*")
@@ -133,6 +168,8 @@ export const UsuariosService = {
         res.status(200).json(resultado);
       }
     } catch (error) {
+      console.log(error);
+
       res.status(500).json(error);
     }
   },

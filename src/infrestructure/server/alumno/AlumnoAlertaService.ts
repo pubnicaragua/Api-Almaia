@@ -11,7 +11,8 @@ import {
 import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 const AlumnoAlertaSchema = Joi.object({
   alumno_id: Joi.number().integer().required(),
-  alerta_regla_id: Joi.number().integer().required(),
+  alerta_regla_id: Joi.number().integer().optional(),
+  mensaje: Joi.string().max(100).required(),
   fecha_generada: Joi.string().required(),
   fecha_resolucion: Joi.string().optional(),
   alerta_origen_id: Joi.number().integer().required(),
@@ -25,7 +26,7 @@ const AlumnoAlertaSchema = Joi.object({
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<AlumnoAlerta> = new DataService(
-  "alumnos_alertas"
+  "alumnos_alertas","alumno_alerta_id"
 );
 export const AlumnoAlertaService = {
   async obtener(req: Request, res: Response) {
@@ -113,13 +114,15 @@ export const AlumnoAlertaService = {
       if (error || !data) {
         throw new Error("El colegio no existe");
       }
-      const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
-        .from("alertas_reglas")
-        .select("*")
-        .eq("alerta_regla_id", alumnoalerta.alerta_regla_id)
-        .single();
-      if (errorAlertaRegla || !dataAlertaRegla) {
-        throw new Error("El colegio no existe");
+      if (alumnoalerta.alerta_regla_id !== undefined){
+        const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
+          .from("alertas_reglas")
+          .select("*")
+          .eq("alerta_regla_id", alumnoalerta.alerta_regla_id)
+          .single();
+        if (errorAlertaRegla || !dataAlertaRegla) {
+          throw new Error("La regla no existe");
+        }
       }
       const { data: dataAlertaOrigen, error: errorAlertaOrigen } = await client
         .from("alertas_origenes")

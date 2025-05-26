@@ -1,7 +1,7 @@
 import { BaseModel } from "../BaseModel";
 
 export class Usuario extends BaseModel {
-    usuario_id: number;
+    usuario_id?: number;
     nombre_social: string;
     email: string;
     encripted_password: string;
@@ -16,7 +16,6 @@ export class Usuario extends BaseModel {
     auth_id?:string;
     constructor(){
         super();
-        this.usuario_id = 0;
         this.nombre_social = "";
         this.email = "";
         this.encripted_password = "";
@@ -27,6 +26,5 @@ export class Usuario extends BaseModel {
         this.intentos_inicio_sesion = 0;
         this.persona_id = 0;
         this.idioma_id = 0;
-        this.auth_id = "";
     }
   }

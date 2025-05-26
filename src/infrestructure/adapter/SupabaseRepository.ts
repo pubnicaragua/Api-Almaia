@@ -91,11 +91,12 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
 
   async updateData(id: number, data: T): Promise<any> {
     await this.ensureClientInitialized();
-   
-    const { error } = await this.client
+
+    const { data:dataUpdate,error } = await this.client
       .from(this.table)
       .update(data)
       .eq(this.pkName, id);
-    if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message);
+      return dataUpdate
   }
 }
