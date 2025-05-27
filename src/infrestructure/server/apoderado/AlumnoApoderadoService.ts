@@ -32,7 +32,11 @@ export const AlumnoApoderadoService = {
           idField: "apoderado_id",
           tableIn: "alumnos_apoderados",
           inField: "apoderado_id",
-          selectFields: `*,apoderados (
+          selectFields: `*,
+                          alumnos(alumno_id,
+                          url_foto_perfil,
+                          personas(persona_id,nombres,apellidos)),
+                          apoderados (
                           apoderado_id,
                           persona_id,
                           personas (
@@ -54,6 +58,7 @@ export const AlumnoApoderadoService = {
           [
             "*",
             "apoderados(apoderado_id,persona_id,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id))",
+            "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
           ],
           where
         );
