@@ -31,6 +31,7 @@ const UsuarioUpdateSchema = Joi.object({
   fecha_nacimiento: Joi.string().optional(),
   numero_documento: Joi.string().optional(),
   rol_id: Joi.number().integer().required(),
+  alumno_id: Joi.number().integer().required(),
   telefono_contacto: Joi.string().max(150).required(),
   url_foto_perfil: Joi.string().max(255).required(),
   persona_id: Joi.number().integer().optional(),
