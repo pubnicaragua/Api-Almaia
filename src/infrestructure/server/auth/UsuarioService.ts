@@ -172,8 +172,16 @@ export const UsuariosService = {
       }
       if (!responseSent) {
         const resultado = await dataService.updateById(usuarioId, usuario);
+ 	const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } = await client
+        .from("usuarios")
+        .select("*")
+        .eq("usuario_id", usuarioId)
+        .single();
+          if (errorUsuarioUpdate ) {
+        throw new Error(errorUsuarioUpdate.message);
+      }
         await dataPersonaService.updateById(usuario.persona_id, persona);
-        res.status(200).json(resultado);
+        res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
       console.log(error);
