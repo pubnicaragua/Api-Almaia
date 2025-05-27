@@ -27,7 +27,7 @@ export const AlumnosService = {
       const alumnos = await dataService.getAll(
         [
           "*",
-          "personas(persona_id,nombres,apellidos,fecha_nacimiento,usuarios(usuario_id,rol_id))",
+          "personas(persona_id,nombres,apellidos,fecha_nacimiento,numero_documento,usuarios(usuario_id,rol_id))",
           "colegios(colegio_id,nombre)",
           "cursos(grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
         ],
