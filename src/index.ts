@@ -31,7 +31,7 @@ const options = {
       title: "Alma IA API",
       version: "1.0",
       description:
-        "Esta es una APIpara gestionar la información de Alma IA.",
+        "Esta es una APIpara gestionar la información de Alma IA. Cada get del CRUD posee parametros es decir api/v1/ruta?campo={valor}",
       license: {
         name: "MIT",
         url: "https://spdx.org/licenses/MIT.html",

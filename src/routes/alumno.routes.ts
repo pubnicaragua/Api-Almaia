@@ -1370,7 +1370,7 @@ router.put(ruta_actividades + '/:id', sessionAuth, ActividadsService.actualizar)
  *       scheme: bearer
  *       bearerFormat: JWT
  */
-router.put( '/:id', sessionAuth, AlumnosService.actualizarPerfil);
+router.put( '/perfil/:id', sessionAuth, AlumnosService.actualizarPerfil);
 
 /**
  * @swagger
