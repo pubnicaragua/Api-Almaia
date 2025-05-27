@@ -5,6 +5,8 @@ import Joi from "joi";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { ComparativaDato } from "../../../core/modelo/alumno/ComparativaDato";
+import { Usuario } from "../../../core/modelo/auth/Usuario";
+import { Persona } from "../../../core/modelo/Persona";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -20,6 +22,28 @@ const AlumnoSchema = Joi.object({
   email: Joi.string().max(45).optional(),
   colegio_id: Joi.number().integer().required(),
 });
+const UsuarioUpdateSchema = Joi.object({
+  nombre_social: Joi.string().max(50).required(),
+  email: Joi.string().max(150).required(),
+  encripted_password: Joi.string().max(35).optional(),
+  nombres: Joi.string().max(35).optional(),
+  apellidos: Joi.string().max(35).optional(),
+  fecha_ncimiento: Joi.string().optional(),
+  numero_documento: Joi.string().optional(),
+  rol_id: Joi.number().integer().required(),
+  telefono_contacto: Joi.string().max(150).required(),
+  url_foto_perfil: Joi.string().max(255).required(),
+  persona_id: Joi.number().integer().optional(),
+  idioma_id: Joi.number().integer().required(),
+});
+const dataUsuarioService: DataService<Usuario> = new DataService(
+  "usuarios",
+  "usuario_id"
+);
+const dataPersonaService: DataService<Persona> = new DataService(
+  "personas",
+  "persona_id"
+);
 export const AlumnosService = {
   async obtener(req: Request, res: Response) {
     try {
@@ -39,14 +63,14 @@ export const AlumnosService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
- async establecer_consentimiento(req: Request, res: Response) {
+  async establecer_consentimiento(req: Request, res: Response) {
     try {
       const alumnoId = parseInt(req.params.id);
-      const {consentimiento} = req.body ;
+      const { consentimiento } = req.body;
       if (!consentimiento && consentimiento === false) {
         throw new Error("El consentimiento es requerido.");
       }
-      const {error } = await client
+      const { error } = await client
         .from("alumnos")
         .update({ consentimiento: consentimiento })
         .eq("alumno_id", alumnoId);
@@ -55,7 +79,7 @@ export const AlumnosService = {
         throw new Error(error.message);
       }
 
-      res.status(200).json({message:"Acepto consentimiento y asentamiento"});
+      res.status(200).json({ message: "Acepto consentimiento y asentamiento" });
     } catch (err) {
       const error = err as Error;
       console.error("Error al guardar el motoralerta:", error);
@@ -214,6 +238,87 @@ export const AlumnosService = {
     } catch (error) {
       console.error("Error al actualizar el alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
+    }
+  },
+  async actualizarPerfil(req: Request, res: Response) {
+    try {
+      const usuarioId = parseInt(req.params.id);
+      const usuario = new Usuario();
+      const persona = new Persona();
+      // Asignar directamente las propiedades correspondientes
+
+      Object.assign(usuario, {
+        rol_id: req.body.rol_id,
+        nombre_social: req.body.nombre_social,
+        email: req.body.email,
+        telefono_contacto: req.body.telefono_contacto,
+        url_foto_perfil: req.body.url_foto_perfil,
+        idioma_id: req.body.idioma_id,
+      });
+      usuario.actualizado_por = req.actualizado_por;
+      let responseSent = false;
+      const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
+      const { data, error } = await client
+        .from("roles")
+        .select("*")
+        .eq("rol_id", usuario.rol_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El rol no existe");
+      }
+      const { data: dataUsuario, error: errorUsuario } = await client
+        .from("usuarios")
+        .select("*")
+        .eq("usuario_id", usuarioId)
+        .single();
+      if (errorUsuario || !dataUsuario) {
+        throw new Error("El usuario no existe");
+      }
+      usuario.persona_id = dataUsuario.persona_id;
+
+      const { data: dataPersona, error: errorPersona } = await client
+        .from("personas")
+        .select("*")
+        .eq("persona_id", usuario.persona_id)
+        .single();
+      if (errorPersona || !dataPersona) {
+        throw new Error("La persona no existe");
+      }
+      Object.assign(persona, dataPersona);
+      persona.nombres = req.body.nombres;
+      persona.apellidos = req.body.apellidos;
+      persona.fecha_nacimiento = req.body.fecha_nacimiento
+      persona.numero_documento = req.body.numero_documento
+      const { data: dataIdioma, error: errorIdioma } = await client
+        .from("idiomas")
+        .select("*")
+        .eq("idioma_id", usuario.idioma_id)
+        .single();
+      if (errorIdioma || !dataIdioma) {
+        throw new Error("El nivel educativo no existe");
+      }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        await dataUsuarioService.updateById(usuarioId, usuario);
+        const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
+          await client
+            .from("usuarios")
+            .select("*")
+            .eq("usuario_id", usuarioId)
+            .single();
+        if (errorUsuarioUpdate) {
+          throw new Error(errorUsuarioUpdate.message);
+        }
+        await dataPersonaService.updateById(usuario.persona_id, persona);
+        res.status(200).json(dataUsuarioUpdate);
+      }
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).json(error);
     }
   },
   async eliminar(req: Request, res: Response) {

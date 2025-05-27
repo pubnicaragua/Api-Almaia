@@ -1221,6 +1221,156 @@ router.post(ruta_actividades, sessionAuth, ActividadsService.guardar);
  *         description: Error interno del servidor
  */
 router.put(ruta_actividades + '/:id', sessionAuth, ActividadsService.actualizar);
+/**
+ * @swagger
+ * /api/v1/alumnos/perfil/{id}:
+ *   put:
+ *     summary: Actualiza el perfil de un alumno
+ *     description: Actualiza la información personal y de usuario de un alumno
+ *     tags:
+ *       - Alumnos
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del usuario/alumno a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nombre_social
+ *               - email
+ *               - rol_id
+ *               - telefono_contacto
+ *               - url_foto_perfil
+ *               - idioma_id
+ *             properties:
+ *               nombre_social:
+ *                 type: string
+ *                 maxLength: 50
+ *                 description: Nombre social del usuario
+ *               email:
+ *                 type: string
+ *                 maxLength: 150
+ *                 description: Email del usuario
+ *               encripted_password:
+ *                 type: string
+ *                 maxLength: 35
+ *                 description: Contraseña encriptada (opcional)
+ *               nombres:
+ *                 type: string
+ *                 maxLength: 35
+ *                 description: Nombres de la persona (opcional)
+ *               apellidos:
+ *                 type: string
+ *                 maxLength: 35
+ *                 description: Apellidos de la persona (opcional)
+ *               fecha_nacimiento:
+ *                 type: string
+ *                 description: Fecha de nacimiento (opcional)
+ *               numero_documento:
+ *                 type: string
+ *                 description: Número de documento (opcional)
+ *               rol_id:
+ *                 type: integer
+ *                 description: ID del rol del usuario
+ *               telefono_contacto:
+ *                 type: string
+ *                 maxLength: 150
+ *                 description: Teléfono de contacto
+ *               url_foto_perfil:
+ *                 type: string
+ *                 maxLength: 255
+ *                 description: URL de la foto de perfil
+ *               idioma_id:
+ *                 type: integer
+ *                 description: ID del idioma preferido
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Usuario'
+ *       400:
+ *         description: Error de validación o datos incorrectos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Mensaje de error
+ *       404:
+ *         description: Usuario, rol o idioma no encontrado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Mensaje de error
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Mensaje de error
+ */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Usuario:
+ *       type: object
+ *       properties:
+ *         usuario_id:
+ *           type: integer
+ *         nombre_social:
+ *           type: string
+ *         email:
+ *           type: string
+ *         telefono_contacto:
+ *           type: string
+ *         url_foto_perfil:
+ *           type: string
+ *         idioma_id:
+ *           type: integer
+ *         rol_id:
+ *           type: integer
+ *         persona_id:
+ *           type: integer
+ *         creado_por:
+ *           type: integer
+ *         actualizado_por:
+ *           type: integer
+ *         fecha_creacion:
+ *           type: string
+ *           format: date-time
+ *         fecha_actualizacion:
+ *           type: string
+ *           format: date-time
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+router.put( '/:id', sessionAuth, AlumnosService.actualizarPerfil);
 
 /**
  * @swagger

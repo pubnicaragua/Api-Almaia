@@ -171,7 +171,7 @@ export const UsuariosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        const resultado = await dataService.updateById(usuarioId, usuario);
+ await dataService.updateById(usuarioId, usuario);
  	const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } = await client
         .from("usuarios")
         .select("*")
