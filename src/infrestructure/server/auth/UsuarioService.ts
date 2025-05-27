@@ -33,7 +33,8 @@ const UsuarioUpdateSchema = Joi.object({
 const dataService: DataService<Usuario> = new DataService(
   "usuarios",
   "usuario_id"
-);const dataPersonaService: DataService<Persona> = new DataService(
+);
+const dataPersonaService: DataService<Persona> = new DataService(
   "personas",
   "persona_id"
 );
@@ -116,10 +117,6 @@ export const UsuariosService = {
       const usuario = new Usuario();
       const persona = new Persona();
       // Asignar directamente las propiedades correspondientes
-      Object.assign(persona, {
-        nombres: req.body.nombres,
-        apellidos: req.body.apellidos,
-      });
 
       Object.assign(usuario, {
         rol_id: req.body.rol_id,
@@ -149,6 +146,7 @@ export const UsuariosService = {
         throw new Error("El usuario no existe");
       }
       usuario.persona_id = dataUsuario.persona_id;
+
       const { data: dataPersona, error: errorPersona } = await client
         .from("personas")
         .select("*")
@@ -157,6 +155,9 @@ export const UsuariosService = {
       if (errorPersona || !dataPersona) {
         throw new Error("La persona no existe");
       }
+      Object.assign(persona, dataPersona);
+      persona.nombres = req.body.nombres;
+      persona.apellidos = req.body.apellidos;
       const { data: dataIdioma, error: errorIdioma } = await client
         .from("idiomas")
         .select("*")
@@ -171,7 +172,7 @@ export const UsuariosService = {
       }
       if (!responseSent) {
         const resultado = await dataService.updateById(usuarioId, usuario);
-         await dataPersonaService.updateById(usuario.persona_id, persona);
+        await dataPersonaService.updateById(usuario.persona_id, persona);
         res.status(200).json(resultado);
       }
     } catch (error) {
@@ -183,11 +184,11 @@ export const UsuariosService = {
   async generar_clave(req: Request, res: Response) {
     try {
       const usuarioId = parseInt(req.params.id);
-      const {clave} = req.body ;
+      const { clave } = req.body;
       if (!clave) {
         throw new Error("La clave es requerida.");
       }
-      const {error } = await client
+      const { error } = await client
         .from("usuarios")
         .update({ clave_generada: clave })
         .eq("usuario_id", usuarioId);
@@ -196,7 +197,7 @@ export const UsuariosService = {
         throw new Error(error.message);
       }
 
-      res.status(200).json({message:"clave generada con exito"});
+      res.status(200).json({ message: "clave generada con exito" });
     } catch (err) {
       const error = err as Error;
       console.error("Error al guardar el motoralerta:", error);
