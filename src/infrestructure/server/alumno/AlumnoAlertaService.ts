@@ -264,9 +264,10 @@ export const AlumnoAlertaService = {
 
       // Opción 1: Usando JOIN en Supabase (sin necesidad de RPC)
       const query = client
-        .from("alumno_alerta")
+        .from("alumnos_alertas")
         .select("*", { count: "exact", head: true })
         .eq("estado", "pendiente");
+console.log('paso query');
 
       // Si se proporciona colegio_id, aplicamos JOIN y filtramos
       if (colegio_id) {
@@ -277,13 +278,14 @@ export const AlumnoAlertaService = {
         }
 
         const { count, error } = await client
-          .from("alumno_alerta")
+          .from("alumnos_alertas")
           .select("alumno:alumno_id(colegio_id)", {
             count: "exact",
             head: true,
           })
           .eq("estado", "pendiente")
           .eq("alumno.colegio_id", colegioIdNumber);
+console.log('paso busqueda');
 
         if (error) throw error;
          res.json({ count: count || 0 });

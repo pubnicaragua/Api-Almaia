@@ -1997,7 +1997,7 @@ router.get(`${rutas_usuarios_colegios}/`, sessionAuth, UsuarioColegiosService.ob
 
 /**
  * @swagger
- * /api/v1/colegio/usuarios_colegios/:
+ * /api/v1/colegios/usuarios_colegios:
  *   post:
  *     tags: [UsuarioColegios]
  *     summary: Crear una nueva relación usuario-colegio
@@ -2030,7 +2030,7 @@ router.post(`${rutas_usuarios_colegios}/`, sessionAuth, UsuarioColegiosService.g
 
 /**
  * @swagger
- * /api/v1/colegioS/usuarios_colegios/{id}:
+ * /api/v1/colegios/usuarios_colegios/{id}:
  *   put:
  *     tags: [UsuarioColegios]
  *     summary: Actualizar una relación usuario-colegio

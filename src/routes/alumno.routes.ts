@@ -1527,6 +1527,61 @@ router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
 
 /**
  * @swagger
+ * /api/v1/alumnos/alertas/conteo:
+ *   get:
+ *     tags:
+ *       - "Alertas de Alumnos"
+ *     summary: "Obtiene el conteo de alertas pendientes"
+ *     description: |
+ *       Cuenta alertas en estado 'pendiente'.
+ *       - Filtra por `colegio_id` si se proporciona.
+ *       - Sin parámetros: conteo total.
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: colegio_id
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: "ID del colegio para filtrar (opcional)"
+ *     responses:
+ *       '200':
+ *         description: "Conteo exitoso"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count:
+ *                   type: integer
+ *                   example: 15
+ *       '400':
+ *         description: "Error en parámetros"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "colegio_id debe ser un número"
+ *       '500':
+ *         description: "Error interno"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Error al contar alertas pendientes"
+ */
+router.get(ruta_alumnos_alertas+"/conteo", sessionAuth, AlumnoAlertaService.contarAlertasPendientes);
+
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     AlertaAlumnoDetallada:
@@ -1685,8 +1740,6 @@ router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
  *           description: Tipo de alerta
  */
 router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle);
-
-router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.contarAlertasPendientes);
 
 /**
  * @swagger
