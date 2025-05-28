@@ -7,6 +7,7 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { ComparativaDato } from "../../../core/modelo/alumno/ComparativaDato";
 import { Usuario } from "../../../core/modelo/auth/Usuario";
 import { Persona } from "../../../core/modelo/Persona";
+import { buscarAlumnos } from "../../../core/services/AlumnoServicioCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -332,4 +333,19 @@ export const AlumnosService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
+   async buscar(req: Request, res: Response) {
+    const { termino } = req.body;
+
+    if (!termino || typeof termino !== 'string') {
+      throw new Error("Debe proporcionar un campo 'termino' en el cuerpo de la solicitud")
+    }
+
+    try {
+      const resultados = await buscarAlumnos(client,termino);
+      res.json(resultados);
+    }catch (error) {
+      console.error("Error al actualizar la alerta evidencia:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
+    }
+   }
 };

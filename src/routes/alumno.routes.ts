@@ -1578,6 +1578,74 @@ router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
  *                   example: "Error al contar alertas pendientes"
  */
 router.get(ruta_alumnos_alertas+"/conteo", sessionAuth, AlumnoAlertaService.contarAlertasPendientes);
+/**
+ * @swagger
+ * /api/v1/alumnos/buscar:
+ *   post:
+ *     summary: Busca alumnos por término de búsqueda
+ *     description: Realiza una búsqueda de alumnos basada en un término proporcionado
+ *     tags:
+ *       - Alumnos
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - termino
+ *             properties:
+ *               termino:
+ *                 type: string
+ *                 description: Término de búsqueda para encontrar alumnos
+ *                 example: "Juan Pérez"
+ *     responses:
+ *       200:
+ *         description: Resultados de la búsqueda
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   alumno_id:
+ *                     type: integer
+ *                     example: 123
+ *                   nombres:
+ *                     type: string
+ *                     example: "Juan"
+ *                   apellidos:
+ *                     type: string
+ *                     example: "Pérez"
+ *                   url_foto_perfil:
+ *                     type: string
+ *                     example: "https://ejemplo.com/foto.jpg"
+ *                   # Agrega aquí otras propiedades que devuelva tu función buscarAlumnos
+ *       400:
+ *         description: Solicitud incorrecta - falta el término de búsqueda
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Debe proporcionar un campo 'termino' en el cuerpo de la solicitud"
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+router.post("/buscar", sessionAuth, AlumnosService.buscar);
 
 
 /**
