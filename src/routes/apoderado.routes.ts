@@ -509,26 +509,47 @@ router.delete(ruta_apoderados_direcciones+'/:id', sessionAuth, ApoderadoDireccio
 router.get(ruta_apoderados_respuestas+'/', sessionAuth, ApoderadoRespuestaService.obtener);
 /**
  * @swagger
- * /api/v1/apoderados/apoderados_respuestas/{id}:
+ * /api/v1/apoderados/apoderados_respuestas:
  *   post:
  *     summary: Crea una nueva respuesta de apoderado
  *     description: Guarda una nueva respuesta de apoderado en el sistema
  *     tags: [ApoderadoRespuestas]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: integer
- *         required: true
- *         description: ID del registro a crear (¿posible error en la ruta? Normalmente POST no lleva ID en path)
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/ApoderadoRespuesta'
+ *             type: object
+ *             required:
+ *               - pregunta_id
+ *               - apoderado_id
+ *               - alumno_id
+ *               - estado_respuesta
+ *             properties:
+ *               pregunta_id:
+ *                 type: integer
+ *                 description: ID de la pregunta respondida
+ *               respuesta_posible_id:
+ *                 type: integer
+ *                 nullable: true
+ *                 description: ID de la respuesta posible seleccionada (opcional)
+ *               apoderado_id:
+ *                 type: integer
+ *                 description: ID del apoderado que responde
+ *               alumno_id:
+ *                 type: integer
+ *                 description: ID del alumno relacionado
+ *               texto_respuesta:
+ *                 type: string
+ *                 maxLength: 50
+ *                 nullable: true
+ *                 description: Texto de la respuesta (opcional, máximo 50 caracteres)
+ *               estado_respuesta:
+ *                 type: string
+ *                 maxLength: 20
+ *                 description: Estado de la respuesta (ej. "completado", "pendiente")
  *     responses:
  *       201:
  *         description: Respuesta de apoderado creada exitosamente
@@ -537,7 +558,15 @@ router.get(ruta_apoderados_respuestas+'/', sessionAuth, ApoderadoRespuestaServic
  *             schema:
  *               $ref: '#/components/schemas/ApoderadoRespuesta'
  *       400:
- *         description: Datos de entrada inválidos
+ *         description: Datos de entrada inválidos o faltan campos requeridos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "pregunta_id es requerido"
  *       500:
  *         description: Error interno del servidor
  */
@@ -563,7 +592,30 @@ router.post(ruta_apoderados_respuestas+'/:id', sessionAuth, ApoderadoRespuestaSe
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/ApoderadoRespuesta'
+ *             type: object
+ *             properties:
+ *               pregunta_id:
+ *                 type: integer
+ *                 description: ID de la pregunta respondida
+ *               respuesta_posible_id:
+ *                 type: integer
+ *                 nullable: true
+ *                 description: ID de la respuesta posible seleccionada (opcional)
+ *               apoderado_id:
+ *                 type: integer
+ *                 description: ID del apoderado que responde
+ *               alumno_id:
+ *                 type: integer
+ *                 description: ID del alumno relacionado
+ *               texto_respuesta:
+ *                 type: string
+ *                 maxLength: 50
+ *                 nullable: true
+ *                 description: Texto de la respuesta (opcional, máximo 50 caracteres)
+ *               estado_respuesta:
+ *                 type: string
+ *                 maxLength: 20
+ *                 description: Estado de la respuesta (ej. "completado", "pendiente")
  *     responses:
  *       200:
  *         description: Respuesta de apoderado actualizada exitosamente
@@ -571,6 +623,16 @@ router.post(ruta_apoderados_respuestas+'/:id', sessionAuth, ApoderadoRespuestaSe
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApoderadoRespuesta'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "texto_respuesta excede el máximo de 50 caracteres"
  *       404:
  *         description: Respuesta de apoderado no encontrada
  *       500:
