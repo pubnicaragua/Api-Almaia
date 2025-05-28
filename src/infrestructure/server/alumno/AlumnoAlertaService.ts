@@ -258,47 +258,56 @@ export const AlumnoAlertaService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
-  async contarAlertasPendientes(req: Request, res: Response) {
+ async contarAlertasPendientes(req: Request, res: Response) {
     try {
-      const { colegio_id } = req.query; // Obtiene colegio_id de los query params (ej: /alertas/pendientes?colegio_id=1)
+        const { colegio_id } = req.query;
 
-      // Opción 1: Usando JOIN en Supabase (sin necesidad de RPC)
-      const query = client
-        .from("alumnos_alertas")
-        .select("*", { count: "exact", head: true })
-        .eq("estado", "pendiente");
-console.log('paso query');
+        if (colegio_id) {
+            const colegioIdNumber = Number(colegio_id);
+            if (isNaN(colegioIdNumber)) {
+                throw new Error("colegio_id debe ser un número");
+            }
 
-      // Si se proporciona colegio_id, aplicamos JOIN y filtramos
-      if (colegio_id) {
-        const colegioIdNumber = Number(colegio_id); // Aseguramos que sea número
-        if (isNaN(colegioIdNumber)) {
-      throw new Error("colegio_id debe ser un número" );
-         
+            // Primero, obtener IDs de alumnos del colegio
+            const { data: alumnos, error: errorAlumnos } = await client
+                .from("alumnos")
+                .select("alumno_id")
+                .eq("colegio_id", colegioIdNumber);
+
+            if (errorAlumnos) throw errorAlumnos;
+
+            const alumnoIds = alumnos?.map(a => a.alumno_id) || [];
+
+            if (alumnoIds.length === 0) {
+                 res.json({ count: 0 }); // No hay alumnos en ese colegio
+            }
+
+            // Luego, contar alertas pendientes de esos alumnos
+            const { count, error: errorAlertas } = await client
+                .from("alumnos_alertas")
+                .select("*", { count: "exact", head: true })
+                .eq("estado", "pendiente")
+                .in("alumno_id", alumnoIds);
+
+            if (errorAlertas) throw errorAlertas;
+
+            res.json({ count: count || 0 });
+
+        } else {
+            const { count, error } = await client
+                .from("alumnos_alertas")
+                .select("*", { count: "exact", head: true })
+                .eq("estado", "pendiente");
+
+            if (error) throw error;
+
+            res.json({ count: count || 0 });
         }
 
-        const { count, error } = await client
-          .from("alumnos_alertas")
-          .select("alumno:alumno_id(colegio_id)", {
-            count: "exact",
-            head: true,
-          })
-          .eq("estado", "pendiente")
-          .eq("alumno.colegio_id", colegioIdNumber);
-console.log('paso busqueda');
-
-        if (error) throw error;
-         res.json({ count: count || 0 });
-      }
-
-      // Caso sin colegio_id: contamos todas las alertas pendientes
-      const { count, error } = await query;
-      if (error) throw error;
-
-      res.json({ count: count || 0 });
     } catch (error) {
-      console.error("Error en contarAlertasPendientes:", error);
-      res.status(500).json({ error: "Error al contar alertas pendientes" });
+        console.error("Error:", error);
+        res.status(500).json({ error: "Error al contar alertas" });
     }
-  },
+}
+
 };
