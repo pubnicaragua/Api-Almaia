@@ -13,7 +13,7 @@ const UsuarioColegioSchema = Joi.object({
   usuario_id: Joi.number().integer().required(),
   rol_id: Joi.number().integer().required(),
 });
-const dataService: DataService<UsuarioColegio> = new DataService("usuariocolegios");
+const dataService: DataService<UsuarioColegio> = new DataService("usuarios_colegios");
 export const UsuarioColegiosService = {
   async obtener(req: Request, res: Response) {
     try {
@@ -28,6 +28,8 @@ export const UsuarioColegiosService = {
       );
       res.json(usuariocolegios);
     } catch (error) {
+      console.log(error);
+      
       res.status(500).json(error);
     }
   },

@@ -1972,7 +1972,7 @@ router.delete(`${rutas_historiales_comunicaciones}/:id`, sessionAuth, HistorialC
 
 /**
  * @swagger
- * /api/v1/colegio/usuario_colegios/:
+ * /api/v1/colegios/usuarios_colegios:
  *   get:
  *     tags: [UsuarioColegios]
  *     summary: Obtener todas las relaciones usuario-colegio

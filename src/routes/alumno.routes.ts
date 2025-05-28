@@ -1686,6 +1686,8 @@ router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
  */
 router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle);
 
+router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.contarAlertasPendientes);
+
 /**
  * @swagger
  * /api/v1/alumnos/alertas:

@@ -26,7 +26,8 @@ const AlumnoAlertaSchema = Joi.object({
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<AlumnoAlerta> = new DataService(
-  "alumnos_alertas","alumno_alerta_id"
+  "alumnos_alertas",
+  "alumno_alerta_id"
 );
 export const AlumnoAlertaService = {
   async obtener(req: Request, res: Response) {
@@ -114,7 +115,7 @@ export const AlumnoAlertaService = {
       if (error || !data) {
         throw new Error("El colegio no existe");
       }
-      if (alumnoalerta.alerta_regla_id !== undefined){
+      if (alumnoalerta.alerta_regla_id !== undefined) {
         const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
           .from("alertas_reglas")
           .select("*")
@@ -255,6 +256,47 @@ export const AlumnoAlertaService = {
     } catch (error) {
       console.error("Error al eliminar el alumnoalerta:", error);
       res.status(500).json({ message: "Error interno del servidor" });
+    }
+  },
+  async contarAlertasPendientes(req: Request, res: Response) {
+    try {
+      const { colegio_id } = req.query; // Obtiene colegio_id de los query params (ej: /alertas/pendientes?colegio_id=1)
+
+      // Opción 1: Usando JOIN en Supabase (sin necesidad de RPC)
+      const query = client
+        .from("alumno_alerta")
+        .select("*", { count: "exact", head: true })
+        .eq("estado", "pendiente");
+
+      // Si se proporciona colegio_id, aplicamos JOIN y filtramos
+      if (colegio_id) {
+        const colegioIdNumber = Number(colegio_id); // Aseguramos que sea número
+        if (isNaN(colegioIdNumber)) {
+      throw new Error("colegio_id debe ser un número" );
+         
+        }
+
+        const { count, error } = await client
+          .from("alumno_alerta")
+          .select("alumno:alumno_id(colegio_id)", {
+            count: "exact",
+            head: true,
+          })
+          .eq("estado", "pendiente")
+          .eq("alumno.colegio_id", colegioIdNumber);
+
+        if (error) throw error;
+         res.json({ count: count || 0 });
+      }
+
+      // Caso sin colegio_id: contamos todas las alertas pendientes
+      const { count, error } = await query;
+      if (error) throw error;
+
+      res.json({ count: count || 0 });
+    } catch (error) {
+      console.error("Error en contarAlertasPendientes:", error);
+      res.status(500).json({ error: "Error al contar alertas pendientes" });
     }
   },
 };
