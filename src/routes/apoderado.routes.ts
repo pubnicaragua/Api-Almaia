@@ -4,10 +4,12 @@ const router = express.Router();
 import { ApoderadoService } from '../infrestructure/server/apoderado/ApoderadoService';
 import { AlumnoApoderadoService } from '../infrestructure/server/apoderado/AlumnoApoderadoService';
 import { ApoderadoDireccionService } from '../infrestructure/server/apoderado/ApoderadoDireccionService';
+import { ApoderadoRespuestaService } from '../infrestructure/server/apoderado/ApoderadoRespuestaService';
 
 const ruta_apoderados = '/apoderados';
 const ruta_alumnos_apoderados = '/alumnos_apoderados';
 const ruta_apoderados_direcciones = '/apoderados_direcciones';
+const ruta_apoderados_respuestas = '/apoderados_respuestas';
 /**
  * @swagger
  * tags:
@@ -17,6 +19,8 @@ const ruta_apoderados_direcciones = '/apoderados_direcciones';
  *     description: Gestión de relaciones entre alumnos y apoderados
  *   - name: Direcciones de Apoderados
  *     description: Gestión de direcciones de apoderados
+ *   - name: ApoderadoRespuestas
+ *     description: Gestión de respuestas de apoderados
  */
 
 /**
@@ -360,6 +364,244 @@ router.put(ruta_apoderados_direcciones+'/:id', sessionAuth, ApoderadoDireccionSe
  *         description: Error interno del servidor
  */
 router.delete(ruta_apoderados_direcciones+'/:id', sessionAuth, ApoderadoDireccionService.eliminar);
+
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     ApoderadoRespuesta:
+ *       type: object
+ *       properties:
+ *         apoderado_respuesta_id:
+ *           type: integer
+ *           description: ID único de la respuesta
+ *         alumno_id:
+ *           type: integer
+ *           description: ID del alumno relacionado
+ *         apoderado_id:
+ *           type: integer
+ *           description: ID del apoderado que responde
+ *         pregunta_id:
+ *           type: integer
+ *           description: ID de la pregunta respondida
+ *         respuesta_id:
+ *           type: string
+ *           nullable: true
+ *           description: ID de la respuesta seleccionada (si aplica)
+ *         texto_respuesta:
+ *           type: string
+ *           description: Texto de la respuesta
+ *         estado_respuesta:
+ *           type: string
+ *           description: Estado de la respuesta (ej. "completado", "pendiente")
+ *         alumnos:
+ *           type: object
+ *           properties:
+ *             alumno_id:
+ *               type: integer
+ *             url_foto_perfil:
+ *               type: string
+ *             personas:
+ *               type: object
+ *               properties:
+ *                 persona_id:
+ *                   type: integer
+ *                 nombres:
+ *                   type: string
+ *                 apellidos:
+ *                   type: string
+ *         preguntas:
+ *           type: object
+ *           properties:
+ *             pregunta_id:
+ *               type: integer
+ *             nombre:
+ *               type: string
+ *             respuestas_posibles:
+ *               type: object
+ *               properties:
+ *                 respuesta_posible_id:
+ *                   type: integer
+ *                 nombre:
+ *                   type: string
+ *         apoderados:
+ *           type: object
+ *           properties:
+ *             apoderado_id:
+ *               type: integer
+ *             personas:
+ *               type: object
+ *               properties:
+ *                 persona_id:
+ *                   type: integer
+ *                 nombres:
+ *                   type: string
+ *                 apellidos:
+ *                   type: string
+ *             telefono_contacto1:
+ *               type: string
+ *             telefono_contacto2:
+ *               type: string
+ *             email_contacto1:
+ *               type: string
+ *             email_contacto2:
+ *               type: string
+ *         respuestas_posibles:
+ *           type: object
+ *           properties:
+ *             respuesta_posible_id:
+ *               type: integer
+ *             nombre:
+ *               type: string
+ */
+
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados_respuestas:
+ *   get:
+ *     summary: Obtiene todas las respuestas de apoderados
+ *     description: Retorna una lista de respuestas de apoderados con información relacionada de alumnos, preguntas y apoderados
+ *     tags: [ApoderadoRespuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: alumno_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de alumno
+ *       - in: query
+ *         name: apoderado_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de apoderado
+ *       - in: query
+ *         name: pregunta_id
+ *         schema:
+ *           type: integer
+ *         description: Filtrar por ID de pregunta
+ *       - in: query
+ *         name: estado_respuesta
+ *         schema:
+ *           type: string
+ *         description: Filtrar por estado de respuesta
+ *     responses:
+ *       200:
+ *         description: Lista de respuestas de apoderados
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ApoderadoRespuesta'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error interno del servidor
+ */
+router.get(ruta_apoderados_respuestas+'/', sessionAuth, ApoderadoRespuestaService.obtener);
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados_respuestas/{id}:
+ *   post:
+ *     summary: Crea una nueva respuesta de apoderado
+ *     description: Guarda una nueva respuesta de apoderado en el sistema
+ *     tags: [ApoderadoRespuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del registro a crear (¿posible error en la ruta? Normalmente POST no lleva ID en path)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ApoderadoRespuesta'
+ *     responses:
+ *       201:
+ *         description: Respuesta de apoderado creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApoderadoRespuesta'
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(ruta_apoderados_respuestas+'/:id', sessionAuth, ApoderadoRespuestaService.guardar);
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados_respuestas/{id}:
+ *   put:
+ *     summary: Actualiza una respuesta de apoderado existente
+ *     description: Modifica los datos de una respuesta de apoderado
+ *     tags: [ApoderadoRespuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID de la respuesta de apoderado a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ApoderadoRespuesta'
+ *     responses:
+ *       200:
+ *         description: Respuesta de apoderado actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApoderadoRespuesta'
+ *       404:
+ *         description: Respuesta de apoderado no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(ruta_apoderados_respuestas+'/:id', sessionAuth, ApoderadoRespuestaService.actualizar);
+/**
+ * @swagger
+ * /api/v1/apoderados/apoderados_respuestas/{id}:
+ *   delete:
+ *     summary: Elimina una respuesta de apoderado
+ *     description: Elimina permanentemente una respuesta de apoderado del sistema
+ *     tags: [ApoderadoRespuestas]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID de la respuesta de apoderado a eliminar
+ *     responses:
+ *       204:
+ *         description: Respuesta de apoderado eliminada exitosamente
+ *       404:
+ *         description: Respuesta de apoderado no encontrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(ruta_apoderados_respuestas+'/:id', sessionAuth, ApoderadoRespuestaService.eliminar);
 
 /**
  * @swagger

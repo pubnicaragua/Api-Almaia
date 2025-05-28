@@ -702,7 +702,7 @@ router.put(ruta_usuarios+'/:id', sessionAuth, UsuariosService.actualizar);
  *       404:
  *         description: Usuario no encontrado
  */
-router.put('/api/v1/auth/usuarios/generar_clave/:id', sessionAuth, UsuariosService.generar_clave);
+router.put('/generar_clave/:id', sessionAuth, UsuariosService.generar_clave);
 
 /**
  * @swagger
