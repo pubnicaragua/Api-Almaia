@@ -55,7 +55,7 @@ export const AlumnosService = {
           "*",
           "personas(persona_id,nombres,apellidos,fecha_nacimiento,numero_documento,usuarios(usuario_id,rol_id))",
           "colegios(colegio_id,nombre)",
-          "cursos(grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
+          "cursos(curso_id,nombre_curso,grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
         ],
         where
       );
@@ -96,7 +96,7 @@ export const AlumnosService = {
         "*",
         "personas(persona_id,nombres,apellidos,fecha_nacimiento,generos(genero_id,nombre))",
         "colegios(colegio_id,nombre)",
-        "cursos(grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
+        "cursos(curso_id,nombre_curso,grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
       ],
       where
     );
