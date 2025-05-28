@@ -1,3 +1,4 @@
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function mapearInformesConNombres(informes:any) {
   return informes.map((informe: { creado_por: { personas: { nombres: string; apellidos: string; }; }; actualizado_por: { personas: { nombres: string; apellidos: string; }; }; }) => ({
@@ -6,3 +7,4 @@ export function mapearInformesConNombres(informes:any) {
     actualizado_por: `${informe.actualizado_por.personas.nombres} ${informe.actualizado_por.personas.apellidos}`
   }));
 }
+

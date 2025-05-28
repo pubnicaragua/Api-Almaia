@@ -4,6 +4,7 @@ import { UsuarioColegio } from "../../../core/modelo/colegio/UsuarioColegio";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { mapearColegios } from "../../../core/services/ColegioServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -13,23 +14,26 @@ const UsuarioColegioSchema = Joi.object({
   usuario_id: Joi.number().integer().required(),
   rol_id: Joi.number().integer().required(),
 });
-const dataService: DataService<UsuarioColegio> = new DataService("usuarios_colegios");
+const dataService: DataService<UsuarioColegio> = new DataService(
+  "usuarios_colegios"
+);
 export const UsuarioColegiosService = {
   async obtener(req: Request, res: Response) {
     try {
       const usuariocolegios = await dataService.getAll(
         [
           "*",
-          "colegios(colegio_id,nombre)",
+          "colegios(colegio_id,nombre,nombre_fantasia,dependencia,sitio_web,direccion,telefono_contacto,correo_electronico,comuna_id,region_id,pais_id,creado_por,actualizado_por,fecha_creacion,fecha_actualizacion,activo)",
           "usuarios(usuario_id,nombre_social)",
           "roles(rol_id,nombre)",
         ],
         req.query
       );
-      res.json(usuariocolegios);
+      const colegios_maping = await mapearColegios(usuariocolegios);
+      res.json(colegios_maping);
     } catch (error) {
       console.log(error);
-      
+
       res.status(500).json(error);
     }
   },
@@ -41,7 +45,9 @@ export const UsuarioColegiosService = {
       usuariocolegio.creado_por = req.creado_por;
       usuariocolegio.actualizado_por = req.actualizado_por;
       let responseSent = false;
-      const { error: validationError } = UsuarioColegioSchema.validate(req.body);
+      const { error: validationError } = UsuarioColegioSchema.validate(
+        req.body
+      );
       const { data, error } = await client
         .from("colegios")
         .select("*")
@@ -50,15 +56,15 @@ export const UsuarioColegiosService = {
       if (error || !data) {
         throw new Error("El colegio no existe");
       }
-      const { data:dataUsuario, error:errorUsuario } = await client
+      const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
         .select("*")
         .eq("usuario_id", usuariocolegio.usuario_id)
         .single();
       if (errorUsuario || !dataUsuario) {
         throw new Error("El Usuario no existe");
-      } 
-      const { data:dataRol, error:errorRol} = await client
+      }
+      const { data: dataRol, error: errorRol } = await client
         .from("roles")
         .select("*")
         .eq("rol_id", usuariocolegio.rol_id)
@@ -71,7 +77,9 @@ export const UsuarioColegiosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        const usuariocolegioCreado = await dataService.processData(usuariocolegio);
+        const usuariocolegioCreado = await dataService.processData(
+          usuariocolegio
+        );
         res.status(201).json(usuariocolegioCreado);
       }
     } catch (error) {
@@ -86,7 +94,9 @@ export const UsuarioColegiosService = {
       Object.assign(usuariocolegio, req.body);
       usuariocolegio.actualizado_por = req.actualizado_por;
       let responseSent = false;
-      const { error: validationError } = UsuarioColegioSchema.validate(req.body);
+      const { error: validationError } = UsuarioColegioSchema.validate(
+        req.body
+      );
       const { data, error } = await client
         .from("colegios")
         .select("*")
@@ -95,15 +105,15 @@ export const UsuarioColegiosService = {
       if (error || !data) {
         throw new Error("El colegio no existe");
       }
-       const { data:dataUsuario, error:errorUsuario } = await client
+      const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
         .select("*")
         .eq("usuario_id", usuariocolegio.usuario_id)
         .single();
       if (errorUsuario || !dataUsuario) {
         throw new Error("El Usuario no existe");
-      } 
-      const { data:dataRol, error:errorRol} = await client
+      }
+      const { data: dataRol, error: errorRol } = await client
         .from("roles")
         .select("*")
         .eq("rol_id", usuariocolegio.rol_id)
@@ -116,7 +126,10 @@ export const UsuarioColegiosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        const resultado = await dataService.updateById(usuariocolegioId, usuariocolegio);
+        const resultado = await dataService.updateById(
+          usuariocolegioId,
+          usuariocolegio
+        );
         res.status(200).json(resultado);
       }
     } catch (error) {

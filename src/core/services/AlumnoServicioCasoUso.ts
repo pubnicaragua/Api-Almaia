@@ -125,3 +125,16 @@ export class AlumnoServicioCasoUso {
     };
   }
 }
+export async function contarAlumnosPorColegio(client: SupabaseClient, colegio_id: number): Promise<number> {
+  const { count, error } = await client
+    .from("alumnos")
+    .select("*", { count: "exact", head: true })
+    .eq("colegio_id", colegio_id);
+
+  if (error) {
+    console.error(`Error al contar alumnos del colegio ${colegio_id}:`, error.message);
+    return 0;
+  }
+
+  return count ?? 0;
+}
