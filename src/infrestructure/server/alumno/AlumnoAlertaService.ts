@@ -44,13 +44,13 @@ export const AlumnoAlertaService = {
           tableIn: "alumnos_alertas",
           inField: "alumno_id",
           selectFields: `*,
-            alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
-            "alertas_reglas(alerta_regla_id,nombre)",
-            "alertas_origenes(alerta_origen_id,nombre)",
-            "alertas_severidades(alerta_severidad_id,nombre)",
-            "alertas_prioridades(alerta_prioridad_id,nombre)",
-            "alertas_tipos(alerta_tipo_id,nombre)",
-            "personas(persona_id,nombres,apellidos) `,
+            alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos)),
+            alertas_reglas(alerta_regla_id,nombre),
+            alertas_origenes(alerta_origen_id,nombre),
+            alertas_severidades(alerta_severidad_id,nombre),
+            alertas_prioridades(alerta_prioridad_id,nombre),
+            alertas_tipos(alerta_tipo_id,nombre),
+            personas(persona_id,nombres,apellidos) `,
         });
         respuestaEnviada = true;
         res.json(mapearAlertas(alumnoalertaAlerta_data));
