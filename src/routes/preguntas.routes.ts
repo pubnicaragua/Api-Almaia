@@ -363,6 +363,8 @@ router.get( ruta_alumno_respuesta, sessionAuth, AlumnoRespuestaService.obtener);
  */
 router.post( ruta_alumno_respuesta, sessionAuth, AlumnoRespuestaService.guardar);
 
+router.post( '/responder', sessionAuth, AlumnoRespuestaSeleccionService.responder);
+
 /**
  * @swagger
  * /api/v1/preguntas/alumnos_respuestas/{id}:

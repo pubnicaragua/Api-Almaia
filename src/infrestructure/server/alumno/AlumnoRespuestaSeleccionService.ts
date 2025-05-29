@@ -82,11 +82,15 @@ export const AlumnoRespuestaSeleccionService = {
       if (errorCurso || !dataCurso) {
         throw new Error("La pregunta no existe");
       }
-       const { data:dataRespuestaPosible, error: errorRespuestaPosible } = await client
-        .from("respuestas_posibles")
-        .select("*")
-        .eq("respuesta_posible_id", alumnoRespuestaSeleccion.respuesta_posible_id)
-        .single();
+      const { data: dataRespuestaPosible, error: errorRespuestaPosible } =
+        await client
+          .from("respuestas_posibles")
+          .select("*")
+          .eq(
+            "respuesta_posible_id",
+            alumnoRespuestaSeleccion.respuesta_posible_id
+          )
+          .single();
       if (errorRespuestaPosible || !dataRespuestaPosible) {
         throw new Error("La respuesta no existe");
       }
@@ -116,7 +120,7 @@ export const AlumnoRespuestaSeleccionService = {
       let responseSent = false;
       const { error: validationError } =
         AlumnoRespuestaSeleccionSchema.validate(req.body);
-     const { data, error } = await client
+      const { data, error } = await client
         .from("alumnos")
         .select("*")
         .eq("alumno_id", alumnoRespuestaSeleccion.alumno_id)
@@ -132,11 +136,15 @@ export const AlumnoRespuestaSeleccionService = {
       if (errorCurso || !dataCurso) {
         throw new Error("La pregunta no existe");
       }
-       const { data:dataRespuestaPosible, error: errorRespuestaPosible } = await client
-        .from("respuestas_posibles")
-        .select("*")
-        .eq("respuesta_posible_id", alumnoRespuestaSeleccion.respuesta_posible_id)
-        .single();
+      const { data: dataRespuestaPosible, error: errorRespuestaPosible } =
+        await client
+          .from("respuestas_posibles")
+          .select("*")
+          .eq(
+            "respuesta_posible_id",
+            alumnoRespuestaSeleccion.respuesta_posible_id
+          )
+          .single();
       if (errorRespuestaPosible || !dataRespuestaPosible) {
         throw new Error("La respuesta no existe");
       }
@@ -167,5 +175,30 @@ export const AlumnoRespuestaSeleccionService = {
       console.error("Error al eliminar el curso del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
     }
+  },
+  async responder(req: Request, res: Response) {
+    const { alumno_id, pregunta_id, respuesta_posible_id } = req.body;
+
+    if (!alumno_id || !pregunta_id || !respuesta_posible_id) {
+      throw new Error("Faltan datos obligatorios.");
+    }
+
+    const respuesta = new AlumnoRespuestaSeleccion();
+    respuesta.alumno_id = alumno_id;
+    respuesta.pregunta_id = pregunta_id;
+    respuesta.respuesta_posible_id = respuesta_posible_id;
+    const { error } = await client
+      .from("alumnos_respuestas_seleccion")
+      .update({ respuesta_posible_id: respuesta.respuesta_posible_id })
+      .match({
+        alumno_id: respuesta.alumno_id,
+        pregunta_id: respuesta.pregunta_id,
+      });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    res.json({ message: "Respuesta actualizada correctamente." });
   },
 };

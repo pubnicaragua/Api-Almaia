@@ -119,11 +119,6 @@ export const AlumnosService = {
       throw new Error(error_alertas.message);
     }
     const alertas = mapearAlertas(alertas_data)
-    console.log('data',alertas_data);
-    console.log(
-      'mapeada',alertas
-    );
-    
     const { data: informes, error: error_informes } = await client
       .from("alumnos_informes")
       .select("*")
