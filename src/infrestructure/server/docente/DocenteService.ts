@@ -29,7 +29,7 @@ export const DocentesService = {
       const docente = await dataService.getAll(
         [
           "*",
-          "personas(persona_id,nombres,apellidos)",
+          "personas(*,persona_id,nombres,apellidos)",
           "colegios(colegio_id,nombre)",
         ],
         where
@@ -47,7 +47,7 @@ export const DocentesService = {
       const docente_data = await dataService.getAll(
         [
           "*",
-          "personas(persona_id,nombres,apellidos)",
+          "personas(*,persona_id,estados_civiles(estado_civil_id,nombre),generos(genero_id,nombre))",
           "colegios(colegio_id,nombre)",
         ],
         where
