@@ -15,6 +15,7 @@ import { DataService } from "../DataService";
 import { AlertStats } from "../../../core/modelo/home/AlertStats";
 import { obtenerCalendarioPorColegio } from "../../../core/services/CalendarioEscolarCasoUso";
 import { obtenerIdColegio } from "../../../core/services/ColegioServiceCasoUso";
+import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -25,10 +26,13 @@ const dataService: DataService<CalendarioFechaImportante> = new DataService(
 export const DashboardHomeService = {
   async getStatsCards(req: Request, res: Response, next: NextFunction) {
     try {
-      const { colegio_id:colegio_id_query } = req.query;
-      let colegio_id=0;
+      const { colegio_id: colegio_id_query } = req.query;
+      let colegio_id = 0;
       const sevenDaysAgo = startOfDay(subDays(new Date(), 7)).toISOString();
-      colegio_id = await obtenerIdColegio(colegio_id_query, req.user.usuario_id);
+      colegio_id = await obtenerIdColegio(
+        colegio_id_query,
+        req.user.usuario_id
+      );
       const alumnoServicioCasoUso = new AlumnoServicioCasoUso(colegio_id);
       const calendario_escolar = obtenerCalendarioPorColegio(colegio_id);
       const alumnnos = await alumnoServicioCasoUso.obtenerAlumnosColegio();
@@ -36,11 +40,13 @@ export const DashboardHomeService = {
         alumnoServicioCasoUso.obtenerCantidadAlumnos(colegio_id),
         alumnoServicioCasoUso.obntenerConteoporTabla(
           "alumnos_respuestas",
-          sevenDaysAgo,alumnnos
+          sevenDaysAgo,
+          alumnnos
         ),
         alumnoServicioCasoUso.obntenerConteoporTabla(
           "alumno_respuesta_seleccion",
-          sevenDaysAgo,alumnnos
+          sevenDaysAgo,
+          alumnnos
         ),
       ]);
       // Obtener datos de actividad
@@ -50,11 +56,26 @@ export const DashboardHomeService = {
       const alertas_services_caso_uso = new AlertasServicioCasoUso();
       const [sosStats, denunciaStats, amarillaStats, naranjaStats, rojaStats] =
         await Promise.all([
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.SOS,colegio_id),
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.DENUNCIA,colegio_id),
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ALMARILLA,colegio_id),
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.NARANJA,colegio_id),
-          alertas_services_caso_uso.getAlertStatsByType(ALERT_TYPES.ROJA,colegio_id),
+          alertas_services_caso_uso.getAlertStatsByType(
+            ALERT_TYPES.SOS,
+            colegio_id
+          ),
+          alertas_services_caso_uso.getAlertStatsByType(
+            ALERT_TYPES.DENUNCIA,
+            colegio_id
+          ),
+          alertas_services_caso_uso.getAlertStatsByType(
+            ALERT_TYPES.ALMARILLA,
+            colegio_id
+          ),
+          alertas_services_caso_uso.getAlertStatsByType(
+            ALERT_TYPES.NARANJA,
+            colegio_id
+          ),
+          alertas_services_caso_uso.getAlertStatsByType(
+            ALERT_TYPES.ROJA,
+            colegio_id
+          ),
         ]);
       const alumnosFrecuentes =
         alumnoServicioCasoUso.calcularAlumnosFrecuentes(responses);
@@ -114,23 +135,35 @@ export const DashboardHomeService = {
 
   // Función para obtener emociones generales
   async getEmotionDataGeneral(req: Request, res: Response) {
-    const data: Emotion[] = [
+    const { data: data_emociones, error } = await client.rpc(
+      "obtener_cantidades_pregunta_3"
+    );
+
+    if (error) {
+      console.error("Error al obtener cantidades:", error);
+    } else {
+      console.log("Resultados:", data_emociones);
+    }
+    const data = mapEmotions(data_emociones);
+
+    /*const data: Emotion[] = [
       { name: "Tristeza", value: 2000, color: "#3b82f6" },
       { name: "Felicidad", value: 4000, color: "#facc15" },
       { name: "Estrés", value: 1800, color: "#6b7280" },
       { name: "Ansiedad", value: 3200, color: "#fb923c" },
       { name: "Enojo", value: 1200, color: "#ef4444" },
       { name: "Otros", value: 2800, color: "#a855f7" },
-    ];
+    ];*/
     res.json(data);
   },
 
   // Función para datos de gráfico circular
   async getDonutData(req: Request, res: Response) {
     const alertas_services_caso_uso = new AlertasServicioCasoUso();
-          const { colegio_id } = req.query;
+    const { colegio_id } = req.query;
 
-    const data: DonutData[] = await alertas_services_caso_uso.getAlertasDonutData(colegio_id)
+    const data: DonutData[] =
+      await alertas_services_caso_uso.getAlertasDonutData(colegio_id);
     res.json(data);
   },
 
