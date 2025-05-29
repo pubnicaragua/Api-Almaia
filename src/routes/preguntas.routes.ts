@@ -362,8 +362,9 @@ router.get( ruta_alumno_respuesta, sessionAuth, AlumnoRespuestaService.obtener);
  *         description: Error interno del servidor
  */
 router.post( ruta_alumno_respuesta, sessionAuth, AlumnoRespuestaService.guardar);
-
+//documentar
 router.post( '/responder', sessionAuth, AlumnoRespuestaSeleccionService.responder);
+router.post( '/responder_miltiple', sessionAuth, AlumnoRespuestaSeleccionService.responder);
 
 /**
  * @swagger
