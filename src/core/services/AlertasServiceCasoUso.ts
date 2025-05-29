@@ -110,8 +110,8 @@ export class AlertasServicioCasoUso {
 
     // Contar ocurrencias por estado
     const counts: Record<string, number> = {};
-   data.forEach((item) => {
-  const key = String(item.estado).toLowerCase();
+    data.forEach((item) => {
+      const key = String(item.estado).toLowerCase();
       counts[key] = (counts[key] || 0) + 1;
     });
 
@@ -131,10 +131,10 @@ export class AlertasServicioCasoUso {
 }
 export function mapearAlertas(alertas: any[]): AlertaMapeada[] {
   return alertas.map((alerta) => {
-    const { ...rest } = alerta;
+    const { personas, ...rest } = alerta;
     return {
       ...rest,
-      persona_responsable_actual: alerta.personas,
+      persona_responsable_actual: personas,
     };
   });
 }
@@ -187,41 +187,39 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
   });
 }
 export async function contarAlertasPendientesPorColegio(
-    client: SupabaseClient,
-    colegioId: number
+  client: SupabaseClient,
+  colegioId: number
 ): Promise<number> {
-    try {
-        // 1. Obtener los IDs de alumnos que pertenecen al colegio
-        const { data: alumnos, error: errorAlumnos } = await client
-            .from("alumnos")
-            .select("alumno_id")
-            .eq("colegio_id", colegioId);
+  try {
+    // 1. Obtener los IDs de alumnos que pertenecen al colegio
+    const { data: alumnos, error: errorAlumnos } = await client
+      .from("alumnos")
+      .select("alumno_id")
+      .eq("colegio_id", colegioId);
 
-        if (errorAlumnos) throw errorAlumnos;
+    if (errorAlumnos) throw errorAlumnos;
 
-        const alumnoIds = alumnos?.map(a => a.alumno_id) || [];
+    const alumnoIds = alumnos?.map((a) => a.alumno_id) || [];
 
-        if (alumnoIds.length === 0) {
-            return 0; // No hay alumnos en el colegio
-        }
-
-        // 2. Contar las alertas pendientes de esos alumnos
-        const { count, error: errorAlertas } = await client
-            .from("alumnos_alertas")
-            .select("*", { count: "exact", head: true })
-            .eq("estado", "pendiente")
-            .in("alumno_id", alumnoIds);
-
-        if (errorAlertas) throw errorAlertas;
-
-        return count || 0;
-    } catch (error) {
-        console.error("Error en contarAlertasPendientesPorColegio:", error);
-        throw new Error("No se pudo contar las alertas pendientes.");
+    if (alumnoIds.length === 0) {
+      return 0; // No hay alumnos en el colegio
     }
+
+    // 2. Contar las alertas pendientes de esos alumnos
+    const { count, error: errorAlertas } = await client
+      .from("alumnos_alertas")
+      .select("*", { count: "exact", head: true })
+      .eq("estado", "pendiente")
+      .in("alumno_id", alumnoIds);
+
+    if (errorAlertas) throw errorAlertas;
+
+    return count || 0;
+  } catch (error) {
+    console.error("Error en contarAlertasPendientesPorColegio:", error);
+    throw new Error("No se pudo contar las alertas pendientes.");
+  }
 }
-
-
 
 const colores: Record<string, string> = {
   pendiente: "#facc15",

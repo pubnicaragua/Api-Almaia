@@ -8,6 +8,7 @@ import { ComparativaDato } from "../../../core/modelo/alumno/ComparativaDato";
 import { Usuario } from "../../../core/modelo/auth/Usuario";
 import { Persona } from "../../../core/modelo/Persona";
 import { buscarAlumnos } from "../../../core/services/AlumnoServicioCasoUso";
+import { mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -108,15 +109,21 @@ export const AlumnosService = {
     if (error_ant_clinicos) {
       throw new Error(error_ant_clinicos.message);
     }
-    const { data: alertas, error: error_alertas } = await client
+    const { data: alertas_data, error: error_alertas } = await client
       .from("alumnos_alertas")
       .select(
-        "*,alertas_reglas(alerta_regla_id,nombre),alertas_origenes(alerta_origen_id,nombre),alertas_severidades(alerta_severidad_id,nombre)alertas_prioridades(alerta_prioridad_id,nombre),alertas_tipos(alerta_tipo_id,nombre)"
+        "*,personas(persona_id,nombres,apellidos),alertas_reglas(alerta_regla_id,nombre),alertas_origenes(alerta_origen_id,nombre),alertas_severidades(alerta_severidad_id,nombre)alertas_prioridades(alerta_prioridad_id,nombre),alertas_tipos(alerta_tipo_id,nombre)"
       )
       .eq("alumno_id", alumno.alumno_id);
     if (error_alertas) {
       throw new Error(error_alertas.message);
     }
+    const alertas = mapearAlertas(alertas_data)
+    console.log('data',alertas_data);
+    console.log(
+      'mapeada',alertas
+    );
+    
     const { data: informes, error: error_informes } = await client
       .from("alumnos_informes")
       .select("*")
