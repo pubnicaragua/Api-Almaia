@@ -1,4 +1,5 @@
-//import { FuncionalidadRol } from "../modelo/auth/FuncionalidadRol";
+
+import { FuncionalidadRol } from "../modelo/auth/FuncionalidadRol";
 import { Perfil } from "../modelo/auth/Perfil";
 import { PerfilEntrada } from "../modelo/auth/PerfilEntrada";
 
@@ -33,12 +34,12 @@ export function mapearDatos(data: PerfilEntrada): Perfil {
       nombre: data.roles.nombre,
       descripcion: data.roles.descripcion
     },
-    funcionalidades:[], //mapearFuncionalidades(data.roles.funcionalidades_rol)
+    funcionalidades:mapearFuncionalidades(data.roles.funcionalidades_roles)
   };
 }
-/*function mapearFuncionalidades(funcionalidades_roles: FuncionalidadRol[]) {
+function mapearFuncionalidades(funcionalidades_roles: FuncionalidadRol[]) {
   return funcionalidades_roles.map(fr => ({
     id: fr.funcionalidad_id,
     nombre: fr.funcionalidades?.descripcion
   }));
-}*/
+}

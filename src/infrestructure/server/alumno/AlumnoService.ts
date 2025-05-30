@@ -36,7 +36,7 @@ const UsuarioUpdateSchema = Joi.object({
   telefono_contacto: Joi.string().max(150).required(),
   url_foto_perfil: Joi.string().max(255).required(),
   persona_id: Joi.number().integer().optional(),
-  idioma_id: Joi.number().integer().required(),
+  idioma_id: Joi.number().integer().optional(),
 });
 const dataUsuarioService: DataService<Usuario> = new DataService(
   "usuarios",
@@ -248,8 +248,6 @@ res.status(500).json({ message: (error as Error).message });
       const usuarioId = parseInt(req.params.id);
       const usuario = new Usuario();
       const persona = new Persona();
-      // Asignar directamente las propiedades correspondientes
-
       Object.assign(usuario, {
         nombre_social: req.body.nombre_social,
         email: req.body.email,
@@ -260,15 +258,7 @@ res.status(500).json({ message: (error as Error).message });
       usuario.actualizado_por = req.actualizado_por;
       let responseSent = false;
       const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
-      const { data, error } = await client
-        .from("roles")
-        .select("*")
-        .eq("rol_id", usuario.rol_id)
-        .single();
-      if (error || !data) {
-        throw new Error("El rol no existe");
-      }
-      const { data: dataUsuario, error: errorUsuario } = await client
+          const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
         .select("*")
         .eq("usuario_id", usuarioId)
@@ -278,6 +268,7 @@ res.status(500).json({ message: (error as Error).message });
       }
       usuario.persona_id = dataUsuario.persona_id;
       usuario.rol_id = dataUsuario.rol_id
+      usuario.idioma_id = dataUsuario.idioma_id
       const { data: dataPersona, error: errorPersona } = await client
         .from("personas")
         .select("*")
@@ -291,14 +282,6 @@ res.status(500).json({ message: (error as Error).message });
       persona.apellidos = req.body.apellidos;
       persona.fecha_nacimiento = req.body.fecha_nacimiento;
       persona.numero_documento = req.body.numero_documento;
-      const { data: dataIdioma, error: errorIdioma } = await client
-        .from("idiomas")
-        .select("*")
-        .eq("idioma_id", usuario.idioma_id)
-        .single();
-      if (errorIdioma || !dataIdioma) {
-        throw new Error("El nivel educativo no existe");
-      }
       if (validationError) {
         responseSent = true;
         throw new Error(validationError.details[0].message);
