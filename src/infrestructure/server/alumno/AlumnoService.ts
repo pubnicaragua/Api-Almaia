@@ -118,7 +118,7 @@ export const AlumnosService = {
     if (error_alertas) {
       throw new Error(error_alertas.message);
     }
-    const alertas = mapearAlertas(alertas_data)
+    const alertas = mapearAlertas(alertas_data);
     const { data: informes, error: error_informes } = await client
       .from("alumnos_informes")
       .select("*")
@@ -291,8 +291,8 @@ export const AlumnosService = {
       Object.assign(persona, dataPersona);
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
-      persona.fecha_nacimiento = req.body.fecha_nacimiento
-      persona.numero_documento = req.body.numero_documento
+      persona.fecha_nacimiento = req.body.fecha_nacimiento;
+      persona.numero_documento = req.body.numero_documento;
       const { data: dataIdioma, error: errorIdioma } = await client
         .from("idiomas")
         .select("*")
@@ -335,19 +335,27 @@ export const AlumnosService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
-   async buscar(req: Request, res: Response) {
+  async buscar(req: Request, res: Response) {
     const { termino } = req.body;
+    const { colegio_id } = req.query;
 
-    if (!termino || typeof termino !== 'string') {
-      throw new Error("Debe proporcionar un campo 'termino' en el cuerpo de la solicitud")
+    if (!termino || typeof termino !== "string") {
+      throw new Error(
+        "Debe proporcionar un campo 'termino' en el cuerpo de la solicitud"
+      );
     }
 
     try {
-      const resultados = await buscarAlumnos(client,termino);
+      let resultados;
+      if (colegio_id !== undefined) {
+        resultados = await buscarAlumnos(client, termino,colegio_id);
+      }
+      resultados = await buscarAlumnos(client, termino);
+
       res.json(resultados);
-    }catch (error) {
+    } catch (error) {
       console.error("Error al actualizar la alerta evidencia:", error);
       res.status(500).json({ message: "Error interno del servidor" });
     }
-   }
+  },
 };

@@ -138,9 +138,18 @@ export async function contarAlumnosPorColegio(client: SupabaseClient, colegio_id
 
   return count ?? 0;
 }
-export async function buscarAlumnos(client: SupabaseClient, termino: string) {
+export async function buscarAlumnos(
+  client: SupabaseClient, 
+  termino: string, 
+  colegioId?: any | null
+) {
+  const params = {
+    termino,
+    colegio_id_param: colegioId !== undefined ? colegioId : null
+  };
+
   const { data, error } = await client
-    .rpc("buscar_alumnos", { termino });
+    .rpc("buscar_alumnos", params);
 
   if (error) {
     console.error("Error buscando alumnos:", error);
