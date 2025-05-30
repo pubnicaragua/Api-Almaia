@@ -13,6 +13,7 @@ interface PersonaEntrada {
 }
 
 interface RolEntrada {
+  funcionalidades_rol: FuncionalidadRol[];
   rol_id: number;
   nombre: string;
   descripcion: string;
