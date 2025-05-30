@@ -135,16 +135,30 @@ export const DashboardHomeService = {
 
   // Función para obtener emociones generales
   async getEmotionDataGeneral(req: Request, res: Response) {
-    const { data: data_emociones, error } = await client.rpc(
-      "obtener_cantidades_pregunta_3"
-    );
-
-    if (error) {
-      console.error("Error al obtener cantidades:", error);
+    const { colegio_id } = req.query;
+    let data;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3",
+        {
+          p_colegio_id: colegio_id || null,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapEmotions(data_emociones);
+      }
     } else {
-      console.log("Resultados:", data_emociones);
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3"
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapEmotions(data_emociones);
+      }
     }
-    const data = mapEmotions(data_emociones);
 
     /*const data: Emotion[] = [
       { name: "Tristeza", value: 2000, color: "#3b82f6" },
