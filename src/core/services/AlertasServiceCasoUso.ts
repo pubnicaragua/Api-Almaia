@@ -146,6 +146,7 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
     return {
       id: rest.alumno_alerta_id,
       student: {
+        alumno_id: rest.alumnos.alumno_id,
         name: `${rest.alumnos.personas.nombres} ${rest.alumnos.personas.apellidos}`,
         course: rest.alumnos?.alumnos_cursos[0]?.cursos?.nombre_curso, // Este dato no está en la estructura original, se asume
         image: rest.alumnos.url_foto_perfil,

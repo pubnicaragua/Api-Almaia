@@ -17,6 +17,9 @@ export const DashboardComparativaService = {
       
       
       getAlertsLineChartData  (req: Request, res: Response)  {
+
+
+        
         const data: AlertData[] = [
           { month: 'Ene', courseA: 1200, courseB: 1500 },
           { month: 'Feb', courseA: 900, courseB: 1200 },
