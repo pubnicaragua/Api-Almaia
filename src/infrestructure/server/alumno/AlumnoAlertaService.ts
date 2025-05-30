@@ -188,9 +188,7 @@ export const AlumnoAlertaService = {
         if (error) {
           throw new Error(`Error al actualizar lectura: ${error.message}`);
         } else {
-          res
-            .status(200)
-            .json({ message: "Se actualizo estado de lectura" });
+          res.status(200).json({ message: "Se actualizo estado de lectura" });
         }
       } else {
         const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
