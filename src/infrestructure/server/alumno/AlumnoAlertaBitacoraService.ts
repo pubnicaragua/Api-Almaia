@@ -16,9 +16,12 @@ export const AlumnoAlertaBitacoraService = {
     },
     guardar: async (req: Request, res: Response) => {
         try {
-            const alumnoAlertaBitacora: AlumnoAlertaBitacora = req.body;
-            const savedAlumnoAlertaBitacora = await dataService.processData(alumnoAlertaBitacora);
-            res.status(201).json(savedAlumnoAlertaBitacora);
+         const alumnoAlertaBitacora: AlumnoAlertaBitacora = new AlumnoAlertaBitacora();
+         Object.assign(alumnoAlertaBitacora, req.body);
+         alumnoAlertaBitacora.creado_por = req.creado_por;
+         alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
+         const savedAlumnoAlertaBitacora = await dataService.processData(alumnoAlertaBitacora);
+        res.status(201).json(savedAlumnoAlertaBitacora);
         } catch (error) {
             console.error("Error al guardar la alerta:", error);
             res.status(500).json({ message: "Error interno del servidor" });
