@@ -348,10 +348,13 @@ export const AlumnosService = {
     try {
       let resultados;
       if (colegio_id !== undefined) {
-        resultados = await buscarAlumnos(client, termino,colegio_id);
+        resultados = await buscarAlumnos(client, termino, colegio_id);
+      } else {
+        resultados = await buscarAlumnos(client, termino);
       }
-      resultados = await buscarAlumnos(client, termino);
-
+      if (resultados === null) {
+        resultados = [];
+      }
       res.json(resultados);
     } catch (error) {
       console.error("Error al actualizar la alerta evidencia:", error);
