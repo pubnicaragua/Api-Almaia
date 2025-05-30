@@ -32,8 +32,7 @@ const UsuarioUpdateSchema = Joi.object({
   apellidos: Joi.string().max(35).optional(),
   fecha_nacimiento: Joi.string().optional(),
   numero_documento: Joi.string().optional(),
-  rol_id: Joi.number().integer().required(),
-  alumno_id: Joi.number().integer().required(),
+  alumno_id: Joi.number().integer().optional(),
   telefono_contacto: Joi.string().max(150).required(),
   url_foto_perfil: Joi.string().max(255).required(),
   persona_id: Joi.number().integer().optional(),
@@ -252,7 +251,6 @@ res.status(500).json({ message: (error as Error).message });
       // Asignar directamente las propiedades correspondientes
 
       Object.assign(usuario, {
-        rol_id: req.body.rol_id,
         nombre_social: req.body.nombre_social,
         email: req.body.email,
         telefono_contacto: req.body.telefono_contacto,
@@ -279,7 +277,7 @@ res.status(500).json({ message: (error as Error).message });
         throw new Error("El usuario no existe");
       }
       usuario.persona_id = dataUsuario.persona_id;
-
+      usuario.rol_id = dataUsuario.rol_id
       const { data: dataPersona, error: errorPersona } = await client
         .from("personas")
         .select("*")

@@ -12,7 +12,7 @@ export const PerfilService = {
     const { data: usuario_data, error: error_usuario } = await client
       .from("usuarios")
       .select(
-        "*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion)"
+        "*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion,funcionalidades_roles(*,funcionalidad_rol_id,funcionalidades(*,funcinalidad_id)))"
       )
       .eq("usuario_id", req.user.usuario_id)
       .single();

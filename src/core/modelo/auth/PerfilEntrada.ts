@@ -1,3 +1,5 @@
+import { FuncionalidadRol } from "./FuncionalidadRol";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 interface PersonaEntrada {
   persona_id: number;
@@ -20,6 +22,7 @@ interface RolEntrada {
 
 
 export interface PerfilEntrada {
+  funcionalidades_rol: FuncionalidadRol[];
    usuario_id: number;
   nombre_social: string;
   email: string;
