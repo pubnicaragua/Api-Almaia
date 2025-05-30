@@ -95,7 +95,7 @@ export const AlumnosService = {
     const data_alumno = await dataService.getAll(
       [
         "*",
-        "personas(persona_id,nombres,apellidos,fecha_nacimiento,generos(genero_id,nombre))",
+        "personas(*,persona_id,nombres,apellidos,fecha_nacimiento,generos(genero_id,nombre))",
         "colegios(colegio_id,nombre)",
         "cursos(curso_id,nombre_curso,grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
       ],
@@ -240,8 +240,8 @@ export const AlumnosService = {
         res.status(200).json({ message: "Alumno actualizado correctamente" });
       }
     } catch (error) {
-      console.error("Error al actualizar el alumno:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+res.status(500).json({ message: (error as Error).message });
+
     }
   },
   async actualizarPerfil(req: Request, res: Response) {
@@ -320,9 +320,7 @@ export const AlumnosService = {
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
-      console.log(error);
-
-      res.status(500).json(error);
+res.status(500).json({ message: (error as Error).message });
     }
   },
   async eliminar(req: Request, res: Response) {
@@ -331,8 +329,7 @@ export const AlumnosService = {
       await dataService.deleteById(id);
       res.status(200).json({ message: "Alumno eliminado correctamente" });
     } catch (error) {
-      console.error("Error al eliminar el alumno:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+     res.status(500).json({ message: (error as Error).message });
     }
   },
   async buscar(req: Request, res: Response) {
@@ -357,8 +354,7 @@ export const AlumnosService = {
       }
       res.json(resultados);
     } catch (error) {
-      console.error("Error al actualizar la alerta evidencia:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+res.status(500).json({ message: (error as Error).message });
     }
   },
 };
