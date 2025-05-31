@@ -182,6 +182,7 @@ router.get("/cards/emociones", sessionAuth, DashboardHomeService.getStatsCards);
  *               error: "Error al recuperar los datos de emociones"
  */
 router.get("/barra/emociones", sessionAuth, DashboardHomeService.getEmotionsData);
+router.get("/barra/patologias", sessionAuth, DashboardHomeService.getEmotionDataPatologia);
 /**
  * @swagger
  * /api/v1/home/emotions/general:

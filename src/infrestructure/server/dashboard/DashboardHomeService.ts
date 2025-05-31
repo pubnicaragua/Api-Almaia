@@ -171,6 +171,38 @@ export const DashboardHomeService = {
     res.json(data);
   },
 
+  async getEmotionDataPatologia(req: Request, res: Response) {
+    const { colegio_id } = req.query;
+    let data;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_por_diagnostico",
+        {
+          p_colegio_id: colegio_id || null,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        console.log(data_emociones);
+        
+        data = mapEmotions(data_emociones);
+      }
+    } else {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_por_diagnostico"
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+                console.log(data_emociones);
+
+        data = mapEmotions(data_emociones);
+      }
+    }
+    res.json(data);
+  },
+
   // Función para datos de gráfico circular
   async getDonutData(req: Request, res: Response) {
     const alertas_services_caso_uso = new AlertasServicioCasoUso();
