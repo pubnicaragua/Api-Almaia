@@ -1,11 +1,11 @@
 export class AlertData {
     month: string;
-    courseA: number;
-    courseB: number;
+    vencidas: number;
+    agtendidas: number;
   
     constructor() {
       this.month = '';
-      this.courseA = 0;
-      this.courseB = 0;
+      this.vencidas = 0;
+      this.agtendidas = 0;
     }
   }

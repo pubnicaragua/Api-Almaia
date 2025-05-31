@@ -142,7 +142,67 @@ router.get('/emotions/course', sessionAuth, DashboardComparativaService.getEmoti
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/alerts/totales', sessionAuth, DashboardComparativaService.getAlertsLineChartData);
+router.get('/alerts/totales', sessionAuth, DashboardComparativaService.obtenerGestorAlertasHoy);
+/**
+ * @swagger
+ * /api/v1/comparativa/alerts/historial:
+ *   get:
+ *     tags:
+ *       - Dashboard Comparativa
+ *     summary: Obtiene el historial de alertas para un colegio específico
+ *     description: Retorna el historial de alertas filtrado por el ID del colegio
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: colegio_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del colegio para filtrar el historial de alertas
+ *     responses:
+ *       200:
+ *         description: Historial de alertas obtenido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "success"
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         example: 1
+ *                       alerta_id:
+ *                         type: integer
+ *                         example: 5
+ *                       colegio_id:
+ *                         type: integer
+ *                         example: 10
+ *                       fecha:
+ *                         type: string
+ *                         format: date-time
+ *                         example: "2023-05-15T14:30:00Z"
+ *                       estado:
+ *                         type: string
+ *                         example: "resuelta"
+ *                       detalles:
+ *                         type: string
+ *                         example: "Se detectó un problema en el área de matemáticas"
+ *       400:
+ *         description: Parámetro colegio_id faltante o inválido
+ *       401:
+ *         description: No autorizado (sesión no válida)
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/alerts/historial', sessionAuth, DashboardComparativaService.obtenerGestorHistorial);
 
 /**
  * @swagger
