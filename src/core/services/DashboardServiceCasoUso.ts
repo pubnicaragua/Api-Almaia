@@ -2,6 +2,7 @@
 import { AlertData } from "../modelo/dashboard/AlertData";
 import { Emotion } from "../modelo/dashboard/Emotion";
 import { emotionColors } from "../modelo/dashboard/EmotionColor";
+import { patologiaColors } from "../modelo/dashboard/PatologiaColors";
 
 export function mapEmotions(
   respuestas: { nombre: string; cantidad: number }[]
@@ -18,7 +19,7 @@ export function mapPatologia(
   return respuestas.map((r) => ({
     name: r.diagnostico,
     value: r.cantidad,
-    color: emotionColors[r.diagnostico] || "#000000", // color por defecto si no está
+    color: patologiaColors[r.diagnostico] || "#000000", // color por defecto si no está
   }));
 }
 const monthMap: { [key: string]: string } = {

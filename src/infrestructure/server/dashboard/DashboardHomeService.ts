@@ -15,7 +15,7 @@ import { DataService } from "../DataService";
 import { AlertStats } from "../../../core/modelo/home/AlertStats";
 import { obtenerCalendarioPorColegio } from "../../../core/services/CalendarioEscolarCasoUso";
 import { obtenerIdColegio } from "../../../core/services/ColegioServiceCasoUso";
-import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
+import { mapEmotions, mapPatologia } from "../../../core/services/DashboardServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -186,7 +186,7 @@ export const DashboardHomeService = {
       } else {
         console.log(data_emociones);
         
-        data = mapEmotions(data_emociones);
+        data = mapPatologia(data_emociones);
       }
     } else {
       const { data: data_emociones, error } = await client.rpc(
@@ -197,7 +197,7 @@ export const DashboardHomeService = {
       } else {
                 console.log(data_emociones);
 
-        data = mapEmotions(data_emociones);
+        data = mapPatologia(data_emociones);
       }
     }
     res.json(data);

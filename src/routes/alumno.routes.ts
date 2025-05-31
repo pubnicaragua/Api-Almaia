@@ -1813,8 +1813,8 @@ router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle
  * @swagger
  * /api/v1/alumnos/alertas:
  *   post:
- *     summary: Crear nueva alerta
- *     description: Registra una nueva alerta para un alumno
+ *     summary: Crear nueva alerta para un alumno
+ *     description: Registra una nueva alerta en el sistema asociada a un alumno específico
  *     tags: [Alertas]
  *     security:
  *       - sessionAuth: []
@@ -1823,7 +1823,70 @@ router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/AlumnoAlerta'
+ *             type: object
+ *             required:
+ *               - alumno_id
+ *               - mensaje
+ *               - fecha_generada
+ *               - alerta_origen_id
+ *               - prioridad_id
+ *               - severidad_id
+ *               - leida
+ *               - estado
+ *               - alertas_tipo_alerta_tipo_id
+ *             properties:
+ *               alumno_id:
+ *                 type: integer
+ *                 description: ID del alumno asociado a la alerta
+ *               alerta_regla_id:
+ *                 type: integer
+ *                 description: ID de la regla que generó la alerta (opcional)
+ *               mensaje:
+ *                 type: string
+ *                 maxLength: 100
+ *                 description: Descripción del motivo de la alerta
+ *               fecha_generada:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Fecha y hora cuando se generó la alerta
+ *               fecha_resolucion:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Fecha y hora cuando se resolvió la alerta (opcional)
+ *               alerta_origen_id:
+ *                 type: integer
+ *                 description: ID del origen de la alerta
+ *               prioridad_id:
+ *                 type: integer
+ *                 description: ID del nivel de prioridad de la alerta
+ *               severidad_id:
+ *                 type: integer
+ *                 description: ID del nivel de severidad de la alerta
+ *               accion_tomada:
+ *                 type: string
+ *                 maxLength: 200
+ *                 description: Descripción de la acción tomada (opcional)
+ *               leida:
+ *                 type: boolean
+ *                 description: Indica si la alerta ha sido leída
+ *               estado:
+ *                 type: string
+ *                 maxLength: 20
+ *                 description: Estado actual de la alerta
+ *               alertas_tipo_alerta_tipo_id:
+ *                 type: integer
+ *                 description: ID del tipo de alerta
+ *             example:
+ *               alumno_id: 12345
+ *               alerta_regla_id: 1
+ *               mensaje: "El alumno muestra bajo rendimiento en matemáticas"
+ *               fecha_generada: "2023-05-15T14:30:00Z"
+ *               alerta_origen_id: 2
+ *               prioridad_id: 1
+ *               severidad_id: 3
+ *               leida: false
+ *               estado: "pendiente"
+ *               alertas_tipo_alerta_tipo_id: 5
  *     responses:
  *       201:
  *         description: Alerta creada exitosamente
@@ -1832,7 +1895,13 @@ router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle
  *             schema:
  *               $ref: '#/components/schemas/AlumnoAlerta'
  *       400:
- *         description: Datos inválidos para crear la alerta
+ *         description: |
+ *           Datos inválidos para crear la alerta. Posibles causas:
+ *           - Faltan campos requeridos
+ *           - Tipos de datos incorrectos
+ *           - Valores fuera de los límites permitidos
+ *       401:
+ *         description: No autorizado (sesión no válida o expirada)
  *       500:
  *         description: Error interno del servidor
  */
