@@ -24,6 +24,18 @@ const AlumnoAlertaSchema = Joi.object({
   estado: Joi.string().max(20).required(),
   alertas_tipo_alerta_tipo_id: Joi.number().integer().required(),
 });
+const AlumnoAlertaUpdateSchema = Joi.object({
+  alumno_id: Joi.number().integer().required(),
+  alerta_regla_id: Joi.number().integer().optional(),
+  mensaje: Joi.string().max(100).required(),
+  fecha_resolucion: Joi.string().optional(),
+  prioridad_id: Joi.number().integer().required(),
+  severidad_id: Joi.number().integer().required(),
+  accion_tomada: Joi.string().max(200).optional(),
+  leida: Joi.boolean().required(),
+  estado: Joi.string().max(20).required(),
+  alertas_tipo_alerta_tipo_id: Joi.number().integer().optional(),
+});
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<AlumnoAlerta> = new DataService(
@@ -195,7 +207,7 @@ export const AlumnoAlertaService = {
         Object.assign(alumnoalerta, req.body);
         alumnoalerta.actualizado_por = req.actualizado_por;
         let responseSent = false;
-        const { error: validationError } = AlumnoAlertaSchema.validate(
+        const { error: validationError } = AlumnoAlertaUpdateSchema.validate(
           req.body
         );
         const { data, error } = await client
@@ -253,6 +265,16 @@ export const AlumnoAlertaService = {
           responseSent = true;
           throw new Error(validationError.details[0].message);
         }
+         const { data: dataAlumnoAlerta, error: errorAlumnoAlerta } = await client
+          .from("alumnos_alertas")
+          .select("*")
+          .eq("alumno_alerta_id", id)
+          .single();
+        if (errorAlumnoAlerta || !dataAlumnoAlerta) {
+          throw new Error("La  severidad no existe");
+        }
+        alumnoalerta.alerta_origen_id = dataAlumnoAlerta.alerta_origen_id
+        alumnoalerta.fecha_generada = dataAlumnoAlerta.fecha_generada
         if (!responseSent) {
           await dataService.updateById(id, alumnoalerta);
           res
