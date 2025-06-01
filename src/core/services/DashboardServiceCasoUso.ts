@@ -2,7 +2,7 @@
 import { AlertData } from "../modelo/dashboard/AlertData";
 import { Emotion } from "../modelo/dashboard/Emotion";
 import { emotionColors } from "../modelo/dashboard/EmotionColor";
-import { EstadisticaEmocionGrado, OutputEstadisticaEmocionGrado } from "../modelo/dashboard/EstadisticaEmocionGrado";
+import { EstadisticaEmocionGrado, EstadisticaPatologiaGrado, OutputEstadisticaEmocionGrado } from "../modelo/dashboard/EstadisticaEmocionGrado";
 import { patologiaColors } from "../modelo/dashboard/PatologiaColors";
 
 export function mapEmotions(
@@ -59,6 +59,21 @@ export const mapearEmocionGrado = (input: EstadisticaEmocionGrado[]): OutputEsta
     }
 
     grouped[key][item.respuesta_nombre] = item.cantidad;
+  });
+
+  return Object.values(grouped);
+};
+export const mapearPatologiaGrado = (input: EstadisticaPatologiaGrado[]): OutputEstadisticaEmocionGrado[] => {
+  const grouped: { [curso_nombre: string]: OutputEstadisticaEmocionGrado } = {};
+
+  input.forEach((item) => {
+    const key = item.curso_nombre;
+
+    if (!grouped[key]) {
+      grouped[key] = { name: item.curso_nombre };
+    }
+
+    grouped[key][item.diagnostico] = item.cantidad;
   });
 
   return Object.values(grouped);

@@ -3,7 +3,7 @@ import { AlertData } from "../../../core/modelo/dashboard/AlertData";
 import { Emotion } from "../../../core/modelo/dashboard/Emotion";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { mapearEmocionGrado, mapearGestorAlertasHoy } from "../../../core/services/DashboardServiceCasoUso";
+import { mapearEmocionGrado, mapearGestorAlertasHoy, mapearPatologiaGrado } from "../../../core/services/DashboardServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -69,6 +69,24 @@ export const DashboardComparativaService = {
       } else {
         //const data: AlertData[] = mapearGestorAlertasHoy(data_emociones);
         res.json(mapearEmocionGrado(data_emociones));
+      }
+    }
+  },   
+  async obtenerPatologiasGrado(req: Request, res: Response) {
+    const { colegio_id, grado_id } = req.query;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_todas_respuestas_por_diagnostico_grado",
+        {
+          p_colegio_id: colegio_id || null,
+          p_grado_id:grado_id
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        //const data: AlertData[] = mapearGestorAlertasHoy(data_emociones);
+        res.json(mapearPatologiaGrado(data_emociones));
       }
     }
   },

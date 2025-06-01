@@ -196,6 +196,57 @@ router.get('/emociones/grado', sessionAuth, DashboardComparativaService.obtenerE
 
 /**
  * @swagger
+ * /api/v1/comparativa/patologias/grado:
+ *   get:
+ *     summary: Obtener estadísticas de patologías por grado
+ *     description: Retorna un listado de patologías agrupadas por grado académico filtrado por colegio y grado específico
+ *     tags: [Comparativo]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: colegio_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: ID del colegio a filtrar
+ *       - in: query
+ *         name: grado_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 2
+ *         description: ID del grado académico a filtrar
+ *     responses:
+ *       200:
+ *         description: Listado de patologías por grado obtenido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     example: "1° Medio - Jornada Mañana - Colegio 1"
+ *                   "Trastorno del Ánimo":
+ *                     type: integer
+ *                     example: 1
+ *       400:
+ *         description: Parámetros inválidos (faltan colegio_id o grado_id)
+ *       401:
+ *         description: No autorizado (sesión no válida o no iniciada)
+ *       404:
+ *         description: No se encontraron datos para los parámetros proporcionados
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/patologias/grado', sessionAuth, DashboardComparativaService.obtenerPatologiasGrado);
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     Emotion:
