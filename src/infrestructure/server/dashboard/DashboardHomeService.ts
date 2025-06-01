@@ -159,15 +159,6 @@ export const DashboardHomeService = {
         data = mapEmotions(data_emociones);
       }
     }
-
-    /*const data: Emotion[] = [
-      { name: "Tristeza", value: 2000, color: "#3b82f6" },
-      { name: "Felicidad", value: 4000, color: "#facc15" },
-      { name: "Estrés", value: 1800, color: "#6b7280" },
-      { name: "Ansiedad", value: 3200, color: "#fb923c" },
-      { name: "Enojo", value: 1200, color: "#ef4444" },
-      { name: "Otros", value: 2800, color: "#a855f7" },
-    ];*/
     res.json(data);
   },
 

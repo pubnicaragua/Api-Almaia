@@ -165,9 +165,6 @@ const ruta_alumnos_diarios = '/diarios';
  *     AlumnoAlertaBitacora:
  *       type: object
  *       properties:
- *         alumno_alerta_bitacora_id:
- *           type: integer
- *           description: ID único de la bitácora
  *         alumno_alerta_id:
  *           type: integer
  *           description: ID de la alerta asociada

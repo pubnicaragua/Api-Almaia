@@ -143,66 +143,56 @@ router.get('/emotions/course', sessionAuth, DashboardComparativaService.getEmoti
  *         description: Error interno del servidor
  */
 router.get('/alerts/totales', sessionAuth, DashboardComparativaService.obtenerGestorAlertasHoy);
+
 /**
  * @swagger
- * /api/v1/comparativa/alerts/historial:
+ * /api/v1/comparativa/emociones/grado:
  *   get:
- *     tags:
- *       - Dashboard Comparativa
- *     summary: Obtiene el historial de alertas para un colegio específico
- *     description: Retorna el historial de alertas filtrado por el ID del colegio
- *     security:
- *       - sessionAuth: []
+ *     summary: Obtener datos comparativos de emociones por colegio y grado
+ *     description: Retorna estadísticas comparativas de emociones filtradas por ID de colegio y grado
+ *     tags: [Comparativo]
  *     parameters:
  *       - in: query
  *         name: colegio_id
+ *         required: true
  *         schema:
  *           type: integer
+ *           example: 123
+ *         description: ID numérico del colegio
+ *       - in: query
+ *         name: grado_id
  *         required: true
- *         description: ID del colegio para filtrar el historial de alertas
+ *         schema:
+ *           type: integer
+ *           example: 456
+ *         description: ID numérico del grado académico
  *     responses:
  *       200:
- *         description: Historial de alertas obtenido correctamente
+ *         description: Datos comparativos obtenidos exitosamente
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: "success"
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: integer
- *                         example: 1
- *                       alerta_id:
- *                         type: integer
- *                         example: 5
- *                       colegio_id:
- *                         type: integer
- *                         example: 10
- *                       fecha:
- *                         type: string
- *                         format: date-time
- *                         example: "2023-05-15T14:30:00Z"
- *                       estado:
- *                         type: string
- *                         example: "resuelta"
- *                       detalles:
- *                         type: string
- *                         example: "Se detectó un problema en el área de matemáticas"
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     example: "1° Medio - Jornada Mañana - Colegio 1"
+ *                   "En paz":
+ *                     type: integer
+ *                     example: 1
+ *                   "Tristeza":
+ *                     type: integer
+ *                     example: 1
  *       400:
- *         description: Parámetro colegio_id faltante o inválido
- *       401:
- *         description: No autorizado (sesión no válida)
+ *         description: Parámetros inválidos
+ *       404:
+ *         description: No se encontraron datos para los parámetros proporcionados
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/alerts/historial', sessionAuth, DashboardComparativaService.obtenerGestorHistorial);
+router.get('/emociones/grado', sessionAuth, DashboardComparativaService.obtenerEmocionesGrado);
 
 /**
  * @swagger
