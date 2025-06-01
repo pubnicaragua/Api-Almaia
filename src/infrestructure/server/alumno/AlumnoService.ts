@@ -9,6 +9,7 @@ import { Usuario } from "../../../core/modelo/auth/Usuario";
 import { Persona } from "../../../core/modelo/Persona";
 import { buscarAlumnos } from "../../../core/services/AlumnoServicioCasoUso";
 import { mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
+import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -135,15 +136,36 @@ export const AlumnosService = {
       throw new Error(error_apoderados.message);
     }
 
+    const { colegio_id } = req.query;
+    let data;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3_por_alumno",
+        {
+          p_colegio_id: colegio_id || null,
+          p_alumno_id: alumnoId,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapEmotions(data_emociones);
+      }
+    } else {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3_por_alumno",
+        {
+          alumno_id: alumnoId,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapEmotions(data_emociones);
+      }
+    }
     // Emociones simuladas
-    const emociones = [
-      { nombre: "Felicidad", valor: 3100 },
-      { nombre: "Tristeza", valor: 1500 },
-      { nombre: "Estrés", valor: 950 },
-      { nombre: "Ansiedad", valor: 2600 },
-      { nombre: "Enojo", valor: 750 },
-      { nombre: "Otros", valor: 1900 },
-    ];
+    const emociones = data;
     const datosComparativa: ComparativaDato[] = [
       {
         emocion: "Feliz",
@@ -171,7 +193,6 @@ export const AlumnosService = {
         promedio: 1.6,
       },
     ];
-
     res.json({
       alumno,
       ficha,
@@ -239,8 +260,7 @@ export const AlumnosService = {
         res.status(200).json({ message: "Alumno actualizado correctamente" });
       }
     } catch (error) {
-res.status(500).json({ message: (error as Error).message });
-
+      res.status(500).json({ message: (error as Error).message });
     }
   },
   async actualizarPerfil(req: Request, res: Response) {
@@ -258,7 +278,7 @@ res.status(500).json({ message: (error as Error).message });
       usuario.actualizado_por = req.actualizado_por;
       let responseSent = false;
       const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
-          const { data: dataUsuario, error: errorUsuario } = await client
+      const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
         .select("*")
         .eq("usuario_id", usuarioId)
@@ -267,8 +287,8 @@ res.status(500).json({ message: (error as Error).message });
         throw new Error("El usuario no existe");
       }
       usuario.persona_id = dataUsuario.persona_id;
-      usuario.rol_id = dataUsuario.rol_id
-      usuario.idioma_id = dataUsuario.idioma_id
+      usuario.rol_id = dataUsuario.rol_id;
+      usuario.idioma_id = dataUsuario.idioma_id;
       const { data: dataPersona, error: errorPersona } = await client
         .from("personas")
         .select("*")
@@ -301,7 +321,7 @@ res.status(500).json({ message: (error as Error).message });
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
-res.status(500).json({ message: (error as Error).message });
+      res.status(500).json({ message: (error as Error).message });
     }
   },
   async eliminar(req: Request, res: Response) {
@@ -310,7 +330,7 @@ res.status(500).json({ message: (error as Error).message });
       await dataService.deleteById(id);
       res.status(200).json({ message: "Alumno eliminado correctamente" });
     } catch (error) {
-     res.status(500).json({ message: (error as Error).message });
+      res.status(500).json({ message: (error as Error).message });
     }
   },
   async buscar(req: Request, res: Response) {
@@ -335,7 +355,7 @@ res.status(500).json({ message: (error as Error).message });
       }
       res.json(resultados);
     } catch (error) {
-res.status(500).json({ message: (error as Error).message });
+      res.status(500).json({ message: (error as Error).message });
     }
   },
 };
