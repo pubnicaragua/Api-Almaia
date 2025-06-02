@@ -136,11 +136,12 @@ export const AuthService = {
       }
     }
   },
-  async updatePassword(req: Request, res: Response) {
-    const { userId, newPassword } = req.body;
-    if (!userId || !newPassword) {
-      res.status(400).json({ message: "userId y newPassword son requeridos" });
-    }
+ async updatePassword(req: Request, res: Response) {
+  const { userId, newPassword } = req.body;
+
+  if (!userId || !newPassword) {
+    res.status(400).json({ message: "userId y newPassword son requeridos" });
+  } else {
     try {
       const { data: usuario_data, error: error_usuario } = await client
         .from("usuarios")
@@ -149,29 +150,35 @@ export const AuthService = {
         )
         .eq("usuario_id", userId)
         .single();
-      if (error_usuario) {
-        throw new Error(error_usuario.message);
-      }
-      const { data, error } = await admin.auth.admin.updateUserById(
-        usuario_data.auth_id,
-        {
-          password: newPassword,
-        }
-      );
-      if (error) {
-        console.error("Error al cambiar contraseña:", error.message);
-        res.status(500).json({
-          message: "Error al actualizar la contraseña",
-          error: error.message,
-        });
-      }
 
-      res
-        .status(200)
-        .json({ message: "Contraseña actualizada correctamente", user: data });
+      if (error_usuario) {
+        res.status(500).json({ message: "Error al obtener usuario", error: error_usuario.message });
+      } else {
+        console.log(usuario_data.auth_id);
+        
+        const { data, error } = await admin.auth.admin.updateUserById(
+          usuario_data.auth_id,
+          { password: newPassword }
+        );
+
+        if (error) {
+          console.error("Error al cambiar contraseña:", error.message);
+          res.status(500).json({
+            message: "Error al actualizar la contraseña",
+            error: error.message,
+          });
+        } else {
+          res.status(200).json({
+            message: "Contraseña actualizada correctamente",
+            user: data,
+          });
+        }
+      }
     } catch (err) {
       console.error("Error inesperado:", err);
       res.status(500).json({ message: "Error interno del servidor" });
     }
-  },
+  }
+}
+
 };
