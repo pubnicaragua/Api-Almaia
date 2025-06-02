@@ -1,7 +1,15 @@
 import cron from "node-cron";
 import { PreguntaService } from "../server/preguntas/PreguntaService";
+import { MotorAlertasService } from "../server/alertas/MotorAlertaService";
+import { DateTime } from "luxon";
 
 // Ejecutar todos los días a las 00:00
 cron.schedule("0 0 * * *", () => {
   PreguntaService.motor_pregunta(); // Tu lógica aquí (ej: limpieza, backups, etc.)
+});
+cron.schedule("* * * * *", () => {
+  const now = DateTime.now().setZone("America/Guayaquil");
+  if (now.hour === 22 && now.minute === 0) {
+    MotorAlertasService.ejecutar_motor();
+  }
 });
