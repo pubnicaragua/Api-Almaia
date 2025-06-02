@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import SupabaseClient from "@supabase/supabase-js/dist/module/SupabaseClient";
 import { SupabaseClientService } from "./supabaseClient";
-import { addDays, differenceInCalendarDays, isAfter, isBefore } from "date-fns";
 import { AlertStats } from "../modelo/home/AlertStats";
 import { AlertaMapeada } from "../modelo/alerta/AlertaMapeada";
 import { DonutData } from "../modelo/dashboard/DonutData";
@@ -14,79 +13,46 @@ export class AlertasServicioCasoUso {
     this.supabaseService = new SupabaseClientService();
     this.client = this.supabaseService.getClient();
   }
-  async getAlertStatsByType(
-    alertTypeId: number,
-    colegio_id: number = 0
-  ): Promise<AlertStats> {
-    const now = new Date();
-    const { data: alertas_tipos, error: error_alertas_tipos } =
-      await this.client
-        .from("alertas_tipos")
-        .select("*")
-        .eq("alerta_tipo_id", alertTypeId)
-        .single();
-    const tiempo_gestion = alertas_tipos?.tiempo_resolucion ?? 0;
-    if (error_alertas_tipos)
-      throw new Error(`Error obteniendo alertas tipo ${alertTypeId}`);
-    const expirationThreshold = addDays(now, tiempo_gestion);
-    let alertas;
-    // Obtener todas las alertas del tipo especificado
-    if (colegio_id !== 0) {
-      alertas = await obtenerRelacionados({
-        tableFilter: "alumnos",
-        filterField: "colegio_id",
-        filterValue: colegio_id,
-        idField: "alumno_id",
-        tableIn: "alumnos_alertas",
-        inField: "alumno_id",
-        selectFields: `estado`,
-      });
-    } else {
-      const { data: alertas_data, error } = await this.client
-        .from("alumnos_alertas")
-        .select("*")
-        .eq("alertas_tipo_alerta_tipo_id", alertTypeId);
-      alertas = alertas_data;
-      if (error)
-        throw new Error(`Error obteniendo alertas tipo ${alertTypeId}`);
+ async getAlertStatsByType(
+  alertTypeId: number,
+  colegio_id: number = 0
+): Promise<AlertStats> {
+  try {
+    // Validar parámetros
+    if (!alertTypeId) {
+      throw new Error('Se requiere un ID de tipo de alerta válido');
     }
-    const stats: AlertStats = {
+
+    // Llamar a la función PostgreSQL
+    const { data, error } = await this.client.rpc('obtener_estadisticas_alertas', {
+      p_colegio_id: colegio_id !== 0 ? colegio_id : null,
+      p_alerta_tipo_id: alertTypeId
+    });
+
+    if (error) {
+      throw new Error(`Error al obtener estadísticas de alertas: ${error.message}`);
+    }
+
+    // La función RPC devuelve un array, tomamos el primer elemento
+    const stats = data?.[0] || {
       totales: 0,
       activos: 0,
       vencidos: 0,
-      por_vencer: 0,
+      por_vencer: 0
     };
 
-    if (!alertas) return stats;
+    return {
+      totales: Number(stats.totales) || 0,
+      activos: Number(stats.activos) || 0,
+      vencidos: Number(stats.vencidos) || 0,
+      por_vencer: Number(stats.por_vencer) || 0
+    };
 
-    stats.totales = alertas.length;
-    const diasAntesDeVencer = 3;
-
-    alertas.forEach((alerta) => {
-      const fechaVencimiento =
-        alerta.fecha_resolucion === null
-          ? new Date()
-          : new Date(alerta.fecha_resolucion);
-
-      if (alerta.estado.toLowerCase() === "resuelto") {
-        return; // No contar alertas ya resueltas
-      }
-
-      stats.activos++;
-
-      if (isAfter(now, fechaVencimiento)) {
-        stats.vencidos++;
-      } else if (isBefore(fechaVencimiento, expirationThreshold)) {
-        const diferenciaDias = differenceInCalendarDays(fechaVencimiento, now);
-        if (diferenciaDias <= diasAntesDeVencer && diferenciaDias >= 0) {
-          stats.por_vencer++;
-        }
-      }
-    });
-
-    return stats;
+  } catch (error) {
+    console.error('Error en getAlertStatsByType:', error);
+    throw error;
   }
-
+}
   async getAlertasDonutData(colegio_id: any = 0): Promise<DonutData[]> {
     let data = null;
     if (colegio_id !== 0) {
