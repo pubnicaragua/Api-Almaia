@@ -175,8 +175,6 @@ export const DashboardHomeService = {
       if (error) {
         console.error("Error al obtener cantidades:", error);
       } else {
-        console.log(data_emociones);
-        
         data = mapPatologia(data_emociones);
       }
     } else {
@@ -186,8 +184,6 @@ export const DashboardHomeService = {
       if (error) {
         console.error("Error al obtener cantidades:", error);
       } else {
-                console.log(data_emociones);
-
         data = mapPatologia(data_emociones);
       }
     }
@@ -236,7 +232,6 @@ export const DashboardHomeService = {
     if (error) {
       console.error("Error fetching alertas:", error);
     } else {
-      console.log("Alertas recientes:", data);
       // Aquí puedes trabajar con los datos (mostrar en UI, etc.)
     }
     res.json(data);

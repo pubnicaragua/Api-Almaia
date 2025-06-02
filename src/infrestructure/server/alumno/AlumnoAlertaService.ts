@@ -177,8 +177,6 @@ export const AlumnoAlertaService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        console.log(alumnoalerta);
-
         const savedAlumnoAlerta = await dataService.processData(alumnoalerta);
         res.status(201).json(savedAlumnoAlerta);
       }

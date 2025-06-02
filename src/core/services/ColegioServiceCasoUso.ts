@@ -24,8 +24,6 @@ export async function obtenerIdColegio(colegio_id: any, usuario_id: number) {
       colegio_id = usuario_colegio[0]?.colegio_id;
     }
   }
-  console.log(colegio_id);
-
   return colegio_id;
 }
 type ColegioExtendido = {

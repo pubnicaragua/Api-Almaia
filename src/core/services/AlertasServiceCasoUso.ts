@@ -105,8 +105,6 @@ export function mapearAlertas(alertas: any[]): AlertaMapeada[] {
   });
 }
 export function mapearAlertaDetalle(alertas: any[]): any[] {
-  console.log(alertas);
-
   return alertas.map((alerta) => {
     const { ...rest } = alerta;
     return {

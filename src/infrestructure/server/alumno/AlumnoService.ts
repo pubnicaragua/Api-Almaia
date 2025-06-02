@@ -224,8 +224,6 @@ export const AlumnosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        console.log(alumno);
-
         const savedAlumno = await dataService.processData(alumno);
         res.status(201).json(savedAlumno);
       }

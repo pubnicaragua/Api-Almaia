@@ -57,8 +57,6 @@ export const PersonaContactosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        console.log(personacontacto);
-
         const savedPersonaContacto = await dataService.processData(
           personacontacto
         );

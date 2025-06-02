@@ -31,8 +31,6 @@ export const PaisService = {
         responseSent = true;
       }
       if (!responseSent) {
-        console.log("pais", pais);
-
         const savedpais = await dataService.processData(pais);
         res.status(201).json(savedpais);
       }

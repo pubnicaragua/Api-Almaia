@@ -3,9 +3,7 @@ import { FuncionalidadRol } from "../modelo/auth/FuncionalidadRol";
 import { Perfil } from "../modelo/auth/Perfil";
 import { PerfilEntrada } from "../modelo/auth/PerfilEntrada";
 
-export function mapearDatos(data: PerfilEntrada): Perfil {
-  console.log(data);
-  
+export function mapearDatos(data: PerfilEntrada): Perfil { 
   return {
     usuario: {
       usuario_id: data.usuario_id,
