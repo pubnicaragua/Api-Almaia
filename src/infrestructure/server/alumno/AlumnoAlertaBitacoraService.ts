@@ -3,10 +3,22 @@ import { DataService } from "../DataService";
 import { AlumnoAlertaBitacora } from "../../../core/modelo/alumno/AlumnoAlertaBitacora";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
+import Joi from "joi";
 
 const dataService: DataService<AlumnoAlertaBitacora> = new DataService(
-  "alumnos_alertas_bitacoras"
+  "alumnos_alertas_bitacoras",
+  "alumno_alerta_bitacora_id"
 );
+const AlumnoAlertaBitacoraSchema = Joi.object({
+  alumno_alerta_id: Joi.number().integer().required(),
+  alumno_id: Joi.number().integer().required(),
+  plan_accion: Joi.string().required(),
+  fecha_compromiso: Joi.string().required(),
+  nuevo_estado: Joi.string().optional(),
+  nuevo_responsable: Joi.number().optional(),
+  fecha_realizacion: Joi.string().optional(),
+  url_archivo: Joi.string().max(255).optional(),
+});
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 export const AlumnoAlertaBitacoraService = {
@@ -16,8 +28,7 @@ export const AlumnoAlertaBitacoraService = {
       const alumnoAlertaBitacora = await dataService.getAll(["*"], where);
       res.json(alumnoAlertaBitacora);
     } catch (error) {
-      console.error("Error al obtener la alerta:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+      res.status(500).json({ message: (error as Error).message });
     }
   },
   guardar: async (req: Request, res: Response) => {
@@ -25,14 +36,15 @@ export const AlumnoAlertaBitacoraService = {
       const alumnoAlertaBitacora: AlumnoAlertaBitacora =
         new AlumnoAlertaBitacora();
       Object.assign(alumnoAlertaBitacora, req.body);
-        const { data, error } = await client
+      const { data, error } = await client
         .from("alumnos")
         .select("*")
         .eq("alumno_id", alumnoAlertaBitacora.alumno_id)
         .single();
       if (error || !data) {
         throw new Error("El alumno no existe");
-      }        const { data:dataAlumnoAlerta, error:errorAlumnoAlerta } = await client
+      }
+      const { data: dataAlumnoAlerta, error: errorAlumnoAlerta } = await client
         .from("alumnos_alertas")
         .select("*")
         .eq("alumno_alerta_id", alumnoAlertaBitacora.alumno_alerta_id)
@@ -42,12 +54,38 @@ export const AlumnoAlertaBitacoraService = {
       }
       alumnoAlertaBitacora.creado_por = req.creado_por;
       alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
-      const savedAlumnoAlertaBitacora = await dataService.processData(
-        alumnoAlertaBitacora
+      let responseSent = false;
+      //Actualiza alertas
+      if (
+        req.body.nuevo_responsable !== undefined ||
+        req.body.nuevo_responsable !== undefined
+      ) {
+        const { error: errorAlumnosAlertas } = await client
+          .from("alumnos_alertas")
+          .update({
+            responsable_actual_id: req.body.nuevo_responsable,
+            estado: req.body.nuevo_estado,
+          })
+          .eq("alumno_alerta_id", alumnoAlertaBitacora.alumno_alerta_id); // filtro por el campo 'id'
+        if (errorAlumnosAlertas) {
+          throw new Error(errorAlumnosAlertas.message);
+        }
+      }
+      const { error: validationError } = AlumnoAlertaBitacoraSchema.validate(
+        req.body
       );
-      res.status(201).json(savedAlumnoAlertaBitacora);
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
+      if (!responseSent) {
+        const savedAlumnoAlertaBitacora = await dataService.processData(
+          alumnoAlertaBitacora
+        );
+        res.status(201).json(savedAlumnoAlertaBitacora);
+      }
     } catch (error) {
-     res.status(500).json({ message: (error as Error).message });
+      res.status(500).json({ message: (error as Error).message });
     }
   },
   async actualizar(req: Request, res: Response) {
@@ -63,8 +101,7 @@ export const AlumnoAlertaBitacoraService = {
         .status(200)
         .json({ message: "Alumno Alerta Bitácora actualizada correctamente" });
     } catch (error) {
-     res.status(500).json({ message: (error as Error).message });
-
+      res.status(500).json({ message: (error as Error).message });
     }
   },
   async eliminar(req: Request, res: Response) {
@@ -76,7 +113,7 @@ export const AlumnoAlertaBitacoraService = {
         .json({ message: "Alumno Alerta Bitácora eliminada correctamente" });
     } catch (error) {
       console.error("Error al eliminar la alerta:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+      res.status(500).json({ message: (error as Error).message });
     }
   },
 };
