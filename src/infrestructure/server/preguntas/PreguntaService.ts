@@ -144,9 +144,6 @@ export const PreguntaService = {
     }
   },
   motor_pregunta() {
-    // Aquí puedes implementar la lógica para el motor de preguntas
-    // Por ejemplo, podrías usar un cron job para ejecutar esta función periódicamente
     console.log("Ejecutando motor de preguntas...");
-    // Lógica del motor de preguntas aquí
   },
 };
