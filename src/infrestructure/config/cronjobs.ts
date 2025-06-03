@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { PreguntaService } from "../server/preguntas/PreguntaService";
 import { MotorAlertasService } from "../server/alertas/MotorAlertaService";
 import { DateTime } from "luxon";
+import { MotorPreguntasService } from "../server/alertas/MotorPreguntaService";
 
 // Ejecutar todos los días a las 00:00
 cron.schedule("0 0 * * *", () => {
@@ -12,4 +13,7 @@ cron.schedule("* * * * *", () => {
   if (now.hour === 22 && now.minute === 0) {
     MotorAlertasService.ejecutar_motor();
   }
+});
+cron.schedule("0 0 * * *", () => {
+    MotorPreguntasService.ejecutar_motor();
 });
