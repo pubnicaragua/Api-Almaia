@@ -83,9 +83,11 @@ export const MotorPreguntasService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
-   async ejecutar_motor() {
+   async ejecutar_motor(colegio_id:number) {
     console.log('ejecutando motor preguntas');
-    const { error } = await client.rpc('generar_preguntas_alumnos');
+    const { error } = await client.rpc('generar_preguntas_alumnos',{
+      p_colegio_id:colegio_id
+    });
     if(error){
       console.error(error.message)
     }

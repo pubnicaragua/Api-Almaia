@@ -14,6 +14,12 @@ cron.schedule("* * * * *", () => {
     MotorAlertasService.ejecutar_motor();
   }
 });
-cron.schedule("0 0 * * *", () => {
-    MotorPreguntasService.ejecutar_motor();
+cron.schedule("*/15 0-5 * * *", () => {
+  const now = DateTime.now().setZone("America/Guayaquil");
+
+  MotorPreguntasService.ejecutar_motor(1);
+  MotorPreguntasService.ejecutar_motor(2);
+
+  // Opcional: imprime la hora para depurar
+  console.log("Ejecutado a:", now.toISO());
 });
