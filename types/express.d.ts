@@ -1,3 +1,4 @@
+import { SupabaseClient } from '@supabase/supabase-js';
 import 'express';
 
 // types/express.d.ts
@@ -8,5 +9,6 @@ declare module 'express-serve-static-core' {
     fecha_creacion:string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user:any
+    supabase:SupabaseClient
   }
 }

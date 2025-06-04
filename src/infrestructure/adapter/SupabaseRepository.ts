@@ -15,6 +15,9 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
       throw new Error(`Error al inicializar SupabaseClient: ${err.message}`);
     });
   }
+ setClient(client: SupabaseClient) {
+    this.client = client;
+  }
 
   private async init() {
     const supabaseService = new SupabaseClientService();

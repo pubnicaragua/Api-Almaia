@@ -51,6 +51,7 @@ export const AlumnosService = {
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      dataService.setClient(req.supabase)
       const alumnos = await dataService.getAll(
         [
           "*",
@@ -92,6 +93,7 @@ export const AlumnosService = {
   async getAlumnoDetalle(req: Request, res: Response) {
     const { alumnoId } = req.params;
     const where = { alumno_id: alumnoId }; // Convertir los parámetros de consulta en filtros
+    dataService.setClient(req.supabase)
     const data_alumno = await dataService.getAll(
       [
         "*",
@@ -119,7 +121,7 @@ export const AlumnosService = {
       throw new Error(error_alertas.message);
     }
     const alertas = mapearAlertas(alertas_data);
-    const { data: informes, error: error_informes } = await client
+    const { data: informes, error: error_informes } = await req.supabase
       .from("alumnos_informes")
       .select("*")
       .eq("alumno_id", alumno.alumno_id);

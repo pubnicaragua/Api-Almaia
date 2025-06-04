@@ -1,14 +1,10 @@
 import { Request, Response } from "express";
-import { SupabaseClientService } from "../../../core/services/supabaseClient";
-import { SupabaseClient } from "@supabase/supabase-js";
 import { mapearDatos } from "../../../core/services/PerfilServiceCasoUso";
-const supabaseService = new SupabaseClientService();
-const client: SupabaseClient = supabaseService.getClient();
 export const PerfilService = {
   async obtenerPerfil(req: Request, res: Response) {
     // Datos simulados del usuario
 
-    const { data: usuario_data, error: error_usuario } = await client
+    const { data: usuario_data, error: error_usuario } = await req.supabase
       .from("usuarios")
       .select(
         "*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion,funcionalidades_roles(*,funcionalidad_rol_id,funcionalidades(*,funcionalidad_id)))"
