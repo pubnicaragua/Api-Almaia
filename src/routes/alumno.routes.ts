@@ -610,7 +610,7 @@ const ruta_alumnos_diarios = '/diarios';
  *       in: cookie
  *       name: session
  */
-router.get('/', sessionAuth, AlumnosService.obtener);
+router.get('/', sessionAuth,sessionAuth, AlumnosService.obtener);
 
 /**
  * @swagger
@@ -1037,7 +1037,7 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *               nullable: true
  *               example: null
  */
-router.get('/detalle/:alumnoId', AlumnosService.getAlumnoDetalle);
+router.get('/detalle/:alumnoId',sessionAuth, AlumnosService.getAlumnoDetalle);
 
 /**
  * @swagger
