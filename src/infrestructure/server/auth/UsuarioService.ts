@@ -165,14 +165,14 @@ export const UsuariosService = {
         const fileName = `${randomUUID()}.${extension}`;
         const client_file = req.supabase;
 
-        const { data, error } = await client_file.storage
+        const {  error } = await client_file.storage
           .from("user-profile")
           .upload(`private/${fileName}`, buffer, {
             contentType: mimeType,
             upsert: true,
           });
         if (error) throw error;
-        usuario.url_foto_perfil = getURL(client_file,'user-profile',data.fullPath);
+        usuario.url_foto_perfil = getURL(client_file,'user-profile',`private/${fileName}` );
       }
 
       const { data: dataPersona, error: errorPersona } = await client

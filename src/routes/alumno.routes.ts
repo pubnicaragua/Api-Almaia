@@ -611,6 +611,53 @@ const ruta_alumnos_diarios = '/diarios';
  *       name: session
  */
 router.get('/', sessionAuth,sessionAuth, AlumnosService.obtener);
+/**
+ * @swagger
+ * /api/v1/alumnos/racha:
+ *   get:
+ *     summary: Obtiene estadísticas de racha y respuestas de un alumno
+ *     description: Retorna información sobre las respuestas correctas y la mejor racha semanal de un alumno
+ *     tags:
+ *       - Alumnos
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: alumno_id
+ *         schema:
+ *           type: string
+ *         description: ID del alumno para obtener sus estadísticas
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Estadísticas de desempeño del alumno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total_respuestas_correctas:
+ *                   type: integer
+ *                   example: 9
+ *                   description: Total de respuestas correctas acumuladas
+ *                 mejor_racha_semanal:
+ *                   type: integer
+ *                   example: 2
+ *                   description: Máxima racha de respuestas correctas consecutivas en una semana
+ *       400:
+ *         description: Falta el parámetro alumno_id o es inválido
+ *       500:
+ *         description: Error del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Mensaje de error detallado
+ */
+router.get('/racha', sessionAuth,sessionAuth, AlumnosService.obtenerRacha);
 
 /**
  * @swagger

@@ -12,7 +12,7 @@ export const sessionAuth = async (
   try {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
-      res.status(401).json({ error: "No token provided" });
+      throw new Error("No token provided");
     }
     if (!SUPABASE_HOST || !SUPABASE_PASSWORD) {
       throw new Error("Faltan variables de entorno de Supabase");
@@ -32,7 +32,7 @@ export const sessionAuth = async (
 
     const { data, error } = await client.auth.getUser();
     if (error || !data?.user) {
-      res.status(401).json({ error: "Invalid token" });
+      throw new Error("Invalid token");
     }
 
     const { data: data_user, error: error_user } = await client
@@ -41,14 +41,13 @@ export const sessionAuth = async (
       .eq("auth_id", data.user?.id);
 
     if (error_user || !data_user?.[0]) {
-      res.status(404).json({ error: "Usuario no encontrado" });
+      throw new Error("Usuario no encontrado");
     }
 
     req.creado_por = data_user?.[0]?.usuario_id;
     req.actualizado_por = data_user?.[0]?.usuario_id;
     req.fecha_creacion = new Date().toISOString();
     req.user = data_user?.[0];
-    // Puedes guardar el cliente con token si lo necesitas luego:
     req.supabase = client;
 
     next();

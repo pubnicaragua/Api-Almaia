@@ -29,3 +29,22 @@ export function getURL(supabase:SupabaseClient,bucket:string,private_url:string)
   .getPublicUrl(private_url);
   return publicUrl
 }
+interface SignedURLResponse {
+  signedUrl: string;
+}
+export async function getPrivateURL(
+  supabase: SupabaseClient,
+  bucket: string,
+  filePath: string
+): Promise<string | null> {
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .createSignedUrl(filePath, 3600) as { data: SignedURLResponse | null; error: Error | null };
+
+  if (error) {
+    console.error('Error generating signed URL:', error.message);
+    return null;
+  }
+
+  return data?.signedUrl || null;
+}

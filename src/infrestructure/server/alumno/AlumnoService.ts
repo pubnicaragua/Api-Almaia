@@ -51,7 +51,7 @@ export const AlumnosService = {
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      dataService.setClient(req.supabase)
+      dataService.setClient(req.supabase);
       const alumnos = await dataService.getAll(
         [
           "*",
@@ -93,7 +93,7 @@ export const AlumnosService = {
   async getAlumnoDetalle(req: Request, res: Response) {
     const { alumnoId } = req.params;
     const where = { alumno_id: alumnoId }; // Convertir los parámetros de consulta en filtros
-    dataService.setClient(req.supabase)
+    dataService.setClient(req.supabase);
     const data_alumno = await dataService.getAll(
       [
         "*",
@@ -356,6 +356,26 @@ export const AlumnosService = {
       res.json(resultados);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
+    }
+  },
+  async obtenerRacha(req: Request, res: Response) {
+    try {
+    const { alumno_id } = req.query;
+         if (alumno_id === undefined) {
+        throw new Error('Falta el parámetro alumno_id');
+      }
+            const { data, error } = await client.rpc(
+        "obtener_rachas_combinadas",
+        {
+          alumno_id_param: alumno_id || null,
+        }
+      );
+      if (error) {
+        throw new Error(error.message);
+      }
+      res.json(data[0]);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });      
     }
   },
 };
