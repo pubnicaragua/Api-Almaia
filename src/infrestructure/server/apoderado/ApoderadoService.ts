@@ -5,6 +5,7 @@ import { Apoderado } from "../../../core/modelo/apoderado/Apoderado";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { ApoderadoRespuesta } from "../../../core/modelo/apoderado/ApoderadoRespuesta";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -116,6 +117,33 @@ export const ApoderadoService = {
       console.error("Error al actualizar la apoderado:", error);
       res.status(500).json({ message: "Error interno del servidor" });
     }
+  },
+  async responderPreguntas(req: Request, res: Response) {
+     const { alumno_id,apoderado_id, pregunta_id, respuesta_posible_id } = req.body;
+    
+        if (!alumno_id || !pregunta_id || !respuesta_posible_id|| !apoderado_id) {
+          throw new Error("Faltan datos obligatorios.");
+        }
+    
+        const respuesta = new ApoderadoRespuesta();
+        respuesta.alumno_id = alumno_id;
+        respuesta.pregunta_id = pregunta_id;
+        respuesta.respuesta_id = respuesta_posible_id;
+        respuesta.apoderado_id =apoderado_id;
+        const { error } = await client
+          .from("alumnos_respuestas_seleccion")
+          .update({ respuesta_posible_id: respuesta.respuesta_id })
+          .match({
+            alumno_id: respuesta.alumno_id,
+            pregunta_id: respuesta.pregunta_id,
+            apoderado_id: respuesta.apoderado_id
+          });
+    
+        if (error) {
+          throw new Error(error.message);
+        }
+    
+        res.json({ message: "Respuesta actualizada correctamente." });
   },
   async eliminar(req: Request, res: Response) {
     try {

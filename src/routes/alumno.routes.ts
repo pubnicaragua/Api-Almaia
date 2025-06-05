@@ -657,9 +657,12 @@ router.get('/', sessionAuth,sessionAuth, AlumnosService.obtener);
  *                   type: string
  *                   description: Mensaje de error detallado
  */
-router.get('/racha', sessionAuth,sessionAuth, AlumnosService.obtenerRacha);
+router.get('/racha', sessionAuth, AlumnosService.obtenerRacha);
 
-router.get('/registro_semanal', sessionAuth,sessionAuth, AlumnosService.obtenerRegistroSemanal);
+router.get('/registro_semanal', sessionAuth, AlumnosService.obtenerRegistroSemanal);
+
+
+router.get('/perfil', sessionAuth, AlumnosService.obtenerPerfil);
 
 /**
  * @swagger

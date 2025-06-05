@@ -10,6 +10,7 @@ import { Persona } from "../../../core/modelo/Persona";
 import { buscarAlumnos } from "../../../core/services/AlumnoServicioCasoUso";
 import { mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
 import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
+import { mapearDatosAlumno } from "../../../core/services/PerfilServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -393,4 +394,42 @@ export const AlumnosService = {
       res.status(500).json({ message: (error as Error).message });
     }
   },
+  async obtenerPerfil(req: Request, res: Response) {
+      const { data: usuario_data, error: error_usuario } = await req.supabase
+        .from("usuarios")
+        .select(
+          "*,idiomas(*),usuarios_colegios(*,colegios(colegio_id,nombre)),personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion,funcionalidades_roles(*,funcionalidad_rol_id,funcionalidades(*,funcionalidad_id)))"
+        )
+        .eq("usuario_id", req.user.usuario_id)
+        .single();
+      if (error_usuario) {
+        throw new Error(error_usuario.message);
+      }
+      
+      const data = mapearDatosAlumno(usuario_data);
+      
+      const usuario = data.usuario;
+      const persona = data.persona;
+      const rol = data.rol;
+      const funcionalidades= data.funcionalidades
+      const { data: alumno_data, error: error_alumno } = await req.supabase
+        .from("alumnos")
+        .select(
+          "*,alumnos_apoderados(*,apoderados(*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento)))"
+        )
+        .eq("persona_id", data.persona.persona_id);
+      if (error_alumno) {
+        throw new Error(error_alumno.message);
+      }
+    const apoderados = alumno_data[0].alumnos_apoderados
+
+  
+      res.json({
+        usuario,
+        persona,
+        rol,
+        funcionalidades,
+        apoderados
+      });
+    },
 };
