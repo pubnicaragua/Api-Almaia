@@ -376,6 +376,23 @@ export const AlumnosService = {
       res.status(500).json({ message: (error as Error).message });
     }
   },
+  async obtenerLogros(req: Request, res: Response) {
+    try {
+      const { alumno_id } = req.query;
+      if (alumno_id === undefined) {
+        throw new Error("Falta el parámetro alumno_id");
+      }
+      const { data, error } = await client.rpc("obtener_registro_hoy", {
+        alumno_id_param: alumno_id || null,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      res.json(data[0]);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  },
 
   async obtenerRegistroSemanal(req: Request, res: Response) {
     try {

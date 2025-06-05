@@ -659,9 +659,350 @@ router.get('/', sessionAuth,sessionAuth, AlumnosService.obtener);
  */
 router.get('/racha', sessionAuth, AlumnosService.obtenerRacha);
 
+/**
+ * @swagger
+ * /api/v1/alumnos/logros:
+ *   get:
+ *     tags:
+ *       - Alumnos
+ *     summary: Obtiene los logros de un alumno
+ *     description: Retorna un objeto indicando qué actividades ha completado el alumno en el día actual
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: alumno_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del alumno para consultar sus logros
+ *     responses:
+ *       200:
+ *         description: Objeto con los logros del alumno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 registro_tarea:
+ *                   type: boolean
+ *                   description: Indica si el alumno registró tarea hoy
+ *                   example: false
+ *                 respondio_pregunta:
+ *                   type: boolean
+ *                   description: Indica si el alumno respondió preguntas hoy
+ *                   example: false
+ *                 realizo_registro:
+ *                   type: boolean
+ *                   description: Indica si el alumno realizó algún registro hoy
+ *                   example: false
+ *       400:
+ *         description: Falta el parámetro alumno_id o es inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Falta el parámetro alumno_id"
+ *       500:
+ *         description: Error interno del servidor al obtener los logros
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message from the server"
+ */
+router.get('/logros', sessionAuth, AlumnosService.obtenerLogros);
+/**
+ * @swagger
+ * /api/v1/alumnos/registro_semanal:
+ *   get:
+ *     tags:
+ *       - Alumnos
+ *     summary: Obtiene el registro semanal de un alumno
+ *     description: Retorna un array con los días de la semana indicando cuáles fueron completados por el alumno
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: alumno_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del alumno para consultar su registro semanal
+ *     responses:
+ *       200:
+ *         description: Array con el estado de completado para cada día de la semana
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Identificador único del día
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     description: Nombre del día (hoy, ayer o abreviación)
+ *                     example: "Hoy"
+ *                   completed:
+ *                     type: boolean
+ *                     description: Indica si el alumno completó las actividades ese día
+ *                     example: false
+ *       400:
+ *         description: Falta el parámetro alumno_id o es inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Falta el parámetro alumno_id"
+ *       500:
+ *         description: Error interno del servidor al obtener el registro semanal
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message from the server"
+ */
 router.get('/registro_semanal', sessionAuth, AlumnosService.obtenerRegistroSemanal);
 
-
+/**
+ * @swagger
+ * /api/v1/alumnos/perfil:
+ *   get:
+ *     tags:
+ *       - Alumnos
+ *     summary: Obtiene el perfil completo del alumno autenticado
+ *     description: Retorna información detallada del usuario, persona, rol, funcionalidades y apoderados asociados
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil completo del alumno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     usuario_id:
+ *                       type: integer
+ *                       example: 9
+ *                     nombre_social:
+ *                       type: string
+ *                       example: "Diegito"
+ *                     email:
+ *                       type: string
+ *                       example: "diego@almaia.cl"
+ *                     telefono_contacto:
+ *                       type: string
+ *                       example: "5465464546"
+ *                     ultimo_inicio_sesion:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2025-06-04T18:27:31.085"
+ *                     estado_usuario:
+ *                       type: string
+ *                       example: ""
+ *                     url_foto_perfil:
+ *                       type: string
+ *                       format: url
+ *                       example: "https://example.com/profile.jpg"
+ *                     persona_id:
+ *                       type: integer
+ *                       example: 6
+ *                     rol_id:
+ *                       type: integer
+ *                       example: 2
+ *                     idioma_id:
+ *                       type: integer
+ *                       example: 4
+ *                     idioma:
+ *                       type: object
+ *                       properties:
+ *                         activo:
+ *                           type: boolean
+ *                         nombre:
+ *                           type: string
+ *                           example: "Español"
+ *                         idioma_id:
+ *                           type: integer
+ *                         creado_por:
+ *                           type: integer
+ *                         descripcion:
+ *                           type: string
+ *                         fecha_creacion:
+ *                           type: string
+ *                           format: date-time
+ *                         actualizado_por:
+ *                           type: integer
+ *                         url_foto_bandera:
+ *                           type: string
+ *                           format: url
+ *                         fecha_actualizacion:
+ *                           type: string
+ *                           format: date-time
+ *                     colegio:
+ *                       type: object
+ *                       properties:
+ *                         nombre:
+ *                           type: string
+ *                           example: "Colegio Bicentenario Santiago Centro"
+ *                         colegio_id:
+ *                           type: integer
+ *                           example: 1
+ *                 persona:
+ *                   type: object
+ *                   properties:
+ *                     persona_id:
+ *                       type: integer
+ *                       example: 6
+ *                     tipo_documento:
+ *                       type: string
+ *                       example: "RUN"
+ *                     numero_documento:
+ *                       type: string
+ *                       example: "16738492"
+ *                     nombres:
+ *                       type: string
+ *                       example: "Andrés"
+ *                     apellidos:
+ *                       type: string
+ *                       example: "Gutiérrez"
+ *                     genero_id:
+ *                       type: integer
+ *                       example: 1
+ *                     estado_civil_id:
+ *                       type: integer
+ *                       example: 2
+ *                     fecha_nacimiento:
+ *                       type: string
+ *                       format: date
+ *                       nullable: true
+ *                 rol:
+ *                   type: object
+ *                   properties:
+ *                     rol_id:
+ *                       type: integer
+ *                       example: 2
+ *                     nombre:
+ *                       type: string
+ *                       example: "Alumno"
+ *                     descripcion:
+ *                       type: string
+ *                       example: "Acceso completo al sistema"
+ *                 funcionalidades:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   example: []
+ *                 apoderados:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       activo:
+ *                         type: boolean
+ *                       alumno_id:
+ *                         type: integer
+ *                       apoderados:
+ *                         type: object
+ *                         properties:
+ *                           activo:
+ *                             type: boolean
+ *                           personas:
+ *                             type: object
+ *                             properties:
+ *                               nombres:
+ *                                 type: string
+ *                               apellidos:
+ *                                 type: string
+ *                               genero_id:
+ *                                 type: integer
+ *                               persona_id:
+ *                                 type: integer
+ *                               tipo_documento:
+ *                                 type: string
+ *                               estado_civil_id:
+ *                                 type: integer
+ *                               fecha_nacimiento:
+ *                                 type: string
+ *                                 format: date
+ *                               numero_documento:
+ *                                 type: string
+ *                           colegio_id:
+ *                             type: integer
+ *                           creado_por:
+ *                             type: integer
+ *                           persona_id:
+ *                             type: integer
+ *                           apoderado_id:
+ *                             type: integer
+ *                           profesion_id:
+ *                             type: integer
+ *                             nullable: true
+ *                           fecha_creacion:
+ *                             type: string
+ *                             format: date-time
+ *                           tipo_oficio_id:
+ *                             type: integer
+ *                             nullable: true
+ *                           actualizado_por:
+ *                             type: integer
+ *                           email_contacto1:
+ *                             type: string
+ *                           email_contacto2:
+ *                             type: string
+ *                             nullable: true
+ *                           telefono_contacto1:
+ *                             type: string
+ *                           telefono_contacto2:
+ *                             type: string
+ *                             nullable: true
+ *                           fecha_actualizacion:
+ *                             type: string
+ *                             format: date-time
+ *                       creado_por:
+ *                         type: integer
+ *                       apoderado_id:
+ *                         type: integer
+ *                       observaciones:
+ *                         type: string
+ *                       estado_usuario:
+ *                         type: string
+ *                       fecha_creacion:
+ *                         type: string
+ *                         format: date-time
+ *                       tipo_apoderado:
+ *                         type: string
+ *                       actualizado_por:
+ *                         type: integer
+ *                       alumno_apoderado_id:
+ *                         type: integer
+ *                       fecha_actualizacion:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: No autorizado (sesión no válida)
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.get('/perfil', sessionAuth, AlumnosService.obtenerPerfil);
 
 /**
