@@ -360,22 +360,37 @@ export const AlumnosService = {
   },
   async obtenerRacha(req: Request, res: Response) {
     try {
-    const { alumno_id } = req.query;
-         if (alumno_id === undefined) {
-        throw new Error('Falta el parámetro alumno_id');
+      const { alumno_id } = req.query;
+      if (alumno_id === undefined) {
+        throw new Error("Falta el parámetro alumno_id");
       }
-            const { data, error } = await client.rpc(
-        "obtener_rachas_combinadas",
-        {
-          alumno_id_param: alumno_id || null,
-        }
-      );
+      const { data, error } = await client.rpc("obtener_rachas_combinadas", {
+        alumno_id_param: alumno_id || null,
+      });
       if (error) {
         throw new Error(error.message);
       }
       res.json(data[0]);
     } catch (error) {
-      res.status(500).json({ message: (error as Error).message });      
+      res.status(500).json({ message: (error as Error).message });
+    }
+  },
+
+  async obtenerRegistroSemanal(req: Request, res: Response) {
+    try {
+      const { alumno_id } = req.query;
+      if (alumno_id === undefined) {
+        throw new Error("Falta el parámetro alumno_id");
+      }
+      const { data, error } = await client.rpc("obtener_dias_respondidos", {
+        p_alumno_id: alumno_id || null,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      res.json(data[0].dias_respondidos_json);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
     }
   },
 };

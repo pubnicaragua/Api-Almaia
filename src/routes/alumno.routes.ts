@@ -659,6 +659,8 @@ router.get('/', sessionAuth,sessionAuth, AlumnosService.obtener);
  */
 router.get('/racha', sessionAuth,sessionAuth, AlumnosService.obtenerRacha);
 
+router.get('/registro_semanal', sessionAuth,sessionAuth, AlumnosService.obtenerRegistroSemanal);
+
 /**
  * @swagger
  * /api/v1/alumnos/detalle/{alumnoId}:
