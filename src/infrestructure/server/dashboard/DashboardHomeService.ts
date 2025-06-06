@@ -216,23 +216,11 @@ export const DashboardHomeService = {
 
   // Función para alertas recientes
   async getRecentAlerts(req: Request, res: Response) {
-    const { data, error } = await client
-      .from("alumnos_alertas")
-      .select(
-        "*,alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos)),alertas_reglas(alerta_regla_id,nombre),alertas_origenes(alerta_origen_id,nombre),alertas_severidades(alerta_severidad_id,nombre),alertas_prioridades(alerta_prioridad_id,nombre),alertas_tipos(alerta_tipo_id,nombre)"
-      )
-      .gte(
-        "fecha_generada",
-        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      )
-      .eq("activo", true) // Solo alertas activas
-      .order("fecha_generada", { ascending: false }) // Más recientes primero
-      .order("prioridad_id", { ascending: false }); // Prioridad alta primero
-
-    if (error) {
-      console.error("Error fetching alertas:", error);
-    } else {
-      // Aquí puedes trabajar con los datos (mostrar en UI, etc.)
+  const {data, error } = await client.rpc('obtener_alertas_por_colegio',{
+      p_colegio_id:req.query.colegio_id
+    });
+    if(error){
+      console.error(error.message)
     }
     res.json(data);
   },
