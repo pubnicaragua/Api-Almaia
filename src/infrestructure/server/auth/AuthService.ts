@@ -5,7 +5,6 @@ import { AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúr
 
 // Interfaz para credenciales
 import Joi from "joi";
-import { SupabaseAdminService } from "../../../core/services/supabaseAdmin";
 const PasswordSchema = Joi.object({
   currentPassword: Joi.string().min(6).required(),
   newPassword: Joi.string().min(6).required(),
@@ -15,10 +14,8 @@ const PasswordSchema = Joi.object({
 });
 // Inicializar Supabase client
 const supabaseService = new SupabaseClientService();
-const supabaseServiceAdmin = new SupabaseAdminService();
 
 const client: SupabaseClient = supabaseService.getClient();
-const admin: SupabaseClient = supabaseServiceAdmin.getClient();
 // Servicio de autenticación
 export const AuthService = {
   async login(req: Request, res: Response) {
@@ -136,48 +133,67 @@ export const AuthService = {
       }
     }
   },
- async updatePassword(req: Request, res: Response) {
-  const { userId, newPassword } = req.body;
+async updatePassword(req: Request, res: Response) {
+  try {
+    const { userId, newPassword } = req.body;
 
-  if (!userId || !newPassword) {
-    res.status(400).json({ message: "userId y newPassword son requeridos" });
-  } else {
-    try {
-      const { data: usuario_data, error: error_usuario } = await client
-        .from("usuarios")
-        .select(
-          "*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion)"
-        )
-        .eq("usuario_id", userId)
-        .single();
-
-      if (error_usuario) {
-        res.status(500).json({ message: "Error al obtener usuario", error: error_usuario.message });
-      } else {
-        console.log(usuario_data.auth_id);
-        
-        const { data, error } = await admin.auth.admin.updateUserById(
-          usuario_data.auth_id,
-          { password: newPassword }
-        );
-
-        if (error) {
-          console.error("Error al cambiar contraseña:", error.message);
-          res.status(500).json({
-            message: "Error al actualizar la contraseña",
-            error: error.message,
-          });
-        } else {
-          res.status(200).json({
-            message: "Contraseña actualizada correctamente",
-            user: data,
-          });
-        }
-      }
-    } catch (err) {
-      console.error("Error inesperado:", err);
-      res.status(500).json({ message: "Error interno del servidor" });
+    if (!userId || !newPassword) {
+      throw new Error("userId y newPassword son requeridos");
     }
+
+    const { data: usuario_data, error: error_usuario } = await client
+      .from("usuarios")
+      .select("auth_id")
+      .eq("usuario_id", userId)
+      .single();
+
+    if (error_usuario || !usuario_data) {
+      throw new Error(
+        error_usuario?.message || "No se pudo obtener el usuario"
+      );
+    }
+
+    const usuarioId = usuario_data.auth_id;
+
+    if (!usuarioId) {
+      throw new Error("El campo auth_id no está definido para este usuario");
+    }
+
+    const { data: usuarioAuth, error: errorAuth } =
+      await req.supabaseAdmin.auth.admin.getUserById(usuarioId);
+
+    if (errorAuth || !usuarioAuth) {
+      throw new Error(
+        errorAuth?.message || "No se encontró el usuario en Supabase Auth"
+      );
+    }
+
+    if (usuarioAuth.user.app_metadata.provider !== "email") {
+      throw new Error(
+        "El usuario no fue creado con email y no permite actualizar contraseña"
+      );
+    }
+
+    const { data, error: errorUpdate } =
+      await req.supabaseAdmin.auth.admin.updateUserById(usuarioId, {
+        password: newPassword,
+      });
+
+    if (errorUpdate) {
+      throw new Error(errorUpdate.message);
+    }
+
+    res.status(200).json({
+      message: "Contraseña actualizada correctamente",
+      user: data,
+    });
+
+  } catch (err: any) {
+    console.error("Error inesperado:", err);
+    res.status(400).json({
+      message: "Error al actualizar la contraseña",
+      error: err.message || "Error interno del servidor",
+    });
   }
 }
 

@@ -10,5 +10,6 @@ declare module 'express-serve-static-core' {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user:any
     supabase:SupabaseClient
+    supabaseAdmin:SupabaseClient
   }
 }

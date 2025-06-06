@@ -143,6 +143,7 @@ router.get('/emotions/course', sessionAuth, DashboardComparativaService.getEmoti
  *         description: Error interno del servidor
  */
 router.get('/alerts/totales', sessionAuth, DashboardComparativaService.obtenerGestorAlertasHoy);
+router.get('/alerts/historial', sessionAuth, DashboardComparativaService.obtenerGestorHistorial);
 
 /**
  * @swagger

@@ -2,7 +2,8 @@
 import { Request, Response, NextFunction } from "express";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const { SUPABASE_HOST, SUPABASE_PASSWORD } = process.env;
+const { SUPABASE_HOST, SUPABASE_PASSWORD, SUPABASE_PASSWORD_ADMIN } =
+  process.env;
 
 export const sessionAuth = async (
   req: Request,
@@ -14,13 +15,24 @@ export const sessionAuth = async (
     if (!token) {
       throw new Error("No token provided");
     }
-    if (!SUPABASE_HOST || !SUPABASE_PASSWORD) {
+    if (!SUPABASE_HOST || !SUPABASE_PASSWORD || !SUPABASE_PASSWORD_ADMIN ) {
       throw new Error("Faltan variables de entorno de Supabase");
     }
     // 🔐 Crea cliente con token embebido
     const client: SupabaseClient = createClient(
       SUPABASE_HOST,
       SUPABASE_PASSWORD,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
+    const admin: SupabaseClient = createClient(
+      SUPABASE_HOST,
+      SUPABASE_PASSWORD_ADMIN,
       {
         global: {
           headers: {
@@ -49,6 +61,7 @@ export const sessionAuth = async (
     req.fecha_creacion = new Date().toISOString();
     req.user = data_user?.[0];
     req.supabase = client;
+    req.supabaseAdmin = admin;
 
     next();
   } catch (error: any) {
