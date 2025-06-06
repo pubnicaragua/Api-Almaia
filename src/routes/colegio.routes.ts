@@ -14,6 +14,7 @@ import { HistorialComunicacionsService } from "../infrestructure/server/colegio/
 import { UsuarioColegiosService } from "../infrestructure/server/colegio/UsuarioColegioService";
 import { UsuarioCursosService } from "../infrestructure/server/colegio/UsuarioCursoService";
 import { MateriasService } from "../infrestructure/server/colegio/MateriaService";
+import multer from 'multer';
 
 const router = express.Router();
 const rutas_grados = "/grados";
@@ -29,7 +30,8 @@ const rutas_cursos = "/cursos";
 const rutas_historiales_comunicaciones = "/historiales_comunicaciones";
 const rutas_usuarios_colegios = "/usuarios_colegios";
 const rutas_usuarios_cursos = "/usuarios_cursos";
-
+const storage = multer.memoryStorage(); // Usar almacenamiento en memoria
+const upload = multer({ storage });
 /**
  * @swagger
  * tags:
@@ -2478,6 +2480,9 @@ router.put(`${rutas_materias}/:id`, sessionAuth, MateriasService.actualizar);
  *         description: Error interno del servidor
  */
 router.delete(`${rutas_materias}/:id`, sessionAuth, MateriasService.eliminar);
+
+router.post('/insercion-data', upload.single('file'), sessionAuth, ColegiosService.importarExcelColegio);
+
 
 /**
  * @swagger

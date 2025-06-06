@@ -1,6 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import 'express';
-
 // types/express.d.ts
 declare module 'express-serve-static-core' {
   interface Request {
@@ -11,5 +10,7 @@ declare module 'express-serve-static-core' {
     user:any
     supabase:SupabaseClient
     supabaseAdmin:SupabaseClient
+    file?: Express.Multer.File; 
+
   }
 }
