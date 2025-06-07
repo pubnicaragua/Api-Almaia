@@ -2,74 +2,94 @@ import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { Colegio } from "../../../core/modelo/colegio/Colegio";
 import * as XLSX from 'xlsx';
-import { procesarAlumnos, procesarAnioAcademico, procesarAulas, procesarCargosDirectivos, procesarColegio, procesarCursos, procesarDiasFestivos, procesarDirectivos, procesarDocentes, procesarFechasImportantes, procesarGrados, procesarMaterias, procesarNivelesEducativos } from "../../../core/services/FileService";
+import { ColegioExcel } from "../../../core/modelo/import/ColegioExcel";
+import { Fileservice } from "../../../core/services/FileService";
+import { CalendarioEscolarExcel } from "../../../core/modelo/import/CalendarioEscolarExcel";
+import { DiaFestivoExcel } from "../../../core/modelo/import/DiaFestivoExcel";
+import { FechaImportanteExcel } from "../../../core/modelo/import/FechaImportanteExcel";
+import { NivelEducativoExcel } from "../../../core/modelo/import/NivelEducativoExcel";
+import { GradoExcel } from "../../../core/modelo/import/GradoExcel";
+import { MateriaExcel } from "../../../core/modelo/import/MateriaExcel";
+import { CursoExcel } from "../../../core/modelo/import/CursoExcel";
 
-
+const fileService = new Fileservice()
 const dataService: DataService<Colegio> = new DataService("colegios");
 export const ColegiosService = {
   async importarExcelColegio(req: Request, res: Response) {
   try {
-    const {colegio_id} = req.query
     if (!req.file) throw new Error('Archivo no encontrado');
-
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
 
-    const hojas = workbook.SheetNames;
+    const ordenLectura = [
+  'Colegio',
+  'Año_Academico',
+  'Dias Festivos',
+  'Fechas Importantes',
+  'Cargos_Directivos',
+  'Directivos',
+  'Niveles_Educativos',
+  'Grados',
+  'Materias',
+  'Cursos',
+  'Docentes',
+  'Alumnos',
+  'Aulas',
+];
 
-    for (const hoja of hojas) {
+    for (const hoja of ordenLectura) {
       const datos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja]);
 
       switch (hoja) {
         case 'Año_Academico':
-          await procesarAnioAcademico({colegio_id,data:datos});
+          await fileService.procesarAnioAcademico({data:datos as CalendarioEscolarExcel[]});
           break;
 
         case 'Dias Festivos':
-          await procesarDiasFestivos({colegio_id,data:datos});
+          await fileService.procesarDiasFestivos({data:datos as DiaFestivoExcel[]});
           break;
 
         case 'Fechas Importantes':
-          await procesarFechasImportantes({colegio_id,data:datos});
+          await fileService.procesarFechasImportantes({data:datos as FechaImportanteExcel[]});
           break;
 
         case 'Colegio':
-          await procesarColegio({colegio_id,data:datos});
+          await fileService.procesarColegio({data:datos as ColegioExcel[]});
           break;
 
         case 'Cargos_Directivos':
-          await procesarCargosDirectivos({colegio_id,data:datos});
+          await fileService.procesarCargosDirectivos({data:datos});
           break;
 
         case 'Directivos':
-          await procesarDirectivos({colegio_id,data:datos});
+          await fileService.procesarDirectivos({data:datos});
           break;
 
         case 'Niveles_Educativos':
-          await procesarNivelesEducativos({colegio_id,data:datos});
+          await fileService.procesarNivelesEducativos({data:datos as NivelEducativoExcel[]});
           break;
 
         case 'Grados':
-          await procesarGrados({colegio_id,data:datos});
+          await fileService.procesarGrados({data:datos as GradoExcel[]});
           break;
 
         case 'Materias':
-          await procesarMaterias({colegio_id,data:datos});
+          await fileService.procesarMaterias({data:datos as MateriaExcel[]});
           break;
 
         case 'Cursos':
-          await procesarCursos({colegio_id,data:datos});
+          await fileService.procesarCursos({data:datos as CursoExcel[]});
           break;
 
         case 'Docentes':
-          await procesarDocentes({colegio_id,data:datos});
+          await fileService.procesarDocentes({data:datos});
           break;
 
         case 'Alumnos':
-          await procesarAlumnos({colegio_id,data:datos});
+          await fileService.procesarAlumnos({data:datos});
           break;
 
         case 'Aulas':
-          await procesarAulas({colegio_id,data:datos});
+          await fileService.procesarAulas({data:datos});
           break;
 
         default:

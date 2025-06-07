@@ -1,7 +1,7 @@
 import { BaseModel } from "../BaseModel";
 
 export class Colegio extends BaseModel {
-    colegio_id: number;
+    colegio_id?: number;
     nombre: string;
     nombre_fantasia: string;
     tipo_colegio: string;
