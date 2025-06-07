@@ -88,7 +88,7 @@ export class Fileservice {
   private async initializeNivelCache() {
     if (!this.gradosCache) {
       const { data: niveles, error } = await this.client
-        .from("niveles")
+        .from("niveles_educativos")
         .select("*");
       if (error) throw new Error(`Error obteniendo niveles: ${error.message}`);
       this.nivelesCache = niveles;
