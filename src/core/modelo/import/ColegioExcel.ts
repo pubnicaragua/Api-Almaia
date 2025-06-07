@@ -9,7 +9,7 @@ export interface ColegioExcel {
     SITIO_WEB: string,
     instagram: string,
     DIRECCION: string,
-    TELEFONO_CONTACTO: string,
+    TELEFONO_CONTACTO: number,
     CORREO_ELECTRONICO: string,
     COMUNA_ID: string,
     REGION_ID:string,

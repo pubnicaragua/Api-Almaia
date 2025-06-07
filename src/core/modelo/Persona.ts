@@ -1,7 +1,7 @@
 import { BaseModel } from "./BaseModel";
 
 export class Persona extends BaseModel {
-    persona_id: number;
+    persona_id?: number;
     tipo_documento: string;
     numero_documento: string;
     nombres: string;
@@ -11,7 +11,6 @@ export class Persona extends BaseModel {
     fecha_nacimiento:Date;
     constructor(){
         super();
-        this.persona_id = 0;
         this.tipo_documento = '';
         this.numero_documento = '';
         this.nombres = '';

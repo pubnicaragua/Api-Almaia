@@ -11,6 +11,10 @@ import { NivelEducativoExcel } from "../../../core/modelo/import/NivelEducativoE
 import { GradoExcel } from "../../../core/modelo/import/GradoExcel";
 import { MateriaExcel } from "../../../core/modelo/import/MateriaExcel";
 import { CursoExcel } from "../../../core/modelo/import/CursoExcel";
+import { DirectivoExcel } from "../../../core/modelo/import/DirectivoExcel";
+import { DocenteExcel } from "../../../core/modelo/import/DocenteExcel";
+import { AlumnoExcel } from "../../../core/modelo/import/AlumnoExcel";
+import { AulaExcel } from "../../../core/modelo/import/AulaExcel";
 
 const dataService: DataService<Colegio> = new DataService("colegios");
 export const ColegiosService = {
@@ -58,11 +62,11 @@ export const ColegiosService = {
           break;
 
         case 'Cargos_Directivos':
-          await fileService.procesarCargosDirectivos({data:datos});
+          await fileService.procesarCargosDirectivos({data:datos });
           break;
 
         case 'Directivos':
-          await fileService.procesarDirectivos({data:datos});
+          await fileService.procesarDirectivos({data:datos as DirectivoExcel[]});
           break;
 
         case 'Niveles_Educativos':
@@ -82,15 +86,15 @@ export const ColegiosService = {
           break;
 
         case 'Docentes':
-          await fileService.procesarDocentes({data:datos});
+          await fileService.procesarDocentes({data:datos as DocenteExcel[]});
           break;
 
         case 'Alumnos':
-          await fileService.procesarAlumnos({data:datos});
+          await fileService.procesarAlumnos({data:datos as AlumnoExcel[]});
           break;
 
         case 'Aulas':
-          await fileService.procesarAulas({data:datos});
+          await fileService.procesarAulas({data:datos as AulaExcel[]});
           break;
 
         default:
