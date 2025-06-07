@@ -12,11 +12,12 @@ import { GradoExcel } from "../../../core/modelo/import/GradoExcel";
 import { MateriaExcel } from "../../../core/modelo/import/MateriaExcel";
 import { CursoExcel } from "../../../core/modelo/import/CursoExcel";
 
-const fileService = new Fileservice()
 const dataService: DataService<Colegio> = new DataService("colegios");
 export const ColegiosService = {
   async importarExcelColegio(req: Request, res: Response) {
   try {
+    const fileService = new Fileservice()
+
     if (!req.file) throw new Error('Archivo no encontrado');
     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
 
