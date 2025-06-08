@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { Colegio } from "../../../core/modelo/colegio/Colegio";
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
 import { ColegioExcel } from "../../../core/modelo/import/ColegioExcel";
 import { Fileservice } from "../../../core/services/FileService";
 import { CalendarioEscolarExcel } from "../../../core/modelo/import/CalendarioEscolarExcel";
@@ -19,101 +19,134 @@ import { AulaExcel } from "../../../core/modelo/import/AulaExcel";
 const dataService: DataService<Colegio> = new DataService("colegios");
 export const ColegiosService = {
   async importarExcelColegio(req: Request, res: Response) {
-  try {
-    const fileService = new Fileservice()
+    try {
+      const fileService = new Fileservice();
+      const { colegio_id } = req.query;
+      if (!req.file) throw new Error("Archivo no encontrado");
+      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
 
-    if (!req.file) throw new Error('Archivo no encontrado');
-    const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const ordenLectura = [
+        "Colegio",
+        "Año_Academico",
+        "Dias Festivos",
+        "Fechas Importantes",
+        "Cargos_Directivos",
+        "Directivos",
+        "Niveles_Educativos",
+        "Grados",
+        "Materias",
+        "Cursos",
+        "Docentes",
+        "Alumnos",
+        "Aulas",
+      ];
+      fileService.setColegio(colegio_id);
+      for (const hoja of ordenLectura) {
+        const datos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja]);
 
-    const ordenLectura = [
-  'Colegio',
-  'Año_Academico',
-  'Dias Festivos',
-  'Fechas Importantes',
-  'Cargos_Directivos',
-  'Directivos',
-  'Niveles_Educativos',
-  'Grados',
-  'Materias',
-  'Cursos',
-  'Docentes',
-  'Alumnos',
-  'Aulas',
-];
+        switch (hoja) {
+          case "Año_Academico":
+            if (colegio_id === undefined) {
+              await fileService.procesarAnioAcademico({
+                data: datos as CalendarioEscolarExcel[],
+              });
+            }
+            break;
 
-    for (const hoja of ordenLectura) {
-      const datos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja]);
+          case "Dias Festivos":
+            if (colegio_id === undefined) {
+              await fileService.procesarDiasFestivos({
+                data: datos as DiaFestivoExcel[],
+              });
+            }
+            break;
 
-      switch (hoja) {
-        case 'Año_Academico':
-          await fileService.procesarAnioAcademico({data:datos as CalendarioEscolarExcel[]});
-          break;
+          case "Fechas Importantes":
+            if (colegio_id === undefined) {
+              await fileService.procesarFechasImportantes({
+                data: datos as FechaImportanteExcel[],
+              });
+            }
+            break;
 
-        case 'Dias Festivos':
-          await fileService.procesarDiasFestivos({data:datos as DiaFestivoExcel[]});
-          break;
+          case "Colegio":
+            if (colegio_id === undefined) {
+              await fileService.procesarColegio({
+                data: datos as ColegioExcel[],
+              });
+            }
+            break;
 
-        case 'Fechas Importantes':
-          await fileService.procesarFechasImportantes({data:datos as FechaImportanteExcel[]});
-          break;
+          case "Cargos_Directivos":
+            await fileService.procesarCargosDirectivos({ data: datos });
+            break;
 
-        case 'Colegio':
-          await fileService.procesarColegio({data:datos as ColegioExcel[]});
-          break;
+          case "Directivos":
+            if (colegio_id === undefined) {
+              await fileService.procesarDirectivos({
+                data: datos as DirectivoExcel[],
+              });
+            }
+            break;
 
-        case 'Cargos_Directivos':
-          await fileService.procesarCargosDirectivos({data:datos });
-          break;
+          case "Niveles_Educativos":
+            if (colegio_id === undefined) {
+              await fileService.procesarNivelesEducativos({
+                data: datos as NivelEducativoExcel[],
+              });
+            }
+            break;
 
-        case 'Directivos':
-          await fileService.procesarDirectivos({data:datos as DirectivoExcel[]});
-          break;
+          case "Grados":
+            await fileService.procesarGrados({ data: datos as GradoExcel[] });
+            break;
 
-        case 'Niveles_Educativos':
-          await fileService.procesarNivelesEducativos({data:datos as NivelEducativoExcel[]});
-          break;
+          case "Materias":
+            await fileService.procesarMaterias({
+              data: datos as MateriaExcel[],
+            });
+            break;
 
-        case 'Grados':
-          await fileService.procesarGrados({data:datos as GradoExcel[]});
-          break;
+          case "Cursos":
+            if (colegio_id === undefined) {
+              await fileService.procesarCursos({ data: datos as CursoExcel[] });
+            }
+            break;
 
-        case 'Materias':
-          await fileService.procesarMaterias({data:datos as MateriaExcel[]});
-          break;
+          case "Docentes":
+            if (colegio_id === undefined) {
+              await fileService.procesarDocentes({
+                data: datos as DocenteExcel[],
+              });
+            }
+            break;
 
-        case 'Cursos':
-          await fileService.procesarCursos({data:datos as CursoExcel[]});
-          break;
+          case "Alumnos":
+            await fileService.procesarAlumnos({ data: datos as AlumnoExcel[] });
+            break;
 
-        case 'Docentes':
-          await fileService.procesarDocentes({data:datos as DocenteExcel[]});
-          break;
+          case "Aulas":
+            if (colegio_id === undefined) {
+              await fileService.procesarAulas({ data: datos as AulaExcel[] });
+            }
+            break;
 
-        case 'Alumnos':
-          await fileService.procesarAlumnos({data:datos as AlumnoExcel[]});
-          break;
-
-        case 'Aulas':
-          await fileService.procesarAulas({data:datos as AulaExcel[]});
-          break;
-
-        default:
-          console.warn(`Hoja desconocida: ${hoja}`);
+          default:
+            console.warn(`Hoja desconocida: ${hoja}`);
+        }
       }
-    }
 
-    res.status(200).json({ message: 'Excel procesado correctamente.' });
-
-  } catch (error) {
+      res.status(200).json({ message: "Excel procesado correctamente." });
+    } catch (error) {
       console.error("Error al obtener el colegio:", error);
       res.status(500).json({ message: "Error interno del servidor" });
     }
-},
+  },
 
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-        const colegios = await dataService.getAll(["*"], where);
+      const colegios = await dataService.getAll(["*"], where);
       res.json(colegios);
     } catch (error) {
       console.error("Error al obtener el colegio:", error);

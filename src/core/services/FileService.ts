@@ -37,6 +37,7 @@ export class Fileservice {
   private cursosCache: any[] | null = null;
   private gradosCache: any[] | null = null;
   private nivelesCache: any[] | null = null;
+  private materiasCache: any[] | null = null;
   private colegio_id: number = 0;
   private calendario_escolar_id: number = 0;
 
@@ -49,8 +50,11 @@ export class Fileservice {
     this.initializeCursoCache();
     this.initializeGradoCache();
     this.initializeNivelCache();
+    this.initializeMateriaCache();
   }
-
+  setColegio(colegio_id: any) {
+    this.colegio_id = colegio_id;
+  }
   private async initializeComunasCache() {
     if (!this.comunasCache) {
       const { data: comunas, error } = await this.client
@@ -103,6 +107,15 @@ export class Fileservice {
         .select("*");
       if (error) throw new Error(`Error obteniendo niveles: ${error.message}`);
       this.nivelesCache = niveles;
+    }
+  }
+  private async initializeMateriaCache() {
+    if (!this.materiasCache) {
+      const { data: materias, error } = await this.client
+        .from("materias")
+        .select("*");
+      if (error) throw new Error(`Error obteniendo materias: ${error.message}`);
+      this.materiasCache = materias;
     }
   }
   public async obtenerIdRegionPorNombre(
@@ -274,6 +287,34 @@ export class Fileservice {
       return data[0].grado_id;
     } catch (error) {
       console.error("Error al buscar grado por nombre:", error);
+      return 0;
+    }
+  }
+  public async obtenerIdMateriaPorNombre(
+    nombremateria: string
+  ): Promise<number | null> {
+    try {
+      // Primero intenta buscar en la caché
+      if (this.materiasCache) {
+        const materiaEncontrada = this.materiasCache.find((materia) =>
+          materia.nombre.toLowerCase().includes(nombremateria.toLowerCase())
+        );
+        if (materiaEncontrada) return materiaEncontrada.materia_id;
+      }
+
+      // Si no está en caché, busca directamente en Supabase
+      const { data, error } = await this.client
+        .from("materias")
+        .select("materia_id")
+        .ilike("nombre", `%${nombremateria}%`) // Búsqueda insensible a mayúsculas
+        .limit(1);
+
+      if (error) throw error;
+      if (!data || data.length === 0) return null;
+
+      return data[0].materia_id;
+    } catch (error) {
+      console.error("Error al buscar materia por nombre:", error);
       return 0;
     }
   }
@@ -616,7 +657,11 @@ export class Fileservice {
     }
   }
 
-  async procesarDocentes({ data }: { data: DocenteExcel[] }): Promise<{personas: Persona[];docentes: Docente[];usuarios: Usuario[];} | null> {
+  async procesarDocentes({ data }: { data: DocenteExcel[] }): Promise<{
+    personas: Persona[];
+    docentes: Docente[];
+    usuarios: Usuario[];
+  } | null> {
     try {
       // Validación básica
       if (!data || data.length === 0) {
@@ -629,16 +674,16 @@ export class Fileservice {
       // Normalizar nombres de campos (eliminar espacios)
       const normalizedData = data.map((item) => ({
         DOCENTE_ID: item["DOCENTE_ID "],
-        RUT: item[" RUT"],
-        NOMBRE: item[" NOMBRE"],
-        APELLIDOS: item[" APELLIDOS"],
-        ESTADO_CIVIL: item[" ESTADO CIVIL"],
-        GENERO: item[" GENERO"],
-        DIRECCION: item[" DIRECCIÓN"],
-        COMUNA: item[" COMUNA"],
-        REGION: item[" REGIÓN"],
-        ESPECIALIDAD: item[" ESPECIALIDAD"],
-        CURSO_TITULAR: item[" CURSO_TITULAR"],
+        RUT: item["RUT"],
+        NOMBRE: item["NOMBRE"],
+        APELLIDOS: item["APELLIDOS"],
+        ESTADO_CIVIL: item["ESTADO CIVIL"],
+        GENERO: item["GENERO"],
+        DIRECCION: item["DIRECCIÓN"],
+        COMUNA: item["COMUNA"],
+        REGION: item["REGIÓN"],
+        ESPECIALIDAD: item["ESPECIALIDAD"],
+        CURSO_TITULAR: item["CURSO_TITULAR"],
       }));
 
       // Mapeamos los datos para personas, docentes y usuarios
@@ -877,7 +922,7 @@ export class Fileservice {
       );
     }
   }
- 
+
   async procesarNivelesEducativos({
     data,
   }: {
@@ -893,6 +938,7 @@ export class Fileservice {
       const datosMapeados = data.map((item) => ({
         nivel_educativo_id: item.NIVEL_EDUCATIVO_ID || undefined, // Si es 0, Supabase generará automáticamente el ID
         nombre: item.NOMBRE?.trim() || "Nivel sin nombre",
+        colegio_id: this.colegio_id,
         creado_por: 0,
         actualizado_por: 0,
         fecha_creacion: new Date().toISOString(),
@@ -931,14 +977,21 @@ export class Fileservice {
       }
 
       // Mapeamos los datos
-      const datosMapeados = data.map((item) => ({
-        nombre: item.NOMBRE?.trim() || "Grado sin nombre",
-        creado_por: 0,
-        actualizado_por: 0,
-        fecha_creacion: new Date().toISOString(),
-        fecha_actualizacion: new Date().toISOString(),
-        activo: true,
-      }));
+      const datosMapeados: Grado[] = await Promise.all(
+        data.map(async (item) => ({
+          nombre: item.NOMBRE?.trim() || "Grado sin nombre",
+          creado_por: 0,
+          actualizado_por: 0,
+          colegio_id: this.colegio_id,
+          nivel_educativo_id:
+            (await this.obtenerIdGradoPorNombre(
+              this.transformarNivelEducativo(item.NOMBRE)
+            )) || 1,
+          fecha_creacion: new Date().toISOString(),
+          fecha_actualizacion: new Date().toISOString(),
+          activo: true,
+        }))
+      );
 
       // Upsert (insertar o actualizar si ya existe)
       const { data: grados, error } = await this.client
@@ -984,7 +1037,7 @@ export class Fileservice {
         fecha_creacion: new Date().toISOString(),
         fecha_actualizacion: new Date().toISOString(),
         activo: true,
-      }));
+      })) as Materia[];
 
       // Upsert (insertar o actualizar si ya existe)
       const { data: materias, error } = await this.client
@@ -1005,7 +1058,11 @@ export class Fileservice {
       return null;
     }
   }
-  async procesarCursos({data}: {data: CursoExcel[];}): Promise<Curso[] | null> {
+  async procesarCursos({
+    data,
+  }: {
+    data: CursoExcel[];
+  }): Promise<Curso[] | null> {
     try {
       // Validación básica
       if (!data || data.length === 0) {
@@ -1022,9 +1079,7 @@ export class Fileservice {
           this.obtenerIdGradoPorNombre(item.GRADO_ID),
           this.obtenerIdNivelEducativoPorNombre(item.NIVEL_EDUCATIVO_ID),
         ]);
-
         return {
-          curso_id: item.CURSO_ID || undefined, // Si es 0, Supabase generará el ID
           nombre_curso: item.NOMBRE_CURSO?.trim() || "Curso sin nombre",
           colegio_id: this.colegio_id,
           grado_id: grado_id,
@@ -1036,6 +1091,8 @@ export class Fileservice {
           activo: true,
         } as Curso;
       });
+      console.log(await datosMapeados);
+
       // Upsert (insertar o actualizar si ya existe)
       const { data: cursos, error } = await this.client
         .from("cursos")
@@ -1055,302 +1112,323 @@ export class Fileservice {
       return null;
     }
   }
-   async procesarAlumnos({ data }: { data: AlumnoExcel[] }): Promise<{personas: Persona[];alumnos: Alumno[];usuarios: Usuario[];apoderados: Apoderado[];} | null> {
-      try {
-        // Validación básica
-        if (!data || data.length === 0) {
-          throw new Error("No se proporcionaron datos de alumnos");
-        }
-        if (!this.colegio_id || this.colegio_id <= 0) {
-          throw new Error("ID de colegio inválido");
-        }
-  
-        // Normalizar nombres de campos (eliminar espacios extra)
-        const normalizedData = data.map((item) => ({
-          ALUMNO_ID: item.ALUMNO_ID,
-          RUT: item.RUT?.trim(),
-          NOMBRE: item.NOMBRE?.trim(),
-          APELLIDOS: item.APELLIDOS?.trim(),
-          NOMBRE_SOCIAL: item.NOMBRE_SOCIAL?.trim(),
-          CURSO: item.CURSO?.trim(),
-          GENERO: item.GENERO?.trim(),
-          DIRECCION: item["DIRECCIÓN"]?.trim(),
-          COMUNA: item.COMUNA?.trim(),
-          REGION: item.REGION?.trim(),
-          TELEFONO_CONTACTO1: item.TELEFONO_CONTACTO1,
-          TELEFONO_CONTACTO2: item.TELEFONO_CONTACTO2,
-          EMAIL: item.EMAIL?.trim(),
-          RUT_APODERADO_1: item.RUT_APODERADO_1?.trim(),
-          NOMBRE_APODERADO_1: item.NOMBRE_APODERADO_1?.trim(),
-          APELLIDO_APODERADO_1: item.APELLIDO_APODERADO_1?.trim(),
-          EMAIL_APODERADO_1: item.EMAIL_APODERADO_1?.trim(),
-          TELEFONO_APODERADO_1: item.TELEFONO_APODERADO_1,
-          RUT_APODERADO_2: item.RUT_APODERADO_2?.trim(),
-          NOMBRE_APODERADO_2: item.NOMBRE_APODERADO_2?.trim(),
-          APELLIDO_APODERADO_2: item.APELLIDO_APODERADO_2?.trim(),
-          EMAIL_APODERADO_2: item.EMAIL_APODERADO_2?.trim(),
-          TELEFONO_APODERADO_2: item.TELEFONO_APODERADO_2,
-          ANTECEDENTES_MEDICOS: item["ANTECEDENTES MEDICOS"]?.trim(),
-        }));
-  
-        // Arrays para almacenar los datos procesados
-        const personasData: Partial<Persona>[] = [];
-        const alumnosData: Partial<Alumno>[] = [];
-        const usuariosData: Partial<Usuario>[] = [];
-        const usuariosColegioData: Partial<UsuarioColegio>[] = [];
-        const apoderadosData: Partial<Apoderado>[] = [];
-        const personasApoderadosData: Partial<Persona>[] = [];
-  
-        for (const item of normalizedData) {
-          const alumnoId = item.ALUMNO_ID || undefined;
-          const generoId = await this.obtenerGeneroId(item.GENERO);
-  
-          // 1. Procesamos la persona del alumno
-          personasData.push({
-            persona_id: alumnoId,
-            tipo_documento: "RUT",
-            numero_documento: item.RUT || "",
-            nombres: item.NOMBRE || "",
-            apellidos: item.APELLIDOS || "",
-            genero_id: generoId || 0,
-            estado_civil_id: 1, // Asumiendo soltero para alumnos
-            fecha_nacimiento: new Date(), // Ajustar si tienes la fecha real
-            creado_por: 0,
-            actualizado_por: 0,
-            fecha_creacion: new Date().toISOString(),
-            fecha_actualizacion: new Date().toISOString(),
-            activo: true,
-          });
-  
-          // 2. Procesamos el alumno
-          alumnosData.push({
-            alumno_id: alumnoId,
-            persona_id: alumnoId,
-            colegio_id: this.colegio_id,
-            telefono_contacto1: item.TELEFONO_CONTACTO1?.toString() || "",
-            telefono_contacto2: item.TELEFONO_CONTACTO2?.toString() || "",
-            email: item.EMAIL || "",
-            creado_por: 0,
-            actualizado_por: 0,
-            fecha_creacion: new Date().toISOString(),
-            fecha_actualizacion: new Date().toISOString(),
-            activo: true,
-          });
-  
-          // 3. Procesamos el usuario del alumno (si tiene email)
-          if (item.EMAIL) {
-            usuariosData.push({
-              nombre_social:
-                item.NOMBRE_SOCIAL || `${item.NOMBRE} ${item.APELLIDOS}`.trim(),
-              email: item.EMAIL.toLowerCase(),
-              encripted_password: "", // Generar una temporal
-              rol_id: 4, // Asumiendo que 4 es el ID para rol alumno
-              persona_id: alumnoId,
-              telefono_contacto: item.TELEFONO_CONTACTO1?.toString() || "",
-              estado_usuario: "activo",
-              ultimo_inicio_sesion: new Date().toISOString(),
-              intentos_inicio_sesion: 0,
-              idioma_id: 1,
-              creado_por: 0,
-              actualizado_por: 0,
-              fecha_creacion: new Date().toISOString(),
-              fecha_actualizacion: new Date().toISOString(),
-              activo: true,
-            });
-  
-            // Relación usuario-colegio para alumno
-            usuariosColegioData.push({
-              usuario_id: 0, // Se actualizará después
-              colegio_id: this.colegio_id,
-              rol_id: 4, // Rol alumno
-              fecha_asignacion: new Date().toISOString(),
-              creado_por: 0,
-              actualizado_por: 0,
-              fecha_creacion: new Date().toISOString(),
-              fecha_actualizacion: new Date().toISOString(),
-              activo: true,
-            });
-          }
-  
-          // 4. Procesamos apoderado 1 si existe
-          if (item.RUT_APODERADO_1) {
-            const apoderado1Id = Math.floor(Math.random() * 1000000); // Generar ID temporal
-            const generoApoderado1Id = await this.obtenerGeneroId(""); // Obtener género si es necesario
-  
-            personasApoderadosData.push({
-              persona_id: apoderado1Id,
-              tipo_documento: "RUT",
-              numero_documento: item.RUT_APODERADO_1,
-              nombres: item.NOMBRE_APODERADO_1 || "",
-              apellidos: item.APELLIDO_APODERADO_1 || "",
-              genero_id: generoApoderado1Id || 0,
-              estado_civil_id: 0, // Puede ajustarse según sea necesario
-              fecha_nacimiento: new Date(),
-              creado_por: 0,
-              actualizado_por: 0,
-              fecha_creacion: new Date().toISOString(),
-              fecha_actualizacion: new Date().toISOString(),
-              activo: true,
-            });
-  
-            apoderadosData.push({
-              apoderado_id: apoderado1Id,
-              persona_id: apoderado1Id,
-              colegio_id: this.colegio_id,
-              telefono_contacto1: item.TELEFONO_APODERADO_1?.toString() || "",
-              telefono_contacto2: "",
-              email_contacto1: item.EMAIL_APODERADO_1 || "",
-              email_contacto2: "",
-              creado_por: 0,
-              actualizado_por: 0,
-              fecha_creacion: new Date().toISOString(),
-              fecha_actualizacion: new Date().toISOString(),
-              activo: true,
-            });
-          }
-  
-          // 5. Procesamos apoderado 2 si existe
-          if (item.RUT_APODERADO_2) {
-            const apoderado2Id = Math.floor(Math.random() * 1000000); // Generar ID temporal
-            const generoApoderado2Id = await this.obtenerGeneroId(""); // Obtener género si es necesario
-  
-            personasApoderadosData.push({
-              persona_id: apoderado2Id,
-              tipo_documento: "RUT",
-              numero_documento: item.RUT_APODERADO_2,
-              nombres: item.NOMBRE_APODERADO_2 || "",
-              apellidos: item.APELLIDO_APODERADO_2 || "",
-              genero_id: generoApoderado2Id || 0,
-              estado_civil_id: 0,
-              fecha_nacimiento: new Date(),
-              creado_por: 0,
-              actualizado_por: 0,
-              fecha_creacion: new Date().toISOString(),
-              fecha_actualizacion: new Date().toISOString(),
-              activo: true,
-            });
-  
-            apoderadosData.push({
-              apoderado_id: apoderado2Id,
-              persona_id: apoderado2Id,
-              colegio_id: this.colegio_id,
-              telefono_contacto1: item.TELEFONO_APODERADO_2?.toString() || "",
-              telefono_contacto2: "",
-              email_contacto1: item.EMAIL_APODERADO_2 || "",
-              email_contacto2: "",
-              creado_por: 0,
-              actualizado_por: 0,
-              fecha_creacion: new Date().toISOString(),
-              fecha_actualizacion: new Date().toISOString(),
-              activo: true,
-            });
-          }
-        }
-  
-        // Combinar todas las personas (alumnos y apoderados)
-        const todasLasPersonas = [...personasData, ...personasApoderadosData];
-  
-        // 1. Insertamos todas las personas primero
-        const { data: personasInsertadas, error: errorPersonas } =
-          await this.client
-            .from("personas")
-            .upsert(todasLasPersonas, { onConflict: "persona_id" })
-            .select("persona_id, numero_documento");
-  
-        if (errorPersonas) throw errorPersonas;
-  
-        // 2. Insertamos alumnos
-        const alumnosParaInsertar = alumnosData.map((alumno, index) => ({
-          ...alumno,
-          persona_id: personasInsertadas?.[index]?.persona_id,
-          alumno_id: personasInsertadas?.[index]?.persona_id,
-        }));
-  
-        const { data: alumnosInsertados, error: errorAlumnos } = await this.client
-          .from("alumnos")
-          .upsert(alumnosParaInsertar, { onConflict: "alumno_id,colegio_id" })
-          .select("alumno_id, persona_id");
-  
-        if (errorAlumnos) throw errorAlumnos;
-  
-        // 3. Insertamos usuarios de alumnos
-        const usuariosParaInsertar = usuariosData
-          .map((usuario, index) => ({
-            ...usuario,
-            persona_id: personasInsertadas?.[index]?.persona_id,
-          }))
-          .filter((u) => u.persona_id && u.email);
-  
-        let usuariosInsertados: Usuario[] = [];
-        if (usuariosParaInsertar.length > 0) {
-          const { data: usuarios, error: errorUsuarios } = await this.client
-            .from("usuarios")
-            .upsert(usuariosParaInsertar, { onConflict: "email" })
-            .select("*,usuario_id, persona_id");
-  
-          if (errorUsuarios) throw errorUsuarios;
-          usuariosInsertados = usuarios || [];
-        }
-  
-        // 4. Insertamos relaciones usuario-colegio
-        if (usuariosInsertados.length > 0) {
-          const relacionesParaInsertar = usuariosColegioData
-            .map((relacion, index) => ({
-              ...relacion,
-              usuario_id: usuariosInsertados?.[index]?.usuario_id,
-            }))
-            .filter((r) => r.usuario_id);
-  
-          if (relacionesParaInsertar.length > 0) {
-            const { error: errorRelaciones } = await this.client
-              .from("usuarios_colegio")
-              .upsert(relacionesParaInsertar, {
-                onConflict: "usuario_id,colegio_id",
-              });
-  
-            if (errorRelaciones) throw errorRelaciones;
-          }
-        }
-  
-        // 5. Insertamos apoderados
-        const apoderadosParaInsertar = apoderadosData
-          .map((apoderado) => {
-            const personaApoderado = personasInsertadas?.find(
-              (p) => p.persona_id === apoderado.persona_id
-            );
-            return {
-              ...apoderado,
-              persona_id: personaApoderado?.persona_id,
-            };
-          })
-          .filter((a) => a.persona_id);
-  
-        let apoderadosInsertados: Apoderado[] = [];
-        if (apoderadosParaInsertar.length > 0) {
-          const { data: apoderados, error: errorApoderados } = await this.client
-            .from("apoderados")
-            .upsert(apoderadosParaInsertar, {
-              onConflict: "apoderado_id,colegio_id",
-            })
-            .select("*");
-  
-          if (errorApoderados) throw errorApoderados;
-          apoderadosInsertados = apoderados || [];
-        }
-  
-        return {
-          personas: personasInsertadas as Persona[],
-          alumnos: alumnosInsertados as Alumno[],
-          usuarios: usuariosInsertados as Usuario[],
-          apoderados: apoderadosInsertados as Apoderado[],
-        };
-      } catch (error) {
-        console.error(
-          "Error en procesarAlumnos:",
-          error instanceof Error ? error.message : error
-        );
-        return null;
+  async procesarAlumnos({ data }: { data: AlumnoExcel[] }): Promise<{
+    personas: Persona[];
+    alumnos: Alumno[];
+    usuarios: Usuario[];
+    apoderados: Apoderado[];
+  } | null> {
+    try {
+      console.log("incio a procesar alumnos");
+
+      // Validación básica
+      if (!data || data.length === 0) {
+        throw new Error("No se proporcionaron datos de alumnos");
       }
+      if (!this.colegio_id || this.colegio_id <= 0) {
+        throw new Error("ID de colegio inválido");
+      }
+
+      // Normalizar nombres de campos (eliminar espacios extra)
+      const normalizedData = data.map((item) => ({
+        ALUMNO_ID: item.ALUMNO_ID,
+        RUT: item.RUT?.trim(),
+        NOMBRE: item.NOMBRE?.trim(),
+        APELLIDOS: item.APELLIDOS?.trim(),
+        NOMBRE_SOCIAL: item.NOMBRE_SOCIAL?.trim(),
+        CURSO: item.CURSO?.trim(),
+        GENERO: item.GENERO?.trim(),
+        DIRECCION: item["DIRECCIÓN"]?.trim(),
+        COMUNA: item.COMUNA?.trim(),
+        REGION: item.REGION?.trim(),
+        TELEFONO_CONTACTO1: item.TELEFONO_CONTACTO1,
+        TELEFONO_CONTACTO2: item.TELEFONO_CONTACTO2,
+        EMAIL: item.EMAIL?.trim(),
+        RUT_APODERADO_1: item.RUT_APODERADO_1?.trim(),
+        NOMBRE_APODERADO_1: item.NOMBRE_APODERADO_1?.trim(),
+        APELLIDO_APODERADO_1: item.APELLIDO_APODERADO_1?.trim(),
+        EMAIL_APODERADO_1: item.EMAIL_APODERADO_1?.trim(),
+        TELEFONO_APODERADO_1: item.TELEFONO_APODERADO_1,
+        RUT_APODERADO_2: item.RUT_APODERADO_2?.trim(),
+        NOMBRE_APODERADO_2: item.NOMBRE_APODERADO_2?.trim(),
+        APELLIDO_APODERADO_2: item.APELLIDO_APODERADO_2?.trim(),
+        EMAIL_APODERADO_2: item.EMAIL_APODERADO_2?.trim(),
+        TELEFONO_APODERADO_2: item.TELEFONO_APODERADO_2,
+        ANTECEDENTES_MEDICOS: item["ANTECEDENTES MEDICOS"]?.trim(),
+      }));
+
+      // Arrays para almacenar los datos procesados
+      const personasData: Partial<Persona>[] = [];
+      const alumnosData: Partial<Alumno>[] = [];
+      const usuariosData: Partial<Usuario>[] = [];
+      const usuariosColegioData: Partial<UsuarioColegio>[] = [];
+      const apoderadosData: Partial<Apoderado>[] = [];
+      const personasApoderadosData: Partial<Persona>[] = [];
+
+      for (const item of normalizedData) {
+        const alumnoId = item.ALUMNO_ID || undefined;
+        const generoId = await this.obtenerGeneroId(item.GENERO);
+
+        // 1. Procesamos la persona del alumno
+        personasData.push({
+          persona_id: alumnoId,
+          tipo_documento: "RUT",
+          numero_documento: item.RUT || "",
+          nombres: item.NOMBRE || "",
+          apellidos: item.APELLIDOS || "",
+          genero_id: generoId || 0,
+          estado_civil_id: 1, // Asumiendo soltero para alumnos
+          fecha_nacimiento: new Date(), // Ajustar si tienes la fecha real
+          creado_por: 0,
+          actualizado_por: 0,
+          fecha_creacion: new Date().toISOString(),
+          fecha_actualizacion: new Date().toISOString(),
+          activo: true,
+        });
+
+        // 2. Procesamos el alumno
+        alumnosData.push({
+          alumno_id: alumnoId,
+          persona_id: alumnoId,
+          colegio_id: this.colegio_id,
+          telefono_contacto1: item.TELEFONO_CONTACTO1?.toString() || "",
+          telefono_contacto2: item.TELEFONO_CONTACTO2?.toString() || "",
+          email: item.EMAIL || "",
+          creado_por: 0,
+          actualizado_por: 0,
+          fecha_creacion: new Date().toISOString(),
+          fecha_actualizacion: new Date().toISOString(),
+          activo: true,
+        });
+
+        // 3. Procesamos el usuario del alumno (si tiene email)
+        if (item.EMAIL) {
+          usuariosData.push({
+            nombre_social:
+              item.NOMBRE_SOCIAL || `${item.NOMBRE} ${item.APELLIDOS}`.trim(),
+            email: item.EMAIL.toLowerCase(),
+            encripted_password: "", // Generar una temporal
+            rol_id: 4, // Asumiendo que 4 es el ID para rol alumno
+            persona_id: alumnoId,
+            telefono_contacto: item.TELEFONO_CONTACTO1?.toString() || "",
+            estado_usuario: "activo",
+            ultimo_inicio_sesion: new Date().toISOString(),
+            intentos_inicio_sesion: 0,
+            idioma_id: 1,
+            creado_por: 0,
+            actualizado_por: 0,
+            fecha_creacion: new Date().toISOString(),
+            fecha_actualizacion: new Date().toISOString(),
+            activo: true,
+          });
+
+          // Relación usuario-colegio para alumno
+          usuariosColegioData.push({
+            usuario_id: 0, // Se actualizará después
+            colegio_id: this.colegio_id,
+            rol_id: 4, // Rol alumno
+            fecha_asignacion: new Date().toISOString(),
+            creado_por: 0,
+            actualizado_por: 0,
+            fecha_creacion: new Date().toISOString(),
+            fecha_actualizacion: new Date().toISOString(),
+            activo: true,
+          });
+        }
+
+        // 4. Procesamos apoderado 1 si existe
+                      console.log(" 4. Procesamos apoderado 1 si existe");
+
+        if (item.RUT_APODERADO_1) {
+          const apoderado1Id = Math.floor(Math.random() * 1000000); // Generar ID temporal
+          const generoApoderado1Id = await this.obtenerGeneroId(""); // Obtener género si es necesario
+
+          personasApoderadosData.push({
+            persona_id: apoderado1Id,
+            tipo_documento: "RUT",
+            numero_documento: item.RUT_APODERADO_1,
+            nombres: item.NOMBRE_APODERADO_1 || "",
+            apellidos: item.APELLIDO_APODERADO_1 || "",
+            genero_id: generoApoderado1Id || 0,
+            estado_civil_id: 0, // Puede ajustarse según sea necesario
+            fecha_nacimiento: new Date(),
+            creado_por: 0,
+            actualizado_por: 0,
+            fecha_creacion: new Date().toISOString(),
+            fecha_actualizacion: new Date().toISOString(),
+            activo: true,
+          });
+
+          apoderadosData.push({
+            apoderado_id: apoderado1Id,
+            persona_id: apoderado1Id,
+            colegio_id: this.colegio_id,
+            telefono_contacto1: item.TELEFONO_APODERADO_1?.toString() || "",
+            telefono_contacto2: "",
+            email_contacto1: item.EMAIL_APODERADO_1 || "",
+            email_contacto2: "",
+            creado_por: 0,
+            actualizado_por: 0,
+            fecha_creacion: new Date().toISOString(),
+            fecha_actualizacion: new Date().toISOString(),
+            activo: true,
+          });
+        }
+
+        // 5. Procesamos apoderado 2 si existe
+              console.log("5. Procesamos apoderado 2 si existe");
+
+        if (item.RUT_APODERADO_2) {
+          const apoderado2Id = Math.floor(Math.random() * 1000000); // Generar ID temporal
+          const generoApoderado2Id = await this.obtenerGeneroId(""); // Obtener género si es necesario
+
+          personasApoderadosData.push({
+            persona_id: apoderado2Id,
+            tipo_documento: "RUT",
+            numero_documento: item.RUT_APODERADO_2,
+            nombres: item.NOMBRE_APODERADO_2 || "",
+            apellidos: item.APELLIDO_APODERADO_2 || "",
+            genero_id: generoApoderado2Id || 0,
+            estado_civil_id: 0,
+            fecha_nacimiento: new Date(),
+            creado_por: 0,
+            actualizado_por: 0,
+            fecha_creacion: new Date().toISOString(),
+            fecha_actualizacion: new Date().toISOString(),
+            activo: true,
+          });
+
+          apoderadosData.push({
+            apoderado_id: apoderado2Id,
+            persona_id: apoderado2Id,
+            colegio_id: this.colegio_id,
+            telefono_contacto1: item.TELEFONO_APODERADO_2?.toString() || "",
+            telefono_contacto2: "",
+            email_contacto1: item.EMAIL_APODERADO_2 || "",
+            email_contacto2: "",
+            creado_por: 0,
+            actualizado_por: 0,
+            fecha_creacion: new Date().toISOString(),
+            fecha_actualizacion: new Date().toISOString(),
+            activo: true,
+          });
+        }
+      }
+
+      // Combinar todas las personas (alumnos y apoderados)
+      const todasLasPersonas = [...personasData, ...personasApoderadosData];
+
+      // 1. Insertamos todas las personas primero
+      console.log("1. Insertamos todas las personas primero");
+
+      const { data: personasInsertadas, error: errorPersonas } =
+        await this.client
+          .from("personas")
+          .upsert(todasLasPersonas, { onConflict: "persona_id" })
+          .select("persona_id, numero_documento");
+
+      if (errorPersonas) throw errorPersonas;
+
+      // 2. Insertamos alumnos
+      console.log(" 2. Insertamos alumnos");
+
+      const alumnosParaInsertar = alumnosData.map((alumno, index) => ({
+        ...alumno,
+        persona_id: personasInsertadas?.[index]?.persona_id,
+        alumno_id: personasInsertadas?.[index]?.persona_id,
+      }));
+
+      const { data: alumnosInsertados, error: errorAlumnos } = await this.client
+        .from("alumnos")
+        .upsert(alumnosParaInsertar, { onConflict: "alumno_id,colegio_id" })
+        .select("alumno_id, persona_id");
+
+      if (errorAlumnos) throw errorAlumnos;
+
+      // 3. Insertamos usuarios de alumnos
+      console.log(" 3. Insertamos usuarios de alumnos");
+
+      const usuariosParaInsertar = usuariosData
+        .map((usuario, index) => ({
+          ...usuario,
+          persona_id: personasInsertadas?.[index]?.persona_id,
+        }))
+        .filter((u) => u.persona_id && u.email);
+
+      let usuariosInsertados: Usuario[] = [];
+      if (usuariosParaInsertar.length > 0) {
+        const { data: usuarios, error: errorUsuarios } = await this.client
+          .from("usuarios")
+          .upsert(usuariosParaInsertar, { onConflict: "email" })
+          .select("*,usuario_id, persona_id");
+
+        if (errorUsuarios) throw errorUsuarios;
+        usuariosInsertados = usuarios || [];
+      }
+
+      // 4. Insertamos relaciones usuario-colegio
+      console.log(" 4. Insertamos relaciones usuario-colegio");
+
+      if (usuariosInsertados.length > 0) {
+        const relacionesParaInsertar = usuariosColegioData
+          .map((relacion, index) => ({
+            ...relacion,
+            usuario_id: usuariosInsertados?.[index]?.usuario_id,
+          }))
+          .filter((r) => r.usuario_id);
+
+        if (relacionesParaInsertar.length > 0) {
+          const { error: errorRelaciones } = await this.client
+            .from("usuarios_colegio")
+            .upsert(relacionesParaInsertar, {
+              onConflict: "usuario_id,colegio_id",
+            });
+
+          if (errorRelaciones) throw errorRelaciones;
+        }
+      }
+
+      // 5. Insertamos apoderados
+      console.log(" 5. Insertamos apoderados");
+
+      const apoderadosParaInsertar = apoderadosData
+        .map((apoderado) => {
+          const personaApoderado = personasInsertadas?.find(
+            (p) => p.persona_id === apoderado.persona_id
+          );
+          return {
+            ...apoderado,
+            persona_id: personaApoderado?.persona_id,
+          };
+        })
+        .filter((a) => a.persona_id);
+
+      let apoderadosInsertados: Apoderado[] = [];
+      if (apoderadosParaInsertar.length > 0) {
+        const { data: apoderados, error: errorApoderados } = await this.client
+          .from("apoderados")
+          .upsert(apoderadosParaInsertar, {
+            onConflict: "apoderado_id,colegio_id",
+          })
+          .select("*");
+
+        if (errorApoderados) throw errorApoderados;
+        apoderadosInsertados = apoderados || [];
+      }
+
+      return {
+        personas: personasInsertadas as Persona[],
+        alumnos: alumnosInsertados as Alumno[],
+        usuarios: usuariosInsertados as Usuario[],
+        apoderados: apoderadosInsertados as Apoderado[],
+      };
+    } catch (error) {
+      console.error(
+        "Error en procesarAlumnos:",
+        error instanceof Error ? error.message : error
+      );
+      return null;
+    }
   }
   async procesarAulas({ data }: { data: AulaExcel[] }): Promise<Aula[] | null> {
     try {
@@ -1378,7 +1456,7 @@ export class Fileservice {
       for (const item of normalizedData) {
         // Obtener IDs necesarios
         const cursoId = await this.obtenerIdCursoPorNombre(item.CURSO);
-        const materiaId = await this.obtenerMateriaId(item.MATERIA);
+        const materiaId = await this.obtenerIdMateriaPorNombre(item.MATERIA);
         const docenteId = item.DOCENTE;
 
         // Validar que existan los IDs necesarios
@@ -1460,7 +1538,6 @@ export class Fileservice {
 
     return jsDate;
   }
-
   // Método auxiliar para calcular días hábiles (opcional)
   private calcularDiasHabiles(fechaInicio: Date, fechaFin: Date): number {
     // Implementación básica - puedes mejorarla
@@ -1469,30 +1546,6 @@ export class Fileservice {
     return diffDays;
   }
   // Métodos auxiliares que necesitarás implementar o que ya podrías tener
-  private async obtenerMateriaId(nombreMateria: string): Promise<number | null> {
-    try {
-      const { data, error } = await this.client
-        .from("materias")
-        .select("materia_id")
-        .eq("nombre", nombreMateria)
-        .eq("colegio_id", this.colegio_id)
-        .single();
-
-      if (error) {
-        console.warn(
-          `Error al buscar materia ${nombreMateria}:`,
-          error.message
-        );
-        return null;
-      }
-
-      return data?.materia_id || null;
-    } catch (error) {
-      console.warn(`Error al obtener materia ${nombreMateria}:`, error);
-      return null;
-    }
-  }
-
   private async verificarDocenteExiste(docenteId: number): Promise<boolean> {
     try {
       const { data, error } = await this.client
@@ -1511,5 +1564,19 @@ export class Fileservice {
       console.warn(`Error al verificar docente ${docenteId}:`, error);
       return false;
     }
+  }
+  transformarNivelEducativo(input: string): string {
+    const palabras = input.trim().split(/\s+/);
+    const ultimaPalabra = palabras[palabras.length - 1].toLowerCase();
+
+    if (ultimaPalabra === "básico" || ultimaPalabra === "basico") {
+      return "Educación Básica";
+    }
+
+    if (ultimaPalabra === "medio") {
+      return "Educación Media";
+    }
+
+    return input; // si no coincide, devuelve el original
   }
 }
