@@ -312,14 +312,14 @@ export const AlumnoAlertaService = {
         res.json({ count });
       } else {
         // Sin filtro de colegio, contar todas las alertas pendientes
-        const { count, error } = await client
+        /*const { count, error } = await client
           .from("alumnos_alertas")
           .select("*", { count: "exact", head: true })
           .eq("estado", "pendiente");
 
-        if (error) throw error;
+        if (error) throw error;*/
 
-        res.json({ count: count || 0 });
+        res.json({ count:  0 });
       }
     } catch (error) {
       console.error("Error:", error);
