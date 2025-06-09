@@ -178,7 +178,9 @@ export async function contarAlertasPendientesPorColegio(
       .in("alumno_id", alumnoIds);
 
     if (errorAlertas) throw errorAlertas;
-
+    if(colegioId == undefined || 0 ){
+      return 0;
+    }
     return count || 0;
   } catch (error) {
     console.error("Error en contarAlertasPendientesPorColegio:", error);
