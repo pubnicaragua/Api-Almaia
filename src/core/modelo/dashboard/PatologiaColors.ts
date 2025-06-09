@@ -1,9 +1,9 @@
 export const patologiaColors: Record<string, string> = {
-  "Salud Mental": "#facc15",
-  "Trastorno del Ánimo": "#fde68a",
-  "Trauma Complejo": "#86efac",
-  "Neurodivergencia": "#fcd34d",
-  "Trastorno del Sueño": "#fbbf24",
-  "Trastorno de Conducta Alimentaria": "#60a5fa",
-  "Adicciones Conductuales": "#22c55e",
+  "Salud Mental": "#4DA6FF",
+  "Trastorno del Ánimo": "#6E6E6E",
+  "Trauma Complejo": "#B03A2E",
+  "Neurodivergencia": "#9B59B6",
+  "Trastorno del Sueño": "#2C3E50",
+  "Trastorno de Conducta Alimentaria": "#808000",
+  "Adicciones Conductuales": "#E67E22",
 };
