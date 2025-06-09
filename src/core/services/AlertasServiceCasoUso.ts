@@ -85,10 +85,10 @@ export class AlertasServicioCasoUso {
 
     const donutData: DonutData[] = Object.entries(counts).map(
       ([estado, value]) => ({
-        label: `${String(value).padStart(2, "0")} ${estadoLabels[estado]}`,
+        label: `${String(value).padStart(2, "0")} ${estadoLabels[getEstadoKeyFromLabel(estado)|| 'pendiente']}`,
         value,
         percentage: `${((value / total) * 100).toFixed(1)}%`,
-        color: colores[estado] || "#000000",
+        color: colores[getEstadoKeyFromLabel(estado)|| 'pendiente'] || "#000000",
       })
     );
 
@@ -219,15 +219,27 @@ export async function contarAlertasPendientesPorColegio(
 }
 
 const colores: Record<string, string> = {
-  pendiente: "#facc15",
-  nuevo: "#22c55e",
-  atendido: "#3b82f6",
-  aplazado: "#a855f7",
+  pendiente: "#facc15",  // Amarillo: esperando acción
+  asignada: "#22c55e",   // Verde: ya tiene responsable
+  reasignado: "#3b82f6", // Azul: ha cambiado de responsable
+  resuelta: "#10b981",   // Verde más claro: solucionado
+  curso: "#0ea5e9",      // Azul claro: en proceso
+  cerrada: "#6b7280",    // Gris: ya finalizado
+  anulada: "#ef4444",    // Rojo: cancelado
 };
 
 const estadoLabels: Record<string, string> = {
   pendiente: "Pendientes",
-  nuevo: "Nuevos",
-  atendido: "Atendidos",
-  aplazado: "Aplazados",
+  asignada: "Asignado",
+  reasignado: " Reasignado",
+  resuelta: "Resuelta",
+  curso: "En curso",
+  cerrada: "Cerrada",
+  anulada: "Anulada",
 };
+function getEstadoKeyFromLabel(label: string): string | undefined {
+  const lowerLabel = label.toLowerCase().trim();
+  return Object.entries(estadoLabels).find(
+    ([_, value]) => value.toLowerCase() === lowerLabel
+  )?.[0];
+}
