@@ -38,16 +38,7 @@ export const DashboardHomeService = {
       const alumnnos = await alumnoServicioCasoUso.obtenerAlumnosColegio();
       const [totalAlumnos, alumnosActivos] = await Promise.all([
         alumnoServicioCasoUso.obtenerCantidadAlumnos(colegio_id),
-        alumnoServicioCasoUso.obntenerConteoporTabla(
-          "alumnos_respuestas",
-          sevenDaysAgo,
-          alumnnos
-        ),
-        alumnoServicioCasoUso.obntenerConteoporTabla(
-          "alumno_respuesta_seleccion",
-          sevenDaysAgo,
-          alumnnos
-        ),
+        alumnoServicioCasoUso.obtenerAlumnosActivos(colegio_id)
       ]);
       // Obtener datos de actividad
       const responses = await alumnoServicioCasoUso.calcularAlumnosActivos(

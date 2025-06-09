@@ -53,6 +53,16 @@ export class AlumnoServicioCasoUso {
     return count ?? 0;
   }
 
+  async obtenerAlumnosActivos(colegio_id:number){
+    const { data, error } = await this.client.rpc('alumnos_activos', {
+      p_colegio_id: colegio_id !== 0 ? colegio_id : null,
+    });
+     if (error) {
+      throw new Error(`Error al obtener estadísticas de alertas: ${error.message}`);
+    }
+    return data.length
+  }
+
   async calcularAlumnosActivos(sevenDaysAgo: string) {
     const [respuestasTexto, respuestasSeleccion] = await Promise.all([
       this.client

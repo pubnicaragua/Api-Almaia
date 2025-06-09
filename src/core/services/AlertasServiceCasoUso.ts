@@ -240,6 +240,7 @@ const estadoLabels: Record<string, string> = {
 function getEstadoKeyFromLabel(label: string): string | undefined {
   const lowerLabel = label.toLowerCase().trim();
   return Object.entries(estadoLabels).find(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ([_, value]) => value.toLowerCase() === lowerLabel
   )?.[0];
 }
