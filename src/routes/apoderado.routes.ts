@@ -45,6 +45,11 @@ const ruta_apoderados_respuestas = '/apoderados_respuestas';
  *         description: Error interno del servidor
  */
 router.get(ruta_apoderados+'/', sessionAuth, ApoderadoService.obtener);
+
+
+
+router.get('/perfil', sessionAuth, ApoderadoService.obtenerPerfil);
+
 /**
  * @swagger
  * /api/v1/apoderados/responder_preguntas:
