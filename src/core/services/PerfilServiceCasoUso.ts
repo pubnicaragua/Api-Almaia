@@ -49,7 +49,7 @@ export function mapearDatosAlumno(data: PerfilEntrada): Perfil {
       rol_id: data.rol_id,
       idioma_id: data.idioma_id,
       idioma:data.idiomas,
-      colegio:data.usuarios_colegios[0].colegios
+      colegio:data?.usuarios_colegios[0]?.colegios
     },
     persona: {
       persona_id: data.personas.persona_id,
