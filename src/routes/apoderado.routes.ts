@@ -100,7 +100,7 @@ router.get('/perfil', sessionAuth, ApoderadoService.obtenerPerfil);
  *         description: Error interno del servidor al actualizar la respuesta
  */
 
-router.get('/responder_preguntas', sessionAuth, ApoderadoService.responderPreguntas);
+router.post('/responder_preguntas', sessionAuth, ApoderadoService.responderPreguntas);
 
 /**
  * @swagger
