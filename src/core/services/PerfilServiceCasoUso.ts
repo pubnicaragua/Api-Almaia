@@ -36,8 +36,6 @@ export function mapearDatos(data: PerfilEntrada): Perfil {
   };
 }
 export function mapearDatosAlumno(data: PerfilEntrada): Perfil { 
-  try{
-
     return {
       usuario: {
         usuario_id: data.usuario_id,
@@ -70,9 +68,6 @@ export function mapearDatosAlumno(data: PerfilEntrada): Perfil {
       },
       funcionalidades:mapearFuncionalidades(data.roles.funcionalidades_roles)
     };
-  }catch(error){
-    console.log(error);    
-  }
 }
 function mapearFuncionalidades(funcionalidades_roles: FuncionalidadRol[]) {
   return funcionalidades_roles.map(fr => ({
