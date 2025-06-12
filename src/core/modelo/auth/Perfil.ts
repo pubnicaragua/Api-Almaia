@@ -9,6 +9,7 @@ export type Perfil = {
     email: string;
     telefono_contacto: string;
     ultimo_inicio_sesion: string;
+    intentos_inicio_sesion:number;
     estado_usuario: string;
     url_foto_perfil: string | null;
     persona_id: number;

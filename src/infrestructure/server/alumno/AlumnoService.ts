@@ -438,7 +438,7 @@ export const AlumnosService = {
       if (error_alumno) {
         throw new Error(error_alumno.message);
       }
-    const apoderados = alumno_data[0].alumnos_apoderados
+    const apoderados = alumno_data[0]?.alumnos_apoderados
 
   
       res.json({
