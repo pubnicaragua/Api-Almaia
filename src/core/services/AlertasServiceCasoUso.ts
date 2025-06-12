@@ -53,47 +53,48 @@ export class AlertasServicioCasoUso {
     throw error;
   }
 }
-  async getAlertasDonutData(colegio_id: any = 0): Promise<DonutData[]> {
-    let data = null;
-    if (colegio_id !== 0) {
-      data = await obtenerRelacionados({
-        tableFilter: "alumnos",
-        filterField: "colegio_id",
-        filterValue: colegio_id,
-        idField: "alumno_id",
-        tableIn: "alumnos_alertas",
-        inField: "alumno_id",
-        selectFields: `estado`,
-      });
-    } else {
-      const { data: data_alertas, error } = await this.client
-        .from("alumnos_alertas")
-        .select("*");
+ async getAlertasDonutData(colegio_id: any = 0): Promise<DonutData[]> {
+  let data = null;
 
-      if (error) throw error;
-      data = data_alertas;
-    }
-
-    // Contar ocurrencias por estado
-    const counts: Record<string, number> = {};
-    data.forEach((item) => {
-      const key = String(item.estado).toLowerCase();
-      counts[key] = (counts[key] || 0) + 1;
+  if (colegio_id !== 0) {
+    data = await obtenerRelacionados({
+      tableFilter: "alumnos",
+      filterField: "colegio_id",
+      filterValue: colegio_id,
+      idField: "alumno_id",
+      tableIn: "alumnos_alertas",
+      inField: "alumno_id",
+      selectFields: `estado`,
     });
+  } else {
+    const { data: data_alertas, error } = await this.client
+      .from("alumnos_alertas")
+      .select("*");
 
-    const total = Object.values(counts).reduce((a, b) => a + b, 0);
-
-    const donutData: DonutData[] = Object.entries(counts).map(
-      ([estado, value]) => ({
-        label: `${String(value).padStart(2, "0")} ${estadoLabels[getEstadoKeyFromLabel(estado)|| 'pendiente']}`,
-        value,
-        percentage: `${((value / total) * 100).toFixed(1)}%`,
-        color: colores[getEstadoKeyFromLabel(estado)|| 'pendiente'] || "#000000",
-      })
-    );
-
-    return donutData;
+    if (error) throw error;
+    data = data_alertas;
   }
+
+  const counts: Record<string, number> = {};
+  data.forEach((item) => {
+    const estadoKey = getEstadoKeyFromLabel(item.estado || 'pendiente') || 'pendiente';
+    counts[estadoKey] = (counts[estadoKey] || 0) + 1;
+  });
+
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
+
+  const donutData: DonutData[] = Object.entries(counts).map(
+    ([estadoKey, value]) => ({
+      label: `${String(value).padStart(2, "0")} ${estadoLabels[estadoKey]}`,
+      value,
+      percentage: `${((value / total) * 100).toFixed(1)}%`,
+      color: colores[estadoKey] || "#000000",
+    })
+  );
+
+  return donutData;
+}
+
 }
 export function mapearAlertas(alertas: any[]): AlertaMapeada[] {
   return alertas.map((alerta) => {
