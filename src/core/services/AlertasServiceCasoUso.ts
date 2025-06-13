@@ -129,7 +129,12 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
         image: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
       },
       isAnonymous: rest.alerta_origen_id === 1, // Asumiendo que 1 significa anónimo
-      description: `Alerta generada por ${rest?.alertas_reglas?.nombre} con severidad ${rest?.alertas_severidades?.nombre}`,
+      regla: rest?.alertas_reglas?.nombre,
+      origen:rest?.alertas_origenes?.nombre,
+      tipo: rest?.alertas_tipos?.nombre,
+      prioridad:rest?.alertas_prioridades?.nombre,
+      severidad: rest?.alertas_severidades?.nombre,
+      description: rest?.mensaje,
       actions: rest.accion_tomada
         ? [
             {
