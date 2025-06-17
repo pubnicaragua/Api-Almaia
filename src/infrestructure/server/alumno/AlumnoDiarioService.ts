@@ -32,6 +32,7 @@ export const AlumnoDiarioService = {
           tableIn: "alumnos_diarios",
           inField: "alumno_id",
           selectFields: `*,alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)`,
+          orderBy: { field: 'fecha', ascending: false } 
         });
         respuestaEnviada = true;
         res.json(alumnos_cursos);
@@ -42,7 +43,8 @@ export const AlumnoDiarioService = {
             "*",
             "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)"
           ],
-          where
+          where,
+          'fecha'
         );
         res.json(alumnoDiario);
       }

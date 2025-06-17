@@ -39,40 +39,41 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     if (error) throw new Error(error.message);
     return data[0];
   }
-  async getAll<T>(
-    columns: string[],
-    where: Record<string, any> = {},
-    orderBy?: string // columna opcional para ordenar
-  ): Promise<T[]> {
-    await this.ensureClientInitialized();
-
-    if (!columns.length) {
-      throw new Error(
-        "Debes especificar al menos una columna para generar el reporte."
-      );
-    }
-
-    const columnQuery = columns.join(",");
-    let query = this.client.from(this.table).select(columnQuery);
-
-    Object.keys(where).forEach((key) => {
-      query = query.eq(key, where[key]);
-    });
-
-    if (orderBy && orderBy !== "*") {
-      query = query.order(orderBy, { ascending: true });
-    }
-
-    const { data, error } = await query.returns<T[]>();
-
-    if (error) {
-      throw new Error(
-        `Error al consultar la tabla '${this.table}': ${error.message}`
-      );
-    }
-
-    return data ?? [];
-  }
+async getAll<T>(  
+  columns: string[],  
+  where: Record<string, any> = {},  
+  orderBy?: string, // columna opcional para ordenar  
+  ascending: boolean = true // dirección del ordenamiento, por defecto ascendente  
+): Promise<T[]> {  
+  await this.ensureClientInitialized();  
+  
+  if (!columns.length) {  
+    throw new Error(  
+      "Debes especificar al menos una columna para generar el reporte."  
+    );  
+  }  
+  
+  const columnQuery = columns.join(",");  
+  let query = this.client.from(this.table).select(columnQuery);  
+  
+  Object.keys(where).forEach((key) => {  
+    query = query.eq(key, where[key]);  
+  });  
+  
+  if (orderBy && orderBy !== "*") {  
+    query = query.order(orderBy, { ascending: ascending });  
+  }  
+  
+  const { data, error } = await query.returns<T[]>();  
+  
+  if (error) {  
+    throw new Error(  
+      `Error al consultar la tabla '${this.table}': ${error.message}`  
+    );  
+  }  
+  
+  return data ?? [];  
+}
 
   async getData(id: number): Promise<any> {
     await this.ensureClientInitialized();

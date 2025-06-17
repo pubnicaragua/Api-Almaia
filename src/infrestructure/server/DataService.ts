@@ -32,12 +32,13 @@ export class DataService<T> {
     return entity; // Puede ser sobrescrito en servicios específicos
   }
 
-  async getAll(
-    columns: string[],
-    where: Record<string, any> = {}
-  ): Promise<T[]> {
-    return await this.repository.getAll(columns, where);
-  }
+async getAll(  
+  columns: string[],  
+  where: Record<string, any> = {},  
+  orderby?: string  
+): Promise<T[]> {  
+  return await this.repository.getAll(columns, where, orderby,false);  
+}
 
   async getById(id: number): Promise<T> {
     return await this.repository.getData(id);
