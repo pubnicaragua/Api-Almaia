@@ -21,6 +21,11 @@ export const AlumnoRespuestaSeleccionService = {
   async obtener(req: Request, res: Response) {
     try {
       const { colegio_id, ...where } = req.query;
+      const finalWhere = {
+  ...where,
+  activo: true,
+  respondio: false,
+};
       let respuestaEnviada = false;
       if (colegio_id !== undefined) {
         const alumnos_cursos = await obtenerRelacionados({
@@ -46,7 +51,7 @@ export const AlumnoRespuestaSeleccionService = {
             "preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono))",
             "respuestas_posibles(respuesta_posible_id,nombre)",
           ],
-          where
+          finalWhere
         );
         res.json(alumnoRespuestaSeleccion);
       }

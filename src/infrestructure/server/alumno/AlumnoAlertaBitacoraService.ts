@@ -24,7 +24,8 @@ const client: SupabaseClient = supabaseService.getClient();
 export const AlumnoAlertaBitacoraService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      const { colegio_id, ...where } = req.query;
+      console.log(colegio_id);
       const alumnoAlertaBitacora = await dataService.getAll(["*"], where);
       res.json(alumnoAlertaBitacora);
     } catch (error) {

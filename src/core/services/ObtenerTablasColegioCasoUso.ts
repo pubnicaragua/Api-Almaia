@@ -17,10 +17,12 @@ export async function obtenerRelacionados({
   const { data: registrosFiltrados, error: errorFiltrado } = await client
     .from(tableFilter)
     .select("*")
-    .eq(filterField, filterValue);
-
+    .eq(filterField, filterValue)
+    .eq("activo", true);
   if (errorFiltrado) {
-    throw new Error(`Error consultando ${tableFilter}: ${errorFiltrado.message}`);
+    throw new Error(
+      `Error consultando ${tableFilter}: ${errorFiltrado.message}`
+    );
   }
 
   const ids = registrosFiltrados?.map((r: any) => r[idField]) ?? [];
@@ -34,10 +36,13 @@ export async function obtenerRelacionados({
   const { data: datosRelacionados, error: errorRelacionados } = await client
     .from(tableIn)
     .select(Array.isArray(selectFields) ? selectFields.join(",") : selectFields)
+    .eq("activo", true)
     .in(inField, ids);
 
   if (errorRelacionados) {
-    throw new Error(`Error consultando ${tableIn}: ${errorRelacionados.message}`);
+    throw new Error(
+      `Error consultando ${tableIn}: ${errorRelacionados.message}`
+    );
   }
 
   return datosRelacionados;
