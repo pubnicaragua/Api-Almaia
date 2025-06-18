@@ -192,13 +192,13 @@ async responder(req: Request, res: Response) {
   respuesta.alumno_id = alumno_id;
   respuesta.pregunta_id = pregunta_id;
   respuesta.respuesta_posible_id = respuesta_posible_id;
-  respuesta.respondio = true;
+  //respuesta.respondio = true;
 
   const { error } = await client
     .from("alumnos_respuestas_seleccion")
     .update({
       respuesta_posible_id: respuesta.respuesta_posible_id,
-      respondio: true
+      //respondio: true
     })
     .match({
       alumno_id: respuesta.alumno_id,
@@ -249,7 +249,7 @@ async responder(req: Request, res: Response) {
           alumno_id,
           pregunta_id,
           respuesta_posible_id: respuestas_posibles[i],
-          respondio: true,
+        //  respondio: true,
         });
       }
     } else {
@@ -259,7 +259,7 @@ async responder(req: Request, res: Response) {
           alumno_id,
           pregunta_id,
           respuesta_posible_id: respuesta_id,
-          respondio: true,
+         // respondio: true,
         });
       }
     }
@@ -270,7 +270,7 @@ async responder(req: Request, res: Response) {
         .from("alumnos_respuestas_seleccion")
         .update({
           respuesta_posible_id: updates[0].respuesta_posible_id,
-          respondio: true
+         // respondio: true
         })
         .eq("alumno_respuesta_id", updates[0].alumno_respuesta_id);
 
