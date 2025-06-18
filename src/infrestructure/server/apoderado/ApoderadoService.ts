@@ -134,11 +134,14 @@ export const ApoderadoService = {
     const respuesta = new ApoderadoRespuesta();
     respuesta.alumno_id = alumno_id;
     respuesta.pregunta_id = pregunta_id;
-    respuesta.respuesta_id = respuesta_posible_id;
+    respuesta.respuesta_posible_id = respuesta_posible_id;
     respuesta.apoderado_id = apoderado_id;
+
     const { error } = await client
-      .from("alumnos_respuestas_seleccion")
-      .update({ respuesta_posible_id: respuesta.respuesta_id })
+      .from("apoderados_respuestas") // Tabla que corresponde al modelo
+      .update({
+        respuesta_posible_id: respuesta.respuesta_posible_id, // Campo correcto según el modelo
+      })
       .match({
         alumno_id: respuesta.alumno_id,
         pregunta_id: respuesta.pregunta_id,
