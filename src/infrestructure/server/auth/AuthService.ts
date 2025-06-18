@@ -136,56 +136,30 @@ export const AuthService = {
 async updatePassword(req: Request, res: Response) {
   try {
     const { userId, newPassword } = req.body;
-
     if (!userId || !newPassword) {
       throw new Error("userId y newPassword son requeridos");
     }
-
-    const { data: usuario_data, error: error_usuario } = await client
+    const { data: usuarioData, error: userError } = await client
       .from("usuarios")
-      .select("auth_id")
+      .select("email, auth_id")
       .eq("usuario_id", userId)
       .single();
-
-    if (error_usuario || !usuario_data) {
+    if (userError || !usuarioData) {
       throw new Error(
-        error_usuario?.message || "No se pudo obtener el usuario"
+        userError?.message || "No se pudo obtener el usuario"
       );
     }
-
-    const usuarioId = usuario_data.auth_id;
-
-    if (!usuarioId) {
-      throw new Error("El campo auth_id no está definido para este usuario");
-    }
-
-    const { data: usuarioAuth, error: errorAuth } =
-      await req.supabaseAdmin.auth.admin.getUserById(usuarioId);
-
-    if (errorAuth || !usuarioAuth) {
-      throw new Error(
-        errorAuth?.message || "No se encontró el usuario en Supabase Auth"
-      );
-    }
-
-    if (usuarioAuth.user.app_metadata.provider !== "email") {
-      throw new Error(
-        "El usuario no fue creado con email y no permite actualizar contraseña"
-      );
-    }
-
-    const { data, error: errorUpdate } =
-      await req.supabaseAdmin.auth.admin.updateUserById(usuarioId, {
-        password: newPassword,
+    const { data, error: updateError } = await client
+      .rpc('cambiar_contrasena', {
+        p_email: usuarioData.email,
+        p_nueva_contrasena: newPassword
       });
-
-    if (errorUpdate) {
-      throw new Error(errorUpdate.message);
+    if (updateError) {
+      throw new Error(updateError.message);
     }
-
     res.status(200).json({
       message: "Contraseña actualizada correctamente",
-      user: data,
+      data: data
     });
 
   } catch (err: any) {
@@ -196,5 +170,4 @@ async updatePassword(req: Request, res: Response) {
     });
   }
 }
-
 };
