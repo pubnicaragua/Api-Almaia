@@ -211,87 +211,62 @@ async responder(req: Request, res: Response) {
 
   res.json({ message: "Respuesta actualizada correctamente." });
 },
-  async responderMultiple(req: Request, res: Response) {
-  const { alumno_id, pregunta_id, respuestas_posibles } = req.body;
-  if (
-    !alumno_id ||
-    !pregunta_id ||
-    !Array.isArray(respuestas_posibles) ||
-    respuestas_posibles.length === 0
-  ) {
-    throw new Error("Datos inválidos o incompletos.");
-  }
-
-  try {
-    // 1. Buscar respuesta previa
-    const { data: existentes, error: fetchError } = await client
-      .from("alumnos_respuestas_seleccion")
-      .select("*")
-      .eq("alumno_id", alumno_id)
-      .eq("pregunta_id", pregunta_id);
-
-    if (fetchError) throw fetchError;
-
-    const updates = [];
-    const inserts = [];
-
-    if (existentes.length > 0) {
-      // Actualizar la primera existente con el primer valor del nuevo array
-      const primera = existentes[0];
-      updates.push({
-        alumno_respuesta_id: primera.alumno_respuesta_id,
-        respuesta_posible_id: respuestas_posibles[0],
-      });
-
-      // Insertar los demás como nuevos
-      for (let i = 1; i < respuestas_posibles.length; i++) {
-        inserts.push({
-          alumno_id,
-          pregunta_id,
-          respuesta_posible_id: respuestas_posibles[i],
-        //  respondio: true,
-        });
-      }
-    } else {
-      // No hay existentes: insertar todos
-      for (const respuesta_id of respuestas_posibles) {
-        inserts.push({
-          alumno_id,
-          pregunta_id,
-          respuesta_posible_id: respuesta_id,
-         // respondio: true,
-        });
-      }
-    }
-
-    // Ejecutar la actualización (si aplica)
-    if (updates.length > 0) {
-      const { error: updateError } = await client
-        .from("alumnos_respuestas_seleccion")
-        .update({
-          respuesta_posible_id: updates[0].respuesta_posible_id,
-         // respondio: true
-        })
-        .eq("alumno_respuesta_id", updates[0].alumno_respuesta_id);
-
-      if (updateError) throw updateError;
-    }
-
-    // Ejecutar las inserciones (si aplica)
-    if (inserts.length > 0) {
-      const { error: insertError } = await client
-        .from("alumnos_respuestas_seleccion")
-        .insert(inserts);
-
-      if (insertError) throw insertError;
-    }
-
-    res.json({ message: "Respuestas procesadas correctamente." });
-  } catch (err) {
-    const error = err as Error;
-      console.error("Error al guardar el alumnoalerta:", error);
-      res.status(500).json({ message: error.message || "Error inesperado" });
-  }
+async responderMultiple(req: Request, res: Response) {  
+  try {  
+    const { alumno_id, pregunta_id, respuestas_posibles } = req.body;  
+      
+    // Validación de datos de entrada  
+    if (  
+      !alumno_id ||  
+      !pregunta_id ||  
+      !Array.isArray(respuestas_posibles) ||  
+      respuestas_posibles.length === 0  
+    ) {  
+          throw new Error("Datos inválidos o incompletos.");
+    }  
+  
+    // Buscar respuestas previas  
+    const { data: existentes, error: fetchError } = await client  
+      .from("alumnos_respuestas_seleccion")  
+      .select("*")  
+      .eq("alumno_id", alumno_id)  
+      .eq("pregunta_id", pregunta_id);  
+  
+    if (fetchError) throw fetchError;  
+  
+    // Si existen respuestas previas, eliminarlas primero para evitar duplicados  
+    if (existentes && existentes.length > 0) {  
+      const { error: deleteError } = await client  
+        .from("alumnos_respuestas_seleccion")  
+        .delete()  
+        .eq("alumno_id", alumno_id)  
+        .eq("pregunta_id", pregunta_id);  
+  
+      if (deleteError) throw deleteError;  
+    }  
+  
+    // Insertar todas las nuevas respuestas  
+    const nuevasRespuestas = respuestas_posibles.map(respuesta_id => ({  
+      alumno_id,  
+      pregunta_id,  
+      respuesta_posible_id: respuesta_id,  
+      //respondio: true,  
+    }));  
+  
+    const { error: insertError } = await client  
+      .from("alumnos_respuestas_seleccion")  
+      .insert(nuevasRespuestas);  
+  
+    if (insertError) throw insertError;  
+  
+    res.status(200).json({ message: "Respuestas procesadas correctamente." });  
+      
+  } catch (error) {  
+    console.error("Error al procesar respuestas múltiples:", error);  
+    res.status(500).json({   
+      message: error instanceof Error ? error.message : "Error interno del servidor"   
+    });  
+  }  
 }
 
 };
