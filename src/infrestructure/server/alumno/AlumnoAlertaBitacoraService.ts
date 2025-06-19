@@ -17,6 +17,8 @@ const AlumnoAlertaBitacoraSchema = Joi.object({
   nuevo_estado: Joi.string().optional(),
   nuevo_responsable: Joi.number().optional(),
   fecha_realizacion: Joi.string().optional(),
+  alerta_prioridad_id:Joi.number().optional(),
+  alerta_severidad_id:Joi.number().optional(),
   url_archivo: Joi.string().max(255).optional(),
 });
 const supabaseService = new SupabaseClientService();
@@ -57,21 +59,23 @@ export const AlumnoAlertaBitacoraService = {
       alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
       let responseSent = false;
       //Actualiza alertas
-      if (
-        req.body.nuevo_responsable !== undefined ||
-        req.body.nuevo_responsable !== undefined
-      ) {
+     // if (
+    //    req.body.nuevo_responsable !== undefined ||
+    //    req.body.nuevo_responsable !== undefined
+    //  ) {
         const { error: errorAlumnosAlertas } = await client
           .from("alumnos_alertas")
           .update({
-            responsable_actual_id: req.body.nuevo_responsable,
-            estado: req.body.nuevo_estado,
+            //responsable_actual_id: req.body.nuevo_responsable,
+            alerta_prioridad_id: req.body.alerta_prioridad_id,
+            alerta_reveridad_id:req.body.alerta_reveridad_id,
+            //estado: req.body.nuevo_estado,
           })
           .eq("alumno_alerta_id", alumnoAlertaBitacora.alumno_alerta_id); // filtro por el campo 'id'
         if (errorAlumnosAlertas) {
           throw new Error(errorAlumnosAlertas.message);
         }
-      }
+   //   }
       const { error: validationError } = AlumnoAlertaBitacoraSchema.validate(
         req.body
       );
