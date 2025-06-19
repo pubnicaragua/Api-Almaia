@@ -133,7 +133,9 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
       origen:rest?.alertas_origenes?.nombre,
       tipo: rest?.alertas_tipos?.nombre,
       prioridad:rest?.alertas_prioridades?.nombre,
+      prioridad_id:rest?.prioridad_id,
       severidad: rest?.alertas_severidades?.nombre,
+      severidad_id: rest?.severidad_id,
       description: rest?.mensaje,
       actions: rest.accion_tomada
         ? [

@@ -105,7 +105,10 @@ export const AlumnoAlertaService = {
         ],
         where
       );
+
       const alumnoalertaAlerta = mapearAlertaDetalle(alumnoalertaAlerta_data);
+      console.log(alumnoalertaAlerta);
+      
       res.json(alumnoalertaAlerta);
     } catch (error) {
       console.error("Error al obtener la alerta del alumnoalerta:", error);

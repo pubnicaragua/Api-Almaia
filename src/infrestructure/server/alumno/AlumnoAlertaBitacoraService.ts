@@ -20,6 +20,7 @@ const AlumnoAlertaBitacoraSchema = Joi.object({
   fecha_realizacion: Joi.string().optional(),
   alerta_prioridad_id:Joi.number().optional(),
   alerta_severidad_id:Joi.number().optional(),
+  responsable_id:Joi.number().optional(),
   url_archivo: Joi.string().max(255).optional(),
 });
 const supabaseService = new SupabaseClientService();
@@ -84,6 +85,9 @@ guardar: async (req: Request, res: Response) => {
     }
     if (req.body.alerta_reveridad_id !== undefined) {
       updateData.severidad_id = req.body.alerta_reveridad_id;
+    }    
+    if (req.body.responsable_id !== undefined) {
+      updateData.responsable_actual_id = req.body.responsable_id;
     }
 
     if (Object.keys(updateData).length > 0) {
