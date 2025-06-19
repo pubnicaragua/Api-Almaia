@@ -28,7 +28,7 @@ export const AlumnoAlertaBitacoraService = {
     try {
       const { colegio_id, ...where } = req.query;
       console.log(colegio_id);
-      const alumnoAlertaBitacora = await dataService.getAll(["*"], where);
+      const alumnoAlertaBitacora = await dataService.getAll(["*,alumnos_alertas(*,responsable:personas(*))"], where);
       res.json(alumnoAlertaBitacora);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message });
@@ -67,8 +67,8 @@ export const AlumnoAlertaBitacoraService = {
           .from("alumnos_alertas")
           .update({
             //responsable_actual_id: req.body.nuevo_responsable,
-            alerta_prioridad_id: req.body.alerta_prioridad_id,
-            alerta_reveridad_id:req.body.alerta_reveridad_id,
+            prioridad_id: req.body.alerta_prioridad_id,
+            severidad_id:req.body.alerta_reveridad_id,
             //estado: req.body.nuevo_estado,
           })
           .eq("alumno_alerta_id", alumnoAlertaBitacora.alumno_alerta_id); // filtro por el campo 'id'
