@@ -23,7 +23,10 @@ const PersonaSchema = Joi.object({
 export const PersonasService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      const { colegio_id, ...filtros } = req.query;
+      const where = { ...filtros };
+      console.log(colegio_id);
+
       const personas = await dataService.getAll(
         [
           "*",
