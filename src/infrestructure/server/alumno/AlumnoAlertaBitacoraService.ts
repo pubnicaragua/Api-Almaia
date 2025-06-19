@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { AlumnoAlertaBitacora } from "../../../core/modelo/alumno/AlumnoAlertaBitacora";
@@ -34,65 +35,86 @@ export const AlumnoAlertaBitacoraService = {
       res.status(500).json({ message: (error as Error).message });
     }
   },
-  guardar: async (req: Request, res: Response) => {
-    try {
-      const alumnoAlertaBitacora: AlumnoAlertaBitacora =
-        new AlumnoAlertaBitacora();
-      Object.assign(alumnoAlertaBitacora, req.body);
-      const { data, error } = await client
-        .from("alumnos")
-        .select("*")
-        .eq("alumno_id", alumnoAlertaBitacora.alumno_id)
-        .single();
-      if (error || !data) {
-        throw new Error("El alumno no existe");
+guardar: async (req: Request, res: Response) => {
+  try {
+    const alumnoAlertaBitacora = new AlumnoAlertaBitacora();
+
+    // Solo se asignan los campos válidos
+    const camposPermitidos = [
+      "alumno_alerta_id",
+      "alumno_id",
+      "plan_accion",
+      "fecha_compromiso",
+      "fecha_realizacion",
+      "url_archivo",
+    ];
+
+    camposPermitidos.forEach((campo) => {
+      if (req.body[campo] !== undefined) {
+        (alumnoAlertaBitacora as any)[campo] = req.body[campo];
       }
-      const { data: dataAlumnoAlerta, error: errorAlumnoAlerta } = await client
-        .from("alumnos_alertas")
-        .select("*")
-        .eq("alumno_alerta_id", alumnoAlertaBitacora.alumno_alerta_id)
-        .single();
-      if (errorAlumnoAlerta || !dataAlumnoAlerta) {
-        throw new Error("La Alerta no existe");
-      }
-      alumnoAlertaBitacora.creado_por = req.creado_por;
-      alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
-      let responseSent = false;
-      //Actualiza alertas
-     // if (
-    //    req.body.nuevo_responsable !== undefined ||
-    //    req.body.nuevo_responsable !== undefined
-    //  ) {
-        const { error: errorAlumnosAlertas } = await client
-          .from("alumnos_alertas")
-          .update({
-            //responsable_actual_id: req.body.nuevo_responsable,
-            prioridad_id: req.body.alerta_prioridad_id,
-            severidad_id:req.body.alerta_reveridad_id,
-            //estado: req.body.nuevo_estado,
-          })
-          .eq("alumno_alerta_id", alumnoAlertaBitacora.alumno_alerta_id); // filtro por el campo 'id'
-        if (errorAlumnosAlertas) {
-          throw new Error(errorAlumnosAlertas.message);
-        }
-   //   }
-      const { error: validationError } = AlumnoAlertaBitacoraSchema.validate(
-        req.body
-      );
-      if (validationError) {
-        responseSent = true;
-        throw new Error(validationError.details[0].message);
-      }
-      if (!responseSent) {
-        const savedAlumnoAlertaBitacora = await dataService.processData(
-          alumnoAlertaBitacora
-        );
-        res.status(201).json(savedAlumnoAlertaBitacora);
-      }
-    } catch (error) {
-      res.status(500).json({ message: (error as Error).message });
+    });
+
+    // Verifica que el alumno exista
+    const { data: alumno, error: errorAlumno } = await client
+      .from("alumnos")
+      .select("*")
+      .eq("alumno_id", alumnoAlertaBitacora.alumno_id)
+      .single();
+
+    if (errorAlumno || !alumno) {
+      throw new Error("El alumno no existe");
     }
-  },
+
+    // Verifica que la alerta exista
+    const { data: alerta, error: errorAlerta } = await client
+      .from("alumnos_alertas")
+      .select("*")
+      .eq("alumno_alerta_id", alumnoAlertaBitacora.alumno_alerta_id)
+      .single();
+
+    if (errorAlerta || !alerta) {
+      throw new Error("La Alerta no existe");
+    }
+
+    // Se actualiza alerta solo si los campos están presentes
+    const updateData: Record<string, any> = {};
+    if (req.body.alerta_prioridad_id !== undefined) {
+      updateData.prioridad_id = req.body.alerta_prioridad_id;
+    }
+    if (req.body.alerta_reveridad_id !== undefined) {
+      updateData.severidad_id = req.body.alerta_reveridad_id;
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      const { error: errorAlertaUpdate } = await client
+        .from("alumnos_alertas")
+        .update(updateData)
+        .eq("alumno_alerta_id", alumnoAlertaBitacora.alumno_alerta_id);
+
+      if (errorAlertaUpdate) {
+        throw new Error(errorAlertaUpdate.message);
+      }
+    }
+    // Validación con Joi (o el esquema que uses)
+    const { error: validationError } = AlumnoAlertaBitacoraSchema.validate(
+      req.body
+    );
+
+    if (validationError) {
+      throw new Error(validationError.details[0].message);
+    }
+    alumnoAlertaBitacora.creado_por = req.creado_por;
+    alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
+    // Guarda la bitácora
+    const saved = await dataService.processData(alumnoAlertaBitacora);
+    res.status(201).json(saved);
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+},
+
+
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
