@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import Joi from "joi";
@@ -43,7 +44,7 @@ async obtener(req: Request, res: Response) {
         }
         
         // Extraemos solo el contenido de persona_json de cada elemento del array
-        personas = data_persona_rol.map(item => item.persona_json);
+        personas = data_persona_rol.map((item: { persona_json: any; }) => item.persona_json);
       } else {
         personas = await dataService.getAll(
           [
