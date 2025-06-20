@@ -37,7 +37,7 @@ export const AuthService = {
       const errorMessage =
         err instanceof Error ? err.message : "Error desconocido";
       res.status(500).json({
-        message: "Error interno del servidor",
+        message: "Credenciales incorrectas:"+errorMessage,
         error: errorMessage,
       });
     }
