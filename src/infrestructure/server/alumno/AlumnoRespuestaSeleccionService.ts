@@ -181,92 +181,179 @@ export const AlumnoRespuestaSeleccionService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
-async responder(req: Request, res: Response) {
-  const { alumno_id, pregunta_id, respuesta_posible_id } = req.body;
-
-  if (!alumno_id || !pregunta_id || !respuesta_posible_id) {
-    throw new Error("Faltan datos obligatorios.");
-  }
-
-  const respuesta = new AlumnoRespuestaSeleccion();
-  respuesta.alumno_id = alumno_id;
-  respuesta.pregunta_id = pregunta_id;
-  respuesta.respuesta_posible_id = respuesta_posible_id;
-  //respuesta.respondio = true;
-
-  const { error } = await client
-    .from("alumnos_respuestas_seleccion")
-    .update({
-      respuesta_posible_id: respuesta.respuesta_posible_id,
-      //respondio: true
-    })
-    .match({
-      alumno_id: respuesta.alumno_id,
-      pregunta_id: respuesta.pregunta_id,
-    });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  res.json({ message: "Respuesta actualizada correctamente." });
-},
-async responderMultiple(req: Request, res: Response) {  
-  try {  
-    const { alumno_id, pregunta_id, respuestas_posibles } = req.body;  
-      
-    // Validación de datos de entrada  
-    if (  
-      !alumno_id ||  
-      !pregunta_id ||  
-      !Array.isArray(respuestas_posibles) ||  
-      respuestas_posibles.length === 0  
-    ) {  
-          throw new Error("Datos inválidos o incompletos.");
-    }  
+  async responder(req: Request, res: Response) {
+    const { alumno_id, pregunta_id, respuesta_posible_id } = req.body;
   
-    // Buscar respuestas previas  
-    const { data: existentes, error: fetchError } = await client  
-      .from("alumnos_respuestas_seleccion")  
-      .select("*")  
-      .eq("alumno_id", alumno_id)  
-      .eq("pregunta_id", pregunta_id);  
+    if (!alumno_id || !pregunta_id || !respuesta_posible_id) {
+      throw new Error("Faltan datos obligatorios.");
+    }
   
-    if (fetchError) throw fetchError;  
+    const respuesta = new AlumnoRespuestaSeleccion();
+    respuesta.alumno_id = alumno_id;
+    respuesta.pregunta_id = pregunta_id;
+    respuesta.respuesta_posible_id = respuesta_posible_id;
+    respuesta.respondio = true;
   
-    // Si existen respuestas previas, eliminarlas primero para evitar duplicados  
-    if (existentes && existentes.length > 0) {  
-      const { error: deleteError } = await client  
+    const { error } = await client
+      .from("alumnos_respuestas_seleccion")
+      .update({
+        respuesta_posible_id: respuesta.respuesta_posible_id,
+        respondio: true,
+        actualizado_por: req.actualizado_por,
+        fecha_actualizacion: new Date(),  
+        activo: true  
+      })
+      .match({
+        alumno_id: respuesta.alumno_id,
+        pregunta_id: respuesta.pregunta_id,
+      });
+  
+    if (error) {
+      throw new Error(error.message);
+    }
+  
+    res.json({ message: "Respuesta actualizada correctamente." });
+  },
+  async responderMultiple(req: Request, res: Response) {  
+    try {  
+      const { alumno_id, pregunta_id, respuestas_posibles } = req.body;  
+        
+      // Validación de datos de entrada  
+      if (  
+        !alumno_id ||  
+        !pregunta_id ||  
+        !Array.isArray(respuestas_posibles) ||  
+        respuestas_posibles.length === 0  
+      ) {  
+            throw new Error("Datos inválidos o incompletos.");
+      }  
+    
+      // Buscar respuestas previas  
+      const { data: existentes, error: fetchError } = await client  
         .from("alumnos_respuestas_seleccion")  
-        .delete()  
+        .select("*")  
         .eq("alumno_id", alumno_id)  
         .eq("pregunta_id", pregunta_id);  
-  
-      if (deleteError) throw deleteError;  
+    
+      if (fetchError) throw fetchError;  
+    
+      // Si existen respuestas previas, eliminarlas primero para evitar duplicados  
+      if (existentes && existentes.length > 0) {  
+        const { error: deleteError } = await client  
+          .from("alumnos_respuestas_seleccion")  
+          .delete()  
+          .eq("alumno_id", alumno_id)  
+          .eq("pregunta_id", pregunta_id);  
+    
+        if (deleteError) throw deleteError;  
+      }  
+    
+      // Insertar todas las nuevas respuestas  
+      const nuevasRespuestas = respuestas_posibles.map(respuesta_id => ({  
+        alumno_id,  
+        pregunta_id,  
+        respuesta_posible_id: respuesta_id,  
+        respondio: true,  
+        fecha_creacion: new Date(),  
+        fecha_actualizacion: new Date(),  
+        activo: true,  
+        creado_por: req.creado_por, 
+        actualizado_por: req.actualizado_por 
+      }));  
+    
+      const { error: insertError } = await client  
+        .from("alumnos_respuestas_seleccion")  
+        .insert(nuevasRespuestas);  
+    
+      if (insertError) throw insertError;  
+    
+      res.status(200).json({ message: "Respuestas procesadas correctamente." });  
+        
+    } catch (error) {  
+      console.error("Error al procesar respuestas múltiples:", error);  
+      res.status(500).json({   
+        message: error instanceof Error ? error.message : "Error interno del servidor"   
+      });  
     }  
+  },
+
+
+async cambiarEstadoRespuesta(req: Request, res: Response) {    
+  try {    
+    const { alumno_id, pregunta_id, nuevo_estado, fecha } = req.body;    
+    console.log('cambiar estado');  
+    
+    if (!alumno_id || !pregunta_id || typeof nuevo_estado !== 'boolean') {    
+      throw new Error("Faltan datos obligatorios o el estado no es válido.");    
+    }    
   
-    // Insertar todas las nuevas respuestas  
-    const nuevasRespuestas = respuestas_posibles.map(respuesta_id => ({  
-      alumno_id,  
-      pregunta_id,  
-      respuesta_posible_id: respuesta_id,  
-      //respondio: true,  
-    }));  
+    // Usar la fecha proporcionada o la fecha actual como fallback  
+    const fechaActualizacion = fecha ? new Date(fecha) : new Date();  
+    
+    const { error } = await client    
+      .from("alumnos_respuestas_seleccion")    
+      .update({    
+        respondio: nuevo_estado,    
+        fecha_actualizacion: fechaActualizacion,    
+        activo: true    
+      })    
+      .match({    
+        alumno_id: alumno_id,    
+        pregunta_id: pregunta_id,    
+      });    
+    
+    if (error) {    
+      throw new Error(error.message);    
+    }    
+    
+    res.json({     
+      message: `Estado de respuesta cambiado a ${nuevo_estado ? 'respondido' : 'no respondido'} correctamente.`     
+    });    
+    
+  } catch (error) {    
+    console.error("Error al cambiar estado de respuesta:", error);    
+    res.status(500).json({     
+      message: error instanceof Error ? error.message : "Error interno del servidor"     
+    });    
+  }    
+},
+
+async cambiarEstadoRespuestaMultiple(req: Request, res: Response) {    
+  try {    
+    const { alumno_id, pregunta_id, nuevo_estado, fecha } = req.body;    
+    
+    if (!alumno_id || !pregunta_id || typeof nuevo_estado !== 'boolean') {    
+      throw new Error("Faltan datos obligatorios o el estado no es válido.");    
+    }    
   
-    const { error: insertError } = await client  
-      .from("alumnos_respuestas_seleccion")  
-      .insert(nuevasRespuestas);  
-  
-    if (insertError) throw insertError;  
-  
-    res.status(200).json({ message: "Respuestas procesadas correctamente." });  
-      
-  } catch (error) {  
-    console.error("Error al procesar respuestas múltiples:", error);  
-    res.status(500).json({   
-      message: error instanceof Error ? error.message : "Error interno del servidor"   
-    });  
-  }  
+    // Usar la fecha proporcionada o la fecha actual como fallback  
+    const fechaActualizacion = fecha ? new Date(fecha) : new Date();  
+    
+    // Actualizar todas las respuestas de la pregunta para el alumno    
+    const { error } = await client    
+      .from("alumnos_respuestas_seleccion")    
+      .update({    
+        respondio: nuevo_estado,    
+        fecha_actualizacion: fechaActualizacion,    
+        activo: true    
+      })    
+      .eq("alumno_id", alumno_id)    
+      .eq("pregunta_id", pregunta_id);    
+    
+    if (error) {    
+      throw new Error(error.message);    
+    }    
+    
+    res.status(200).json({     
+      message: `Estado de todas las respuestas cambiado a ${nuevo_estado ? 'respondido' : 'no respondido'} correctamente.`     
+    });    
+    
+  } catch (error) {    
+    console.error("Error al cambiar estado de respuestas múltiples:", error);    
+    res.status(500).json({     
+      message: error instanceof Error ? error.message : "Error interno del servidor"     
+    });    
+  }    
 }
 
 };
