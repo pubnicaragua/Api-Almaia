@@ -30,6 +30,33 @@ export const AuthService = {
       if (authError || !authData.user) {
         throw new Error(authError?.message || "Autenticación fallida");
       }
+
+      // Buscar el usuario en la tabla usuarios por email
+      const { data: userData, error: userError } = await client
+        .from("usuarios")
+        .select("usuario_id, intentos_inicio_sesion")
+        .eq("email", email)
+        .single();
+
+      if (userError) {
+        console.error("Error al buscar usuario:", userError);
+      } else if (userData) {
+        // Actualizar intentos de inicio de sesión y última fecha
+        const { error: updateError } = await client
+          .from("usuarios")
+          .update({
+            intentos_inicio_sesion: (userData.intentos_inicio_sesion || 0) + 1,
+            ultimo_inicio_sesion: new Date(),
+            fecha_actualizacion: new Date(),
+            activo: true,
+          })
+          .eq("usuario_id", userData.usuario_id);
+
+        if (updateError) {
+          console.error("Error al actualizar datos de login:", updateError);
+        }
+      }
+
       res.status(200).json({
         token: authData.session?.access_token || "",
       });
@@ -37,7 +64,7 @@ export const AuthService = {
       const errorMessage =
         err instanceof Error ? err.message : "Error desconocido";
       res.status(500).json({
-        message: "Credenciales incorrectas:"+errorMessage,
+        message: "Credenciales incorrectas:" + errorMessage,
         error: errorMessage,
       });
     }
@@ -133,41 +160,40 @@ export const AuthService = {
       }
     }
   },
-async updatePassword(req: Request, res: Response) {
-  try {
-    const { userId, newPassword } = req.body;
-    if (!userId || !newPassword) {
-      throw new Error("userId y newPassword son requeridos");
-    }
-    const { data: usuarioData, error: userError } = await client
-      .from("usuarios")
-      .select("email, auth_id")
-      .eq("usuario_id", userId)
-      .single();
-    if (userError || !usuarioData) {
-      throw new Error(
-        userError?.message || "No se pudo obtener el usuario"
+  async updatePassword(req: Request, res: Response) {
+    try {
+      const { userId, newPassword } = req.body;
+      if (!userId || !newPassword) {
+        throw new Error("userId y newPassword son requeridos");
+      }
+      const { data: usuarioData, error: userError } = await client
+        .from("usuarios")
+        .select("email, auth_id")
+        .eq("usuario_id", userId)
+        .single();
+      if (userError || !usuarioData) {
+        throw new Error(userError?.message || "No se pudo obtener el usuario");
+      }
+      const { data, error: updateError } = await client.rpc(
+        "cambiar_contrasena",
+        {
+          p_email: usuarioData.email,
+          p_nueva_contrasena: newPassword,
+        }
       );
-    }
-    const { data, error: updateError } = await client
-      .rpc('cambiar_contrasena', {
-        p_email: usuarioData.email,
-        p_nueva_contrasena: newPassword
+      if (updateError) {
+        throw new Error(updateError.message);
+      }
+      res.status(200).json({
+        message: "Contraseña actualizada correctamente",
+        data: data,
       });
-    if (updateError) {
-      throw new Error(updateError.message);
+    } catch (err: any) {
+      console.error("Error inesperado:", err);
+      res.status(400).json({
+        message: "Error al actualizar la contraseña",
+        error: err.message || "Error interno del servidor",
+      });
     }
-    res.status(200).json({
-      message: "Contraseña actualizada correctamente",
-      data: data
-    });
-
-  } catch (err: any) {
-    console.error("Error inesperado:", err);
-    res.status(400).json({
-      message: "Error al actualizar la contraseña",
-      error: err.message || "Error interno del servidor",
-    });
-  }
-}
+  },
 };
