@@ -10,6 +10,9 @@ import {
   mapearAlertas,
 } from "../../../core/services/AlertasServiceCasoUso";
 import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
+import { EmailService } from "../../../core/services/EmailService";
+const emailService = new EmailService();
+
 const AlumnoAlertaSchema = Joi.object({
   alumno_id: Joi.number().integer().allow(null).optional(),
   alerta_regla_id: Joi.number().integer().optional(),
@@ -118,93 +121,119 @@ export const AlumnoAlertaService = {
     }
   },
   guardar: async (req: Request, res: Response) => {
-  try {
-    const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
-    const { anonimo = false, ...bodyWithoutAnonimo } = req.body; // Establece false por defecto si es undefined
-    Object.assign(alumnoalerta, bodyWithoutAnonimo);
-    alumnoalerta.creado_por = req.creado_por;
-    alumnoalerta.actualizado_por = req.actualizado_por;
-    
-    let responseSent = false;
-    const { error: validationError } = AlumnoAlertaSchema.validate(req.body);
+    try {
+      let destinatarios = ["app@almaia.cl"]; // fallback por defecto
 
-    // Verificación de alumno solo si no es anónimo (anonimo es explícitamente false)
-    if (anonimo === false) {
-      const { data, error } = await client
-        .from("alumnos")
-        .select("*")
-        .eq("alumno_id", alumnoalerta.alumno_id)
-        .single();
-      if (error || !data) {
-        throw new Error("El alumno no existe");
+      const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
+      const { anonimo = false, ...bodyWithoutAnonimo } = req.body; // Establece false por defecto si es undefined
+      Object.assign(alumnoalerta, bodyWithoutAnonimo);
+      alumnoalerta.creado_por = req.creado_por;
+      alumnoalerta.actualizado_por = req.actualizado_por;
+
+      let responseSent = false;
+      const { error: validationError } = AlumnoAlertaSchema.validate(req.body);
+
+      // Verificación de alumno solo si no es anónimo (anonimo es explícitamente false)
+      if (anonimo === false) {
+        const { data, error } = await client
+          .from("alumnos")
+          .select("*")
+          .eq("alumno_id", alumnoalerta.alumno_id)
+          .single();
+        if (error || !data) {
+          throw new Error("El alumno no existe");
+        }
+        // Obtener información del colegio
+        const { data: dataColegio, error: errorColegio } = await client
+          .from("colegios")
+          .select("correo_electronico")
+          .eq("colegio_id", data.colegio_id)
+          .single();
+
+        if (!errorColegio && dataColegio?.correo_electronico) {
+          // Procesar correos: dividir por comas, limpiar espacios y filtrar vacíos
+          destinatarios = dataColegio.correo_electronico
+            .split(",")
+            .map((email: string) => email.trim())
+            .filter((email: string) => email.length > 0);
+        }
       }
-    }
 
-    // Resto del código permanece igual
-    if (alumnoalerta.alerta_regla_id !== undefined) {
-      const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
-        .from("alertas_reglas")
-        .select("*")
-        .eq("alerta_regla_id", alumnoalerta.alerta_regla_id)
-        .single();
-      if (errorAlertaRegla || !dataAlertaRegla) {
-        throw new Error("La regla no existe");
+      // Resto del código permanece igual
+      if (alumnoalerta.alerta_regla_id !== undefined) {
+        const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
+          .from("alertas_reglas")
+          .select("*")
+          .eq("alerta_regla_id", alumnoalerta.alerta_regla_id)
+          .single();
+        if (errorAlertaRegla || !dataAlertaRegla) {
+          throw new Error("La regla no existe");
+        }
       }
-    }
 
-    const { data: dataAlertaOrigen, error: errorAlertaOrigen } = await client
-      .from("alertas_origenes")
-      .select("*")
-      .eq("alerta_origen_id", alumnoalerta.alerta_origen_id)
-      .single();
-    if (errorAlertaOrigen || !dataAlertaOrigen) {
-      throw new Error("El origen no existe");
-    }
-
-    const { data: dataAlertaPrioridad, error: errorAlertaPrioridad } =
-      await client
-        .from("alertas_prioridades")
+      const { data: dataAlertaOrigen, error: errorAlertaOrigen } = await client
+        .from("alertas_origenes")
         .select("*")
-        .eq("alerta_prioridad_id", alumnoalerta.prioridad_id)
+        .eq("alerta_origen_id", alumnoalerta.alerta_origen_id)
         .single();
-    if (errorAlertaPrioridad || !dataAlertaPrioridad) {
-      throw new Error("La prioridad no existe");
-    }
+      if (errorAlertaOrigen || !dataAlertaOrigen) {
+        throw new Error("El origen no existe");
+      }
 
-    const { data: dataAlertaSeveridad, error: errorAlertaSeveridad } =
-      await client
-        .from("alertas_severidades")
+      const { data: dataAlertaPrioridad, error: errorAlertaPrioridad } =
+        await client
+          .from("alertas_prioridades")
+          .select("*")
+          .eq("alerta_prioridad_id", alumnoalerta.prioridad_id)
+          .single();
+      if (errorAlertaPrioridad || !dataAlertaPrioridad) {
+        throw new Error("La prioridad no existe");
+      }
+
+      const { data: dataAlertaSeveridad, error: errorAlertaSeveridad } =
+        await client
+          .from("alertas_severidades")
+          .select("*")
+          .eq("alerta_severidad_id", alumnoalerta.severidad_id)
+          .single();
+      if (errorAlertaSeveridad || !dataAlertaSeveridad) {
+        throw new Error("La severidad no existe");
+      }
+
+      const { data: dataAlertaTipo, error: errorAlertaTipo } = await client
+        .from("alertas_tipos")
         .select("*")
-        .eq("alerta_severidad_id", alumnoalerta.severidad_id)
+        .eq("alerta_tipo_id", alumnoalerta.alertas_tipo_alerta_tipo_id)
         .single();
-    if (errorAlertaSeveridad || !dataAlertaSeveridad) {
-      throw new Error("La severidad no existe");
-    }
+      if (errorAlertaTipo || !dataAlertaTipo) {
+        throw new Error("El tipo de alerta no existe");
+      }
 
-    const { data: dataAlertaTipo, error: errorAlertaTipo } = await client
-      .from("alertas_tipos")
-      .select("*")
-      .eq("alerta_tipo_id", alumnoalerta.alertas_tipo_alerta_tipo_id)
-      .single();
-    if (errorAlertaTipo || !dataAlertaTipo) {
-      throw new Error("El tipo de alerta no existe");
-    }
+      if (validationError) {
+        responseSent = true;
+        throw new Error(validationError.details[0].message);
+      }
 
-    if (validationError) {
-      responseSent = true;
-      throw new Error(validationError.details[0].message);
-    }
+      if (!responseSent) {
+        const savedAlumnoAlerta = await dataService.processData(alumnoalerta);
+        const email = await emailService.enviarNotificacionAlerta(
+          {
+            tipo: dataAlertaTipo.nombre,
+            codigo: savedAlumnoAlerta.alumno_alerta_id,
+            enlace: "https://almacolegios.vercel.app/",
+          },
+          destinatarios
+        );
+        console.log(email);
 
-    if (!responseSent) {
-      const savedAlumnoAlerta = await dataService.processData(alumnoalerta);
-      res.status(201).json(savedAlumnoAlerta);
+        res.status(201).json(savedAlumnoAlerta);
+      }
+    } catch (err) {
+      const error = err as Error;
+      console.error("Error al guardar el alumnoalerta:", error);
+      res.status(500).json({ message: error.message || "Error inesperado" });
     }
-  } catch (err) {
-    const error = err as Error;
-    console.error("Error al guardar el alumnoalerta:", error);
-    res.status(500).json({ message: error.message || "Error inesperado" });
-  }
-},
+  },
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);

@@ -30,7 +30,7 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     }
   }
 
-  async saveData(entity: T): Promise<void> {
+  async saveData(entity: T): Promise<any> {
     await this.ensureClientInitialized();
     const { data, error } = await this.client
       .from(this.table)

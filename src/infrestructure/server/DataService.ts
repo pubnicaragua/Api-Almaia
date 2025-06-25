@@ -24,8 +24,8 @@ export class DataService<T> {
   }
   async processData(entity: T): Promise<T> {
     const processedEntity = this.transformData(entity);
-    await this.repository.saveData(processedEntity);
-    return processedEntity;
+     const result =await this.repository.saveData(processedEntity);
+    return result;
   }
 
   protected transformData(entity: T): T {
