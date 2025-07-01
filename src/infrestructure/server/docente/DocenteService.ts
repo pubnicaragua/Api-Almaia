@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { Docente } from "../../../core/modelo/colegio/Docente";
@@ -29,12 +30,24 @@ export const DocentesService = {
       const docente = await dataService.getAll(
         [
           "*",
-          "personas(persona_id,nombres,apellidos)",
-          "colegios(colegio_id,nombre)",
+          "personas(*,persona_id,nombres,apellidos,usuarios(usuario_id,url_foto_perfil))",
+          "colegios(colegio_id,nombre)"
         ],
         where
       );
-      res.json(docente);
+
+      const docentes = docente.map((doc: any) => {
+        const { personas, colegios, ...rest } = doc; // Desestructurar para evitar conflictos con el nombre de la variable
+        const { usuarios , ...persona } = personas;
+        return {  
+          ...rest,
+          url_foto_perfil: usuarios[0]?.url_foto_perfil || '/assets/img/avatar-docente.png',
+          personas: { ...persona },
+          colegios
+        };
+      });
+
+      res.json(docentes);
     } catch (error) {
       console.error("Error al obtener el docente:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -47,12 +60,21 @@ export const DocentesService = {
       const docente_data = await dataService.getAll(
         [
           "*",
-          "personas(persona_id,nombres,apellidos)",
+          "personas(*,persona_id,estados_civiles(estado_civil_id,nombre),generos(genero_id,nombre),usuarios(usuario_id,url_foto_perfil))",
           "colegios(colegio_id,nombre)",
         ],
         where
       );
-      const docente = docente_data[0];
+      const { personas, colegios, ...rest } = docente_data[0] as any;
+      const { usuarios, ...persona } = personas;
+      
+      const docente = {
+        ...rest,
+        url_foto_perfil: usuarios[0]?.url_foto_perfil || '/assets/img/avatar-docente.png',
+        personas: { ...persona },
+        colegios
+      };
+      
       res.json(docente);
     } catch (error) {
       console.error("Error al obtener el docente:", error);

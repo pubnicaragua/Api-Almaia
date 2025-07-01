@@ -72,8 +72,6 @@ export const AvisosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        console.log(aviso);
-
         const savedAviso = await dataService.processData(aviso);
         res.status(201).json(savedAviso);
       }

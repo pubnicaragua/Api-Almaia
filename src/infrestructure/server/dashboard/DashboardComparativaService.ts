@@ -1,31 +1,93 @@
 import { Request, Response } from "express";
 import { AlertData } from "../../../core/modelo/dashboard/AlertData";
 import { Emotion } from "../../../core/modelo/dashboard/Emotion";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+import { mapearEmocionGrado, mapearGestorAlertasHoy, mapearPatologiaGrado } from "../../../core/services/DashboardServiceCasoUso";
 
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
 export const DashboardComparativaService = {
-     getEmotionsDataCourse(req: Request, res: Response) {
-        const data: Emotion[] = [
-          { name: 'Tristeza', value: 1500, color: '#3b82f6' },
-          { name: 'Felicidad', value: 3000, color: '#facc15' },
-          { name: 'Estrés', value: 1000, color: '#6b7280' },
-          { name: 'Ansiedad', value: 2500, color: '#fb923c' },
-          { name: 'Enojo', value: 800, color: '#ef4444' },
-          { name: 'Otros', value: 2000, color: '#6b7280' },
-        ];
-        res.json(data);
-      },
-      
-      
-      getAlertsLineChartData  (req: Request, res: Response)  {
-        const data: AlertData[] = [
-          { month: 'Ene', courseA: 1200, courseB: 1500 },
-          { month: 'Feb', courseA: 900, courseB: 1200 },
-          { month: 'Mar', courseA: 1500, courseB: 1000 },
-          { month: 'Abr', courseA: 2000, courseB: 1800 },
-          { month: 'May', courseA: 3000, courseB: 2500 },
-          { month: 'Jun', courseA: 2500, courseB: 2800 },
-          { month: 'Jul', courseA: 2800, courseB: 3200 },
-        ];
+  getEmotionsDataCourse(req: Request, res: Response) {
+    const data: Emotion[] = [
+      { name: "Tristeza", value: 1500, color: "#3b82f6" },
+      { name: "Felicidad", value: 3000, color: "#facc15" },
+      { name: "Estrés", value: 1000, color: "#6b7280" },
+      { name: "Ansiedad", value: 2500, color: "#fb923c" },
+      { name: "Enojo", value: 800, color: "#ef4444" },
+      { name: "Otros", value: 2000, color: "#6b7280" },
+    ];
+    res.json(data);
+  },
+
+  async obtenerGestorAlertasHoy(req: Request, res: Response) {
+    const { colegio_id } = req.query;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_estadisticas_alertas",
+        {
+          p_colegio_id: colegio_id || null,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        const data: AlertData[] = mapearGestorAlertasHoy(data_emociones);
         res.json(data);
       }
-}
+    }
+  },  
+  async obtenerGestorHistorial(req: Request, res: Response) {
+    const { colegio_id } = req.query;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_gestor_historial",
+        {
+          p_colegio_id: colegio_id || null,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        const data: AlertData[] = mapearGestorAlertasHoy(data_emociones);
+        res.json(data);
+      }
+    }
+  }, 
+   async obtenerEmocionesGrado(req: Request, res: Response) {
+    const { colegio_id, grado_id } = req.query;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3_por_grado",
+        {
+          p_colegio_id: colegio_id || null,
+          p_grado_id:grado_id
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        //const data: AlertData[] = mapearGestorAlertasHoy(data_emociones);
+        res.json(mapearEmocionGrado(data_emociones));
+      }
+    }
+  },   
+  async obtenerPatologiasGrado(req: Request, res: Response) {
+    const { colegio_id, grado_id } = req.query;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_todas_respuestas_por_diagnostico_grado",
+        {
+          p_colegio_id: colegio_id || null,
+          p_grado_id:grado_id
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        //const data: AlertData[] = mapearGestorAlertasHoy(data_emociones);
+        res.json(mapearPatologiaGrado(data_emociones));
+      }
+    }
+  },
+};

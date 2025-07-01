@@ -362,9 +362,141 @@ router.get( ruta_alumno_respuesta, sessionAuth, AlumnoRespuestaService.obtener);
  *         description: Error interno del servidor
  */
 router.post( ruta_alumno_respuesta, sessionAuth, AlumnoRespuestaService.guardar);
-//documentar
+/**  
+ * @swagger  
+ * /preguntas/responder:  
+ *   post:  
+ *     summary: Registrar respuesta individual de alumno  
+ *     description: Permite que un alumno registre su respuesta a una pregunta específica  
+ *     tags:  
+ *       - Respuestas de Alumnos  
+ *     security:  
+ *       - bearerAuth: []  
+ *     requestBody:  
+ *       required: true  
+ *       content:  
+ *         application/json:  
+ *           schema:  
+ *             type: object  
+ *             required:  
+ *               - alumno_id  
+ *               - pregunta_id  
+ *               - respuesta_posible_id  
+ *             properties:  
+ *               alumno_id:  
+ *                 type: integer  
+ *                 description: ID del alumno que responde  
+ *                 example: 123  
+ *               pregunta_id:  
+ *                 type: integer  
+ *                 description: ID de la pregunta a responder  
+ *                 example: 456  
+ *               respuesta_posible_id:  
+ *                 type: integer  
+ *                 description: ID de la respuesta seleccionada  
+ *                 example: 789  
+ *     responses:  
+ *       200:  
+ *         description: Respuesta registrada correctamente  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Respuesta actualizada correctamente."  
+ *       400:  
+ *         description: Faltan datos obligatorios  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Faltan datos obligatorios."  
+ *       401:  
+ *         description: No autorizado - Token inválido  
+ *       500:  
+ *         description: Error interno del servidor  
+ */  
 router.post( '/responder', sessionAuth, AlumnoRespuestaSeleccionService.responder);
-router.post( '/responder_miltiple', sessionAuth, AlumnoRespuestaSeleccionService.responder);
+/**  
+ * @swagger  
+ * /preguntas/responder_multiple:  
+ *   post:  
+ *     summary: Registrar respuestas múltiples de alumno  
+ *     description: Permite que un alumno registre múltiples respuestas para una pregunta (preguntas de selección múltiple)  
+ *     tags:  
+ *       - Respuestas de Alumnos  
+ *     security:  
+ *       - bearerAuth: []  
+ *     requestBody:  
+ *       required: true  
+ *       content:  
+ *         application/json:  
+ *           schema:  
+ *             type: object  
+ *             required:  
+ *               - alumno_id  
+ *               - pregunta_id  
+ *               - respuestas_posibles  
+ *             properties:  
+ *               alumno_id:  
+ *                 type: integer  
+ *                 description: ID del alumno que responde  
+ *                 example: 123  
+ *               pregunta_id:  
+ *                 type: integer  
+ *                 description: ID de la pregunta a responder  
+ *                 example: 456  
+ *               respuestas_posibles:  
+ *                 type: array  
+ *                 description: Array de IDs de respuestas seleccionadas  
+ *                 items:  
+ *                   type: integer  
+ *                 example: [789, 790, 791]  
+ *                 minItems: 1  
+ *     responses:  
+ *       200:  
+ *         description: Respuestas procesadas correctamente  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Respuestas procesadas correctamente."  
+ *       400:  
+ *         description: Datos inválidos o incompletos  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Datos inválidos o incompletos."  
+ *       401:  
+ *         description: No autorizado - Token inválido  
+ *       500:  
+ *         description: Error interno del servidor  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Error interno del servidor"  
+ */  
+router.post( '/responder_multiple', sessionAuth, AlumnoRespuestaSeleccionService.responderMultiple);
+
+
+router.post('/cambiar-estado', AlumnoRespuestaSeleccionService.cambiarEstadoRespuesta);  
+router.post('/cambiar-estado-multiple',AlumnoRespuestaSeleccionService.cambiarEstadoRespuestaMultiple);
 
 /**
  * @swagger

@@ -142,7 +142,109 @@ router.get('/emotions/course', sessionAuth, DashboardComparativaService.getEmoti
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/alerts/totales', sessionAuth, DashboardComparativaService.getAlertsLineChartData);
+router.get('/alerts/totales', sessionAuth, DashboardComparativaService.obtenerGestorAlertasHoy);
+router.get('/alerts/historial', sessionAuth, DashboardComparativaService.obtenerGestorHistorial);
+
+/**
+ * @swagger
+ * /api/v1/comparativa/emociones/grado:
+ *   get:
+ *     summary: Obtener datos comparativos de emociones por colegio y grado
+ *     description: Retorna estadísticas comparativas de emociones filtradas por ID de colegio y grado
+ *     tags: [Comparativo]
+ *     parameters:
+ *       - in: query
+ *         name: colegio_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 123
+ *         description: ID numérico del colegio
+ *       - in: query
+ *         name: grado_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 456
+ *         description: ID numérico del grado académico
+ *     responses:
+ *       200:
+ *         description: Datos comparativos obtenidos exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     example: "1° Medio - Jornada Mañana - Colegio 1"
+ *                   "En paz":
+ *                     type: integer
+ *                     example: 1
+ *                   "Tristeza":
+ *                     type: integer
+ *                     example: 1
+ *       400:
+ *         description: Parámetros inválidos
+ *       404:
+ *         description: No se encontraron datos para los parámetros proporcionados
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/emociones/grado', sessionAuth, DashboardComparativaService.obtenerEmocionesGrado);
+
+/**
+ * @swagger
+ * /api/v1/comparativa/patologias/grado:
+ *   get:
+ *     summary: Obtener estadísticas de patologías por grado
+ *     description: Retorna un listado de patologías agrupadas por grado académico filtrado por colegio y grado específico
+ *     tags: [Comparativo]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: colegio_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: ID del colegio a filtrar
+ *       - in: query
+ *         name: grado_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 2
+ *         description: ID del grado académico a filtrar
+ *     responses:
+ *       200:
+ *         description: Listado de patologías por grado obtenido correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     example: "1° Medio - Jornada Mañana - Colegio 1"
+ *                   "Trastorno del Ánimo":
+ *                     type: integer
+ *                     example: 1
+ *       400:
+ *         description: Parámetros inválidos (faltan colegio_id o grado_id)
+ *       401:
+ *         description: No autorizado (sesión no válida o no iniciada)
+ *       404:
+ *         description: No se encontraron datos para los parámetros proporcionados
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/patologias/grado', sessionAuth, DashboardComparativaService.obtenerPatologiasGrado);
 
 /**
  * @swagger

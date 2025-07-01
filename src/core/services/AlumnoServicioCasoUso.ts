@@ -53,6 +53,16 @@ export class AlumnoServicioCasoUso {
     return count ?? 0;
   }
 
+  async obtenerAlumnosActivos(colegio_id:number){
+    const { data, error } = await this.client.rpc('alumnos_activos', {
+      p_colegio_id: colegio_id !== 0 ? colegio_id : null,
+    });
+     if (error) {
+      throw new Error(`Error al obtener estadísticas de alertas: ${error.message}`);
+    }
+    return data.length
+  }
+
   async calcularAlumnosActivos(sevenDaysAgo: string) {
     const [respuestasTexto, respuestasSeleccion] = await Promise.all([
       this.client
@@ -138,9 +148,18 @@ export async function contarAlumnosPorColegio(client: SupabaseClient, colegio_id
 
   return count ?? 0;
 }
-export async function buscarAlumnos(client: SupabaseClient, termino: string) {
+export async function buscarAlumnos(
+  client: SupabaseClient, 
+  termino: string, 
+  colegioId?: any | null
+) {
+  const params = {
+    termino,
+    colegio_id_param: colegioId !== undefined ? colegioId : null
+  };
+
   const { data, error } = await client
-    .rpc("buscar_alumnos", { termino });
+    .rpc("buscar_alumnos", params);
 
   if (error) {
     console.error("Error buscando alumnos:", error);

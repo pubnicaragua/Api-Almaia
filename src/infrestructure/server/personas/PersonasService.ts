@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import Joi from "joi";
@@ -21,20 +22,43 @@ const PersonaSchema = Joi.object({
   estado_civil_id: Joi.number().integer().required(),
 });
 export const PersonasService = {
-  async obtener(req: Request, res: Response) {
+async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const personas = await dataService.getAll(
-        [
-          "*",
-          "generos(genero_id,nombre)",
-          "estados_civiles(estado_civil_id,nombre)",
-        ],
-        where
-      );
+      const { colegio_id, rol_id, ...filtros } = req.query;
+      const where = { ...filtros };
+      let personas;
+
+      if (colegio_id !== undefined || rol_id !== undefined) {
+        const { data: data_persona_rol, error } = await client.rpc(
+          "personas_por_colegio_rol",
+          {
+            p_colegio_id: colegio_id,
+            p_rol_id: rol_id,
+          }
+        );
+        
+        if (error) {
+          throw new Error(
+            `Error al obtener personas por colegio y rol: ${error.message}`
+          );
+        }
+        
+        // Extraemos solo el contenido de persona_json de cada elemento del array
+        personas = data_persona_rol.map((item: { persona_json: any; }) => item.persona_json);
+      } else {
+        personas = await dataService.getAll(
+          [
+            "*",
+            "generos(genero_id,nombre)",
+            "estados_civiles(estado_civil_id,nombre)",
+          ],
+          where
+        );
+      }
+      
       res.json(personas);
     } catch (error) {
-      console.error("Error al obtener el persona:", error);
+      console.error("Error al obtener personas:", error);
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },

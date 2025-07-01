@@ -1,4 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Colegio } from "../colegio/Colegio";
+import { Idioma } from "../configuracion/Idioma";
+import { FuncionalidadRol } from "./FuncionalidadRol";
+
+ 
 interface PersonaEntrada {
   persona_id: number;
   tipo_documento: string;
@@ -11,15 +15,30 @@ interface PersonaEntrada {
 }
 
 interface RolEntrada {
+  funcionalidades_roles: FuncionalidadRol[];
   rol_id: number;
   nombre: string;
   descripcion: string;
+}
+interface UsuariosColegioEntrada {
+   activo: boolean,
+      rol_id: number,
+      colegios: Colegio,
+      colegio_id: number,
+      creado_por: number,
+      usuario_id: number,
+      fecha_creacion:string,
+      actualizado_por: number,
+      fecha_asignacion: string,
+      fecha_actualizacion:string,
+      usuarios_colegio_id: number
 }
 
 
 
 
 export interface PerfilEntrada {
+  funcionalidades_rol: FuncionalidadRol[];
    usuario_id: number;
   nombre_social: string;
   email: string;
@@ -40,4 +59,6 @@ export interface PerfilEntrada {
   auth_id: string;
   personas: PersonaEntrada;
   roles: RolEntrada;
+  idiomas: Idioma;
+  usuarios_colegios: UsuariosColegioEntrada[];
 }

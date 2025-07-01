@@ -9,6 +9,8 @@ import { Usuario } from "../../../core/modelo/auth/Usuario";
 import { Persona } from "../../../core/modelo/Persona";
 import { buscarAlumnos } from "../../../core/services/AlumnoServicioCasoUso";
 import { mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
+import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
+import { mapearDatosAlumno } from "../../../core/services/PerfilServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -32,12 +34,11 @@ const UsuarioUpdateSchema = Joi.object({
   apellidos: Joi.string().max(35).optional(),
   fecha_nacimiento: Joi.string().optional(),
   numero_documento: Joi.string().optional(),
-  rol_id: Joi.number().integer().required(),
-  alumno_id: Joi.number().integer().required(),
+  alumno_id: Joi.number().integer().optional(),
   telefono_contacto: Joi.string().max(150).required(),
   url_foto_perfil: Joi.string().max(255).required(),
   persona_id: Joi.number().integer().optional(),
-  idioma_id: Joi.number().integer().required(),
+  idioma_id: Joi.number().integer().optional(),
 });
 const dataUsuarioService: DataService<Usuario> = new DataService(
   "usuarios",
@@ -51,6 +52,7 @@ export const AlumnosService = {
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      dataService.setClient(req.supabase);
       const alumnos = await dataService.getAll(
         [
           "*",
@@ -92,10 +94,11 @@ export const AlumnosService = {
   async getAlumnoDetalle(req: Request, res: Response) {
     const { alumnoId } = req.params;
     const where = { alumno_id: alumnoId }; // Convertir los parámetros de consulta en filtros
+    dataService.setClient(req.supabase);
     const data_alumno = await dataService.getAll(
       [
         "*",
-        "personas(persona_id,nombres,apellidos,fecha_nacimiento,generos(genero_id,nombre))",
+        "personas(*,persona_id,nombres,apellidos,fecha_nacimiento,generos(genero_id,nombre))",
         "colegios(colegio_id,nombre)",
         "cursos(curso_id,nombre_curso,grados(grado_id,nombre),niveles_educativos(nivel_educativo_id,nombre))",
       ],
@@ -118,8 +121,8 @@ export const AlumnosService = {
     if (error_alertas) {
       throw new Error(error_alertas.message);
     }
-    const alertas = mapearAlertas(alertas_data)
-    const { data: informes, error: error_informes } = await client
+    const alertas = mapearAlertas(alertas_data);
+    const { data: informes, error: error_informes } = await req.supabase
       .from("alumnos_informes")
       .select("*")
       .eq("alumno_id", alumno.alumno_id);
@@ -136,15 +139,36 @@ export const AlumnosService = {
       throw new Error(error_apoderados.message);
     }
 
+    const { colegio_id } = req.query;
+    let data;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3_por_alumno",
+        {
+          p_colegio_id: colegio_id || null,
+          p_alumno_id: alumnoId,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapEmotions(data_emociones);
+      }
+    } else {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3_por_alumno",
+        {
+          alumno_id: alumnoId,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapEmotions(data_emociones);
+      }
+    }
     // Emociones simuladas
-    const emociones = [
-      { nombre: "Felicidad", valor: 3100 },
-      { nombre: "Tristeza", valor: 1500 },
-      { nombre: "Estrés", valor: 950 },
-      { nombre: "Ansiedad", valor: 2600 },
-      { nombre: "Enojo", valor: 750 },
-      { nombre: "Otros", valor: 1900 },
-    ];
+    const emociones = data;
     const datosComparativa: ComparativaDato[] = [
       {
         emocion: "Feliz",
@@ -172,7 +196,6 @@ export const AlumnosService = {
         promedio: 1.6,
       },
     ];
-
     res.json({
       alumno,
       ficha,
@@ -204,8 +227,6 @@ export const AlumnosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        console.log(alumno);
-
         const savedAlumno = await dataService.processData(alumno);
         res.status(201).json(savedAlumno);
       }
@@ -240,8 +261,7 @@ export const AlumnosService = {
         res.status(200).json({ message: "Alumno actualizado correctamente" });
       }
     } catch (error) {
-      console.error("Error al actualizar el alumno:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+      res.status(500).json({ message: (error as Error).message });
     }
   },
   async actualizarPerfil(req: Request, res: Response) {
@@ -249,10 +269,7 @@ export const AlumnosService = {
       const usuarioId = parseInt(req.params.id);
       const usuario = new Usuario();
       const persona = new Persona();
-      // Asignar directamente las propiedades correspondientes
-
       Object.assign(usuario, {
-        rol_id: req.body.rol_id,
         nombre_social: req.body.nombre_social,
         email: req.body.email,
         telefono_contacto: req.body.telefono_contacto,
@@ -262,14 +279,6 @@ export const AlumnosService = {
       usuario.actualizado_por = req.actualizado_por;
       let responseSent = false;
       const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
-      const { data, error } = await client
-        .from("roles")
-        .select("*")
-        .eq("rol_id", usuario.rol_id)
-        .single();
-      if (error || !data) {
-        throw new Error("El rol no existe");
-      }
       const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
         .select("*")
@@ -279,7 +288,8 @@ export const AlumnosService = {
         throw new Error("El usuario no existe");
       }
       usuario.persona_id = dataUsuario.persona_id;
-
+      usuario.rol_id = dataUsuario.rol_id;
+      usuario.idioma_id = dataUsuario.idioma_id;
       const { data: dataPersona, error: errorPersona } = await client
         .from("personas")
         .select("*")
@@ -291,16 +301,8 @@ export const AlumnosService = {
       Object.assign(persona, dataPersona);
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
-      persona.fecha_nacimiento = req.body.fecha_nacimiento
-      persona.numero_documento = req.body.numero_documento
-      const { data: dataIdioma, error: errorIdioma } = await client
-        .from("idiomas")
-        .select("*")
-        .eq("idioma_id", usuario.idioma_id)
-        .single();
-      if (errorIdioma || !dataIdioma) {
-        throw new Error("El nivel educativo no existe");
-      }
+      persona.fecha_nacimiento = req.body.fecha_nacimiento;
+      persona.numero_documento = req.body.numero_documento;
       if (validationError) {
         responseSent = true;
         throw new Error(validationError.details[0].message);
@@ -320,9 +322,7 @@ export const AlumnosService = {
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
-      console.log(error);
-
-      res.status(500).json(error);
+      res.status(500).json({ message: (error as Error).message });
     }
   },
   async eliminar(req: Request, res: Response) {
@@ -331,23 +331,122 @@ export const AlumnosService = {
       await dataService.deleteById(id);
       res.status(200).json({ message: "Alumno eliminado correctamente" });
     } catch (error) {
-      console.error("Error al eliminar el alumno:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+      res.status(500).json({ message: (error as Error).message });
     }
   },
-   async buscar(req: Request, res: Response) {
+  async buscar(req: Request, res: Response) {
     const { termino } = req.body;
+    const { colegio_id } = req.query;
 
-    if (!termino || typeof termino !== 'string') {
-      throw new Error("Debe proporcionar un campo 'termino' en el cuerpo de la solicitud")
+    if (!termino || typeof termino !== "string") {
+      throw new Error(
+        "Debe proporcionar un campo 'termino' en el cuerpo de la solicitud"
+      );
     }
 
     try {
-      const resultados = await buscarAlumnos(client,termino);
+      let resultados;
+      if (colegio_id !== undefined) {
+        resultados = await buscarAlumnos(client, termino, colegio_id);
+      } else {
+        resultados = await buscarAlumnos(client, termino);
+      }
+      if (resultados === null) {
+        resultados = [];
+      }
       res.json(resultados);
-    }catch (error) {
-      console.error("Error al actualizar la alerta evidencia:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
     }
-   }
+  },
+  async obtenerRacha(req: Request, res: Response) {
+    try {
+      const { alumno_id } = req.query;
+      if (alumno_id === undefined) {
+        throw new Error("Falta el parámetro alumno_id");
+      }
+      const { data, error } = await client.rpc("obtener_rachas_combinadas", {
+        alumno_id_param: alumno_id || null,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      res.json(data[0]);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  },
+  async obtenerLogros(req: Request, res: Response) {
+    try {
+      const { alumno_id } = req.query;
+      if (alumno_id === undefined) {
+        throw new Error("Falta el parámetro alumno_id");
+      }
+      const { data, error } = await client.rpc("obtener_registro_hoy", {
+        alumno_id_param: alumno_id || null,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      res.json(data[0]);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  },
+
+  async obtenerRegistroSemanal(req: Request, res: Response) {
+    try {
+      const { alumno_id } = req.query;
+      if (alumno_id === undefined) {
+        throw new Error("Falta el parámetro alumno_id");
+      }
+      const { data, error } = await client.rpc("obtener_dias_respondidos", {
+        p_alumno_id: alumno_id || null,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      res.json(data[0].dias_respondidos_json);
+    } catch (error) {
+      res.status(500).json({ message: (error as Error).message });
+    }
+  },
+  async obtenerPerfil(req: Request, res: Response) {
+      const { data: usuario_data, error: error_usuario } = await req.supabase
+        .from("usuarios")
+        .select(
+          "*,idiomas(*),usuarios_colegios(*,colegios(colegio_id,nombre)),personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion,funcionalidades_roles(*,funcionalidad_rol_id,funcionalidades(*,funcionalidad_id)))"
+        )
+        .eq("usuario_id", req.user.usuario_id)
+        .single();
+      if (error_usuario) {
+        throw new Error(error_usuario.message);
+      }
+      
+      const data = mapearDatosAlumno(usuario_data);
+      
+      const usuario = data.usuario;
+      const persona = data.persona;
+      const rol = data.rol;
+      const funcionalidades= data.funcionalidades
+      const { data: alumno_data, error: error_alumno } = await req.supabase
+        .from("alumnos")
+        .select(
+          "*,alumnos_apoderados(*,apoderados(*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento)))"
+        )
+        .eq("persona_id", data.persona.persona_id);
+      if (error_alumno) {
+        throw new Error(error_alumno.message);
+      }
+    const apoderados = alumno_data[0]?.alumnos_apoderados
+
+  
+      res.json({
+        usuario,
+        persona,
+        rol,
+        funcionalidades,
+        apoderados
+      });
+    },
 };

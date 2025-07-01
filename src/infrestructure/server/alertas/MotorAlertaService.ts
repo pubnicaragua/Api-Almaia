@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { MotorAlerta } from "../../../core/modelo/alerta/MotorAlerta";
 import Joi from "joi";
-
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<MotorAlerta> = new DataService(
   "motores_alertas","motor_alerta_id"
 );
@@ -79,5 +82,14 @@ export const MotorAlertasService = {
       console.error("Error al eliminar el motor de alerta:", error);
       res.status(500).json({ message: "Error interno del servidor" });
     }
+  },
+    async ejecutar_motor() {
+    console.log('ejecutando motor alertas');
+    const { error } = await client.rpc('generar_alertas_emocionales');
+    if(error){
+      console.error(error.message)
+    }
+    console.log('finalizo motor alertas');
+ 
   },
 };

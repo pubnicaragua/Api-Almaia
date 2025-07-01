@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import { SupabaseClientService } from "./supabaseClient";
-import { contarAlertasPendientesPorColegio } from "./AlertasServiceCasoUso";
+import { contarAlertasPorColegio } from "./AlertasServiceCasoUso";
 import { contarAlumnosPorColegio } from "./AlumnoServicioCasoUso";
 
 const supabaseService = new SupabaseClientService();
@@ -24,8 +24,6 @@ export async function obtenerIdColegio(colegio_id: any, usuario_id: number) {
       colegio_id = usuario_colegio[0]?.colegio_id;
     }
   }
-  console.log(colegio_id);
-
   return colegio_id;
 }
 type ColegioExtendido = {
@@ -78,7 +76,7 @@ export async function mapearColegios(arrayOriginal: any): Promise<ColegioExtendi
       comuna_id: item.colegios.comuna_id || 0,
       region_id: item.colegios.region_id || 0,
       pais_id: item.colegios.pais_id || 0,
-      alerts: await contarAlertasPendientesPorColegio(client, item.colegio_id),
+      alerts: await contarAlertasPorColegio(client, item.colegio_id),
       students: await contarAlumnosPorColegio(client, item.colegio_id)
     };
   }));

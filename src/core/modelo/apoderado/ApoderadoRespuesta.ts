@@ -5,7 +5,7 @@ export class ApoderadoRespuesta extends BaseModel {
   alumno_id: number;
   apoderado_id: number;
   pregunta_id: number;
-  respuesta_id?: string;
+  respuesta_posible_id?: number;
   texto_respuesta: string;
   estado_respuesta:string;
   constructor() {

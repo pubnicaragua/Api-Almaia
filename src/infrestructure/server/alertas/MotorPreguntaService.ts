@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { MotorPregunta } from "../../../core/modelo/alerta/MotorPregunta";
 import Joi from "joi";
-
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
+const supabaseService = new SupabaseClientService();
+const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<MotorPregunta> = new DataService(
   "motores_preguntas",
   "motor_pregunta_id"
@@ -79,5 +82,16 @@ export const MotorPreguntasService = {
       console.error("Error al eliminar el motor de pregunta:", error);
       res.status(500).json({ message: "Error interno del servidor" });
     }
+  },
+   async ejecutar_motor(colegio_id:number) {
+    console.log('ejecutando motor preguntas');
+    const { error } = await client.rpc('generar_preguntas_alumnos',{
+      p_colegio_id:colegio_id
+    });
+    if(error){
+      console.error(error.message)
+    }
+    console.log('finalizo motor preguntas');
+ 
   },
 };

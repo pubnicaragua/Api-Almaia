@@ -15,7 +15,7 @@ import { DataService } from "../DataService";
 import { AlertStats } from "../../../core/modelo/home/AlertStats";
 import { obtenerCalendarioPorColegio } from "../../../core/services/CalendarioEscolarCasoUso";
 import { obtenerIdColegio } from "../../../core/services/ColegioServiceCasoUso";
-import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
+import { mapEmotions, mapPatologia } from "../../../core/services/DashboardServiceCasoUso";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -38,16 +38,7 @@ export const DashboardHomeService = {
       const alumnnos = await alumnoServicioCasoUso.obtenerAlumnosColegio();
       const [totalAlumnos, alumnosActivos] = await Promise.all([
         alumnoServicioCasoUso.obtenerCantidadAlumnos(colegio_id),
-        alumnoServicioCasoUso.obntenerConteoporTabla(
-          "alumnos_respuestas",
-          sevenDaysAgo,
-          alumnnos
-        ),
-        alumnoServicioCasoUso.obntenerConteoporTabla(
-          "alumno_respuesta_seleccion",
-          sevenDaysAgo,
-          alumnnos
-        ),
+        alumnoServicioCasoUso.obtenerAlumnosActivos(colegio_id)
       ]);
       // Obtener datos de actividad
       const responses = await alumnoServicioCasoUso.calcularAlumnosActivos(
@@ -135,25 +126,60 @@ export const DashboardHomeService = {
 
   // Función para obtener emociones generales
   async getEmotionDataGeneral(req: Request, res: Response) {
-    const { data: data_emociones, error } = await client.rpc(
-      "obtener_cantidades_pregunta_3"
-    );
-
-    if (error) {
-      console.error("Error al obtener cantidades:", error);
+    const { colegio_id, fecha_hasta } = req.query;
+    let data;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3",
+        {
+          p_colegio_id: colegio_id || null,
+          p_fecha_hasta: fecha_hasta || undefined,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapEmotions(data_emociones);
+      }
     } else {
-      console.log("Resultados:", data_emociones);
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_pregunta_3"
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapEmotions(data_emociones);
+      }
     }
-    const data = mapEmotions(data_emociones);
+    res.json(data);
+  },
 
-    /*const data: Emotion[] = [
-      { name: "Tristeza", value: 2000, color: "#3b82f6" },
-      { name: "Felicidad", value: 4000, color: "#facc15" },
-      { name: "Estrés", value: 1800, color: "#6b7280" },
-      { name: "Ansiedad", value: 3200, color: "#fb923c" },
-      { name: "Enojo", value: 1200, color: "#ef4444" },
-      { name: "Otros", value: 2800, color: "#a855f7" },
-    ];*/
+  async getEmotionDataPatologia(req: Request, res: Response) {
+    const { colegio_id, fecha_hasta } = req.query;
+    let data;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_por_diagnostico",
+        {
+          p_colegio_id: colegio_id || null,
+          p_fecha_hasta: fecha_hasta || undefined,
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapPatologia(data_emociones);
+      }
+    } else {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_por_diagnostico"
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapPatologia(data_emociones);
+      }
+    }
     res.json(data);
   },
 
@@ -183,24 +209,11 @@ export const DashboardHomeService = {
 
   // Función para alertas recientes
   async getRecentAlerts(req: Request, res: Response) {
-    const { data, error } = await client
-      .from("alumnos_alertas")
-      .select(
-        "*,alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos)),alertas_reglas(alerta_regla_id,nombre),alertas_origenes(alerta_origen_id,nombre),alertas_severidades(alerta_severidad_id,nombre),alertas_prioridades(alerta_prioridad_id,nombre),alertas_tipos(alerta_tipo_id,nombre)"
-      )
-      .gte(
-        "fecha_generada",
-        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      )
-      .eq("activo", true) // Solo alertas activas
-      .order("fecha_generada", { ascending: false }) // Más recientes primero
-      .order("prioridad_id", { ascending: false }); // Prioridad alta primero
-
-    if (error) {
-      console.error("Error fetching alertas:", error);
-    } else {
-      console.log("Alertas recientes:", data);
-      // Aquí puedes trabajar con los datos (mostrar en UI, etc.)
+  const {data, error } = await client.rpc('obtener_alertas_por_colegio',{
+      p_colegio_id:req.query.colegio_id
+    });
+    if(error){
+      console.error(error.message)
     }
     res.json(data);
   },

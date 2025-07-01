@@ -5,11 +5,13 @@ export class AlumnoRespuestaSeleccion extends BaseModel {
     alumno_id: number;
     pregunta_id: number;
     respuesta_posible_id: number;
+    respondio:boolean;
     constructor(){
         super();
         this.alumno_id = 0;
         this.pregunta_id = 0;
         this.respuesta_posible_id = 0;
+        this.respondio=false;
     }
   }
   

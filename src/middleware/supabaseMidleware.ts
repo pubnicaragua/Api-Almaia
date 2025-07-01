@@ -1,16 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response, NextFunction } from "express";
-import { SupabaseClientService } from "../core/services/supabaseClient";
-import { SupabaseClient } from "@supabase/supabase-js";
-//import { getSecret, loginToVault } from "../core/services/valutClient";
-let client: SupabaseClient;
-(async () => {
-  const supabaseService = new SupabaseClientService();
-  client = supabaseService.getClient();
-})();
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-// Middleware para extraer el ID del usuario desde el token
+const { SUPABASE_HOST, SUPABASE_PASSWORD, SUPABASE_PASSWORD_ADMIN } =
+  process.env;
+
 export const sessionAuth = async (
-  req: Request & { userId?: string },
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -19,33 +15,56 @@ export const sessionAuth = async (
     if (!token) {
       throw new Error("No token provided");
     }
-
-    if (!client) {
-      throw new Error("Supabase client not initialized");
+    if (!SUPABASE_HOST || !SUPABASE_PASSWORD || !SUPABASE_PASSWORD_ADMIN ) {
+      throw new Error("Faltan variables de entorno de Supabase");
     }
+    // 🔐 Crea cliente con token embebido
+    const client: SupabaseClient = createClient(
+      SUPABASE_HOST,
+      SUPABASE_PASSWORD,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
+    const admin: SupabaseClient = createClient(
+      SUPABASE_HOST,
+      SUPABASE_PASSWORD_ADMIN,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      }
+    );
 
-    const { data, error } = await client.auth.getUser(token);
-
+    const { data, error } = await client.auth.getUser();
     if (error || !data?.user) {
       throw new Error("Invalid token");
     }
-    await client.from("usuarios").select().eq("auth_id", data.user.id);
+
     const { data: data_user, error: error_user } = await client
       .from("usuarios")
       .select()
-      .eq("auth_id", data.user.id); // O usa [.in(...)] si es un array
+      .eq("auth_id", data.user?.id);
 
-    if (error_user) {
-      console.error("Error al obtener usuarios:", error_user);
+    if (error_user || !data_user?.[0]) {
+      throw new Error("Usuario no encontrado");
     }
 
     req.creado_por = data_user?.[0]?.usuario_id;
     req.actualizado_por = data_user?.[0]?.usuario_id;
-    req.fecha_creacion = new Date().toISOString()
-    req.user=  data_user?.[0]
+    req.fecha_creacion = new Date().toISOString();
+    req.user = data_user?.[0];
+    req.supabase = client;
+    req.supabaseAdmin = admin;
+
     next();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    res.status(500).send(error.message);
+    res.status(500).json({ error: error.message });
   }
 };

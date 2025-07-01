@@ -46,6 +46,62 @@ const ruta_apoderados_respuestas = '/apoderados_respuestas';
  */
 router.get(ruta_apoderados+'/', sessionAuth, ApoderadoService.obtener);
 
+
+
+router.get('/perfil', sessionAuth, ApoderadoService.obtenerPerfil);
+
+/**
+ * @swagger
+ * /api/v1/apoderados/responder_preguntas:
+ *   post:
+ *     tags: [Apoderado]
+ *     summary: Permite a un apoderado responder una pregunta
+ *     description: Actualiza la respuesta de un apoderado a una pregunta específica para un alumno
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - alumno_id
+ *               - apoderado_id
+ *               - pregunta_id
+ *               - respuesta_posible_id
+ *             properties:
+ *               alumno_id:
+ *                 type: integer
+ *                 description: ID del alumno relacionado
+ *               apoderado_id:
+ *                 type: integer
+ *                 description: ID del apoderado que responde
+ *               pregunta_id:
+ *                 type: integer
+ *                 description: ID de la pregunta a responder
+ *               respuesta_posible_id:
+ *                 type: integer
+ *                 description: ID de la respuesta seleccionada
+ *     responses:
+ *       200:
+ *         description: Respuesta actualizada correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Respuesta actualizada correctamente."
+ *       400:
+ *         description: Faltan datos obligatorios o son inválidos
+ *       500:
+ *         description: Error interno del servidor al actualizar la respuesta
+ */
+
+router.post('/responder_preguntas', sessionAuth, ApoderadoService.responderPreguntas);
+
 /**
  * @swagger
  * /api/v1/apoderados/apoderados:

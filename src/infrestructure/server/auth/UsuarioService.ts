@@ -5,6 +5,13 @@ import { Usuario } from "../../../core/modelo/auth/Usuario";
 import { DataService } from "../DataService";
 import { Request, Response } from "express";
 import { Persona } from "../../../core/modelo/Persona";
+import {
+  extractBase64Info,
+  getExtensionFromMime,
+  getURL,
+  isBase64DataUrl,
+} from "../../../core/services/ImagenServiceCasoUso";
+import { randomUUID } from "crypto";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -24,9 +31,10 @@ const UsuarioUpdateSchema = Joi.object({
   encripted_password: Joi.string().max(35).optional(),
   nombres: Joi.string().max(35).optional(),
   apellidos: Joi.string().max(35).optional(),
+  fecha_nacimiento: Joi.date().optional(),
   rol_id: Joi.number().integer().required(),
   telefono_contacto: Joi.string().max(150).required(),
-  url_foto_perfil: Joi.string().max(255).required(),
+  url_foto_perfil: Joi.string().required(),
   persona_id: Joi.number().integer().optional(),
   idioma_id: Joi.number().integer().required(),
 });
@@ -38,9 +46,11 @@ const dataPersonaService: DataService<Persona> = new DataService(
   "personas",
   "persona_id"
 );
+
 export const UsuariosService = {
   async obtener(req: Request, res: Response) {
     try {
+      dataService.setClient(req.supabase)
       const usuarios = await dataService.getAll(
         [
           "*",
@@ -117,7 +127,6 @@ export const UsuariosService = {
       const usuario = new Usuario();
       const persona = new Persona();
       // Asignar directamente las propiedades correspondientes
-
       Object.assign(usuario, {
         rol_id: req.body.rol_id,
         nombre_social: req.body.nombre_social,
@@ -146,6 +155,27 @@ export const UsuariosService = {
         throw new Error("El usuario no existe");
       }
       usuario.persona_id = dataUsuario.persona_id;
+      usuario.creado_por = dataUsuario.creado_por;
+      usuario.actualizado_por = req.actualizado_por;
+
+      if (isBase64DataUrl(usuario.url_foto_perfil || " ")) {
+        const { mimeType, base64Data } = extractBase64Info(
+          usuario.url_foto_perfil || " "
+        );
+        const buffer = Buffer.from(base64Data, "base64");
+        const extension = getExtensionFromMime(mimeType);
+        const fileName = `${randomUUID()}.${extension}`;
+        const client_file = req.supabase;
+
+        const {  error } = await client_file.storage
+          .from("user-profile")
+          .upload(`private/${fileName}`, buffer, {
+            contentType: mimeType,
+            upsert: true,
+          });
+        if (error) throw error;
+        usuario.url_foto_perfil = getURL(client_file,'user-profile',`private/${fileName}` );
+      }
 
       const { data: dataPersona, error: errorPersona } = await client
         .from("personas")
@@ -156,8 +186,11 @@ export const UsuariosService = {
         throw new Error("La persona no existe");
       }
       Object.assign(persona, dataPersona);
+      
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
+      persona.fecha_nacimiento = req.body.fecha_nacimiento;
+
       const { data: dataIdioma, error: errorIdioma } = await client
         .from("idiomas")
         .select("*")
@@ -166,25 +199,33 @@ export const UsuariosService = {
       if (errorIdioma || !dataIdioma) {
         throw new Error("El nivel educativo no existe");
       }
+
       if (validationError) {
         responseSent = true;
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
- await dataService.updateById(usuarioId, usuario);
- 	const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } = await client
-        .from("usuarios")
-        .select("*")
-        .eq("usuario_id", usuarioId)
-        .single();
-          if (errorUsuarioUpdate ) {
-        throw new Error(errorUsuarioUpdate.message);
-      }
+            console.log('url',usuario.url_foto_perfil);
+
+        await dataService.updateById(usuarioId, usuario);
+
+        const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
+          await client
+            .from("usuarios")
+            .select("*")
+            .eq("usuario_id", usuarioId)
+            .single();
+
+        if (errorUsuarioUpdate) {
+          throw new Error(errorUsuarioUpdate.message);
+        }
+
         await dataPersonaService.updateById(usuario.persona_id, persona);
+        
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error de datos",error);
 
       res.status(500).json(error);
     }

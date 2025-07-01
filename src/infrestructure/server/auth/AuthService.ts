@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { AuditoriaesService } from "./AuditoriaService";
 import { AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
 
 // Interfaz para credenciales
 import Joi from "joi";
-import { SupabaseAdminService } from "../../../core/services/supabaseAdmin";
 const PasswordSchema = Joi.object({
   currentPassword: Joi.string().min(6).required(),
   newPassword: Joi.string().min(6).required(),
@@ -15,24 +15,85 @@ const PasswordSchema = Joi.object({
 });
 // Inicializar Supabase client
 const supabaseService = new SupabaseClientService();
-const supabaseServiceAdmin = new SupabaseAdminService();
+
 
 const client: SupabaseClient = supabaseService.getClient();
-const admin: SupabaseClient = supabaseServiceAdmin.getClient();
 // Servicio de autenticación
 export const AuthService = {
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
     try {
+      // console.log('Intentando iniciar sesión con:', email);
       // Autenticar al usuario en Supabase Auth
       const { data: authData, error: authError } =
         await client.auth.signInWithPassword({
           email,
           password,
         });
+
       if (authError || !authData.user) {
+        req.body = {
+          isSend: false,
+          tipo_auditoria_id: 1,
+          colegio_id: 0,
+          usuario_id: 0,
+          fecha: new Date().toLocaleString(),
+          descripcion: `Error de inicio de sesión para el usuario ${email}`,
+          modulo_afectado: "auth",
+          accion_realizada: "login",
+          ip_origen: req.ip,
+          referencia_id: 0, // Puedes ajustar esto según tu lógica
+          model: "Usuarios",
+        };
+        await AuditoriaesService.guardar(req, res);
         throw new Error(authError?.message || "Autenticación fallida");
       }
+
+      // Buscar el usuario en la tabla usuarios por email
+      const { data: userData, error: userError } = await client
+        .from("usuarios")
+        .select(`
+          usuario_id,
+          intentos_inicio_sesion
+          `)
+        .eq("email", email)
+        .single();
+
+        console.log("Datos del usuario:", userData);  
+
+      if (userError) {
+        console.error("Error al buscar usuario:", userError);
+      } else if (userData) {
+        // Actualizar intentos de inicio de sesión y última fecha
+        const { error: updateError } = await client
+          .from("usuarios")
+          .update({
+            intentos_inicio_sesion: (userData.intentos_inicio_sesion || 0) + 1,
+            ultimo_inicio_sesion: new Date(),
+            fecha_actualizacion: new Date(),
+            activo: true,
+          })
+          .eq("usuario_id", userData.usuario_id);
+
+        req.body = {
+          isSend: false,
+          tipo_auditoria_id: 3,
+          colegio_id: 0,
+          usuario_id: userData.usuario_id,
+          descripcion: `Inicio de sesión exitoso para el usuario ${email}`,
+          fecha: new Date().toLocaleString(),
+          modulo_afectado: "auth",
+          accion_realizada: "login",
+          ip_origen: req.ip,
+          referencia_id: 2, // Puedes ajustar esto según tu lógica
+          model: "Usuarios",
+        };
+        await AuditoriaesService.guardar(req, res);
+        if (updateError) {
+          console.error("Error al actualizar datos de login:", updateError);
+        }
+      }
+
       res.status(200).json({
         token: authData.session?.access_token || "",
       });
@@ -40,7 +101,7 @@ export const AuthService = {
       const errorMessage =
         err instanceof Error ? err.message : "Error desconocido";
       res.status(500).json({
-        message: "Error interno del servidor",
+        message: "Credenciales incorrectas:" + errorMessage,
         error: errorMessage,
       });
     }
@@ -137,41 +198,39 @@ export const AuthService = {
     }
   },
   async updatePassword(req: Request, res: Response) {
-    const { userId, newPassword } = req.body;
-    if (!userId || !newPassword) {
-      res.status(400).json({ message: "userId y newPassword son requeridos" });
-    }
     try {
-      const { data: usuario_data, error: error_usuario } = await client
+      const { userId, newPassword } = req.body;
+      if (!userId || !newPassword) {
+        throw new Error("userId y newPassword son requeridos");
+      }
+      const { data: usuarioData, error: userError } = await client
         .from("usuarios")
-        .select(
-          "*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion)"
-        )
+        .select("email, auth_id")
         .eq("usuario_id", userId)
         .single();
-      if (error_usuario) {
-        throw new Error(error_usuario.message);
+      if (userError || !usuarioData) {
+        throw new Error(userError?.message || "No se pudo obtener el usuario");
       }
-      const { data, error } = await admin.auth.admin.updateUserById(
-        usuario_data.auth_id,
+      const { data, error: updateError } = await client.rpc(
+        "cambiar_contrasena",
         {
-          password: newPassword,
+          p_email: usuarioData.email,
+          p_nueva_contrasena: newPassword,
         }
       );
-      if (error) {
-        console.error("Error al cambiar contraseña:", error.message);
-        res.status(500).json({
-          message: "Error al actualizar la contraseña",
-          error: error.message,
-        });
+      if (updateError) {
+        throw new Error(updateError.message);
       }
-
-      res
-        .status(200)
-        .json({ message: "Contraseña actualizada correctamente", user: data });
-    } catch (err) {
+      res.status(200).json({
+        message: "Contraseña actualizada correctamente",
+        data: data,
+      });
+    } catch (err: any) {
       console.error("Error inesperado:", err);
-      res.status(500).json({ message: "Error interno del servidor" });
+      res.status(400).json({
+        message: "Error al actualizar la contraseña",
+        error: err.message || "Error interno del servidor",
+      });
     }
   },
 };

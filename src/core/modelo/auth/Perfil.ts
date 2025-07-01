@@ -1,3 +1,6 @@
+import { Colegio } from "../colegio/Colegio";
+import { Idioma } from "../configuracion/Idioma";
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type Perfil = {
   usuario: {
@@ -6,10 +9,13 @@ export type Perfil = {
     email: string;
     telefono_contacto: string;
     ultimo_inicio_sesion: string;
+    intentos_inicio_sesion:number;
     estado_usuario: string;
     url_foto_perfil: string | null;
     persona_id: number;
     rol_id: number;
+    colegio?:Colegio;
+    idioma?:Idioma;
     idioma_id: number;
   };
   persona: {

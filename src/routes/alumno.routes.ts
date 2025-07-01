@@ -165,9 +165,6 @@ const ruta_alumnos_diarios = '/diarios';
  *     AlumnoAlertaBitacora:
  *       type: object
  *       properties:
- *         alumno_alerta_bitacora_id:
- *           type: integer
- *           description: ID único de la bitácora
  *         alumno_alerta_id:
  *           type: integer
  *           description: ID de la alerta asociada
@@ -613,7 +610,400 @@ const ruta_alumnos_diarios = '/diarios';
  *       in: cookie
  *       name: session
  */
-router.get('/', sessionAuth, AlumnosService.obtener);
+router.get('/', sessionAuth,sessionAuth, AlumnosService.obtener);
+/**
+ * @swagger
+ * /api/v1/alumnos/racha:
+ *   get:
+ *     summary: Obtiene estadísticas de racha y respuestas de un alumno
+ *     description: Retorna información sobre las respuestas correctas y la mejor racha semanal de un alumno
+ *     tags:
+ *       - Alumnos
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: alumno_id
+ *         schema:
+ *           type: string
+ *         description: ID del alumno para obtener sus estadísticas
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Estadísticas de desempeño del alumno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total_respuestas_correctas:
+ *                   type: integer
+ *                   example: 9
+ *                   description: Total de respuestas correctas acumuladas
+ *                 mejor_racha_semanal:
+ *                   type: integer
+ *                   example: 2
+ *                   description: Máxima racha de respuestas correctas consecutivas en una semana
+ *       400:
+ *         description: Falta el parámetro alumno_id o es inválido
+ *       500:
+ *         description: Error del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Mensaje de error detallado
+ */
+router.get('/racha', sessionAuth, AlumnosService.obtenerRacha);
+
+/**
+ * @swagger
+ * /api/v1/alumnos/logros:
+ *   get:
+ *     tags:
+ *       - Alumnos
+ *     summary: Obtiene los logros de un alumno
+ *     description: Retorna un objeto indicando qué actividades ha completado el alumno en el día actual
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: alumno_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del alumno para consultar sus logros
+ *     responses:
+ *       200:
+ *         description: Objeto con los logros del alumno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 registro_tarea:
+ *                   type: boolean
+ *                   description: Indica si el alumno registró tarea hoy
+ *                   example: false
+ *                 respondio_pregunta:
+ *                   type: boolean
+ *                   description: Indica si el alumno respondió preguntas hoy
+ *                   example: false
+ *                 realizo_registro:
+ *                   type: boolean
+ *                   description: Indica si el alumno realizó algún registro hoy
+ *                   example: false
+ *       400:
+ *         description: Falta el parámetro alumno_id o es inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Falta el parámetro alumno_id"
+ *       500:
+ *         description: Error interno del servidor al obtener los logros
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message from the server"
+ */
+router.get('/logros', sessionAuth, AlumnosService.obtenerLogros);
+/**
+ * @swagger
+ * /api/v1/alumnos/registro_semanal:
+ *   get:
+ *     tags:
+ *       - Alumnos
+ *     summary: Obtiene el registro semanal de un alumno
+ *     description: Retorna un array con los días de la semana indicando cuáles fueron completados por el alumno
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: alumno_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del alumno para consultar su registro semanal
+ *     responses:
+ *       200:
+ *         description: Array con el estado de completado para cada día de la semana
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Identificador único del día
+ *                     example: 1
+ *                   name:
+ *                     type: string
+ *                     description: Nombre del día (hoy, ayer o abreviación)
+ *                     example: "Hoy"
+ *                   completed:
+ *                     type: boolean
+ *                     description: Indica si el alumno completó las actividades ese día
+ *                     example: false
+ *       400:
+ *         description: Falta el parámetro alumno_id o es inválido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Falta el parámetro alumno_id"
+ *       500:
+ *         description: Error interno del servidor al obtener el registro semanal
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error message from the server"
+ */
+router.get('/registro_semanal', sessionAuth, AlumnosService.obtenerRegistroSemanal);
+
+/**
+ * @swagger
+ * /api/v1/alumnos/perfil:
+ *   get:
+ *     tags:
+ *       - Alumnos
+ *     summary: Obtiene el perfil completo del alumno autenticado
+ *     description: Retorna información detallada del usuario, persona, rol, funcionalidades y apoderados asociados
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil completo del alumno
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     usuario_id:
+ *                       type: integer
+ *                       example: 9
+ *                     nombre_social:
+ *                       type: string
+ *                       example: "Diegito"
+ *                     email:
+ *                       type: string
+ *                       example: "diego@almaia.cl"
+ *                     telefono_contacto:
+ *                       type: string
+ *                       example: "5465464546"
+ *                     ultimo_inicio_sesion:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2025-06-04T18:27:31.085"
+ *                     estado_usuario:
+ *                       type: string
+ *                       example: ""
+ *                     url_foto_perfil:
+ *                       type: string
+ *                       format: url
+ *                       example: "https://example.com/profile.jpg"
+ *                     persona_id:
+ *                       type: integer
+ *                       example: 6
+ *                     rol_id:
+ *                       type: integer
+ *                       example: 2
+ *                     idioma_id:
+ *                       type: integer
+ *                       example: 4
+ *                     idioma:
+ *                       type: object
+ *                       properties:
+ *                         activo:
+ *                           type: boolean
+ *                         nombre:
+ *                           type: string
+ *                           example: "Español"
+ *                         idioma_id:
+ *                           type: integer
+ *                         creado_por:
+ *                           type: integer
+ *                         descripcion:
+ *                           type: string
+ *                         fecha_creacion:
+ *                           type: string
+ *                           format: date-time
+ *                         actualizado_por:
+ *                           type: integer
+ *                         url_foto_bandera:
+ *                           type: string
+ *                           format: url
+ *                         fecha_actualizacion:
+ *                           type: string
+ *                           format: date-time
+ *                     colegio:
+ *                       type: object
+ *                       properties:
+ *                         nombre:
+ *                           type: string
+ *                           example: "Colegio Bicentenario Santiago Centro"
+ *                         colegio_id:
+ *                           type: integer
+ *                           example: 1
+ *                 persona:
+ *                   type: object
+ *                   properties:
+ *                     persona_id:
+ *                       type: integer
+ *                       example: 6
+ *                     tipo_documento:
+ *                       type: string
+ *                       example: "RUN"
+ *                     numero_documento:
+ *                       type: string
+ *                       example: "16738492"
+ *                     nombres:
+ *                       type: string
+ *                       example: "Andrés"
+ *                     apellidos:
+ *                       type: string
+ *                       example: "Gutiérrez"
+ *                     genero_id:
+ *                       type: integer
+ *                       example: 1
+ *                     estado_civil_id:
+ *                       type: integer
+ *                       example: 2
+ *                     fecha_nacimiento:
+ *                       type: string
+ *                       format: date
+ *                       nullable: true
+ *                 rol:
+ *                   type: object
+ *                   properties:
+ *                     rol_id:
+ *                       type: integer
+ *                       example: 2
+ *                     nombre:
+ *                       type: string
+ *                       example: "Alumno"
+ *                     descripcion:
+ *                       type: string
+ *                       example: "Acceso completo al sistema"
+ *                 funcionalidades:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                   example: []
+ *                 apoderados:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       activo:
+ *                         type: boolean
+ *                       alumno_id:
+ *                         type: integer
+ *                       apoderados:
+ *                         type: object
+ *                         properties:
+ *                           activo:
+ *                             type: boolean
+ *                           personas:
+ *                             type: object
+ *                             properties:
+ *                               nombres:
+ *                                 type: string
+ *                               apellidos:
+ *                                 type: string
+ *                               genero_id:
+ *                                 type: integer
+ *                               persona_id:
+ *                                 type: integer
+ *                               tipo_documento:
+ *                                 type: string
+ *                               estado_civil_id:
+ *                                 type: integer
+ *                               fecha_nacimiento:
+ *                                 type: string
+ *                                 format: date
+ *                               numero_documento:
+ *                                 type: string
+ *                           colegio_id:
+ *                             type: integer
+ *                           creado_por:
+ *                             type: integer
+ *                           persona_id:
+ *                             type: integer
+ *                           apoderado_id:
+ *                             type: integer
+ *                           profesion_id:
+ *                             type: integer
+ *                             nullable: true
+ *                           fecha_creacion:
+ *                             type: string
+ *                             format: date-time
+ *                           tipo_oficio_id:
+ *                             type: integer
+ *                             nullable: true
+ *                           actualizado_por:
+ *                             type: integer
+ *                           email_contacto1:
+ *                             type: string
+ *                           email_contacto2:
+ *                             type: string
+ *                             nullable: true
+ *                           telefono_contacto1:
+ *                             type: string
+ *                           telefono_contacto2:
+ *                             type: string
+ *                             nullable: true
+ *                           fecha_actualizacion:
+ *                             type: string
+ *                             format: date-time
+ *                       creado_por:
+ *                         type: integer
+ *                       apoderado_id:
+ *                         type: integer
+ *                       observaciones:
+ *                         type: string
+ *                       estado_usuario:
+ *                         type: string
+ *                       fecha_creacion:
+ *                         type: string
+ *                         format: date-time
+ *                       tipo_apoderado:
+ *                         type: string
+ *                       actualizado_por:
+ *                         type: integer
+ *                       alumno_apoderado_id:
+ *                         type: integer
+ *                       fecha_actualizacion:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: No autorizado (sesión no válida)
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/perfil', sessionAuth, AlumnosService.obtenerPerfil);
 
 /**
  * @swagger
@@ -1040,7 +1430,7 @@ router.get('/', sessionAuth, AlumnosService.obtener);
  *               nullable: true
  *               example: null
  */
-router.get('/detalle/:alumnoId', AlumnosService.getAlumnoDetalle);
+router.get('/detalle/:alumnoId',sessionAuth, AlumnosService.getAlumnoDetalle);
 
 /**
  * @swagger
@@ -1813,8 +2203,8 @@ router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle
  * @swagger
  * /api/v1/alumnos/alertas:
  *   post:
- *     summary: Crear nueva alerta
- *     description: Registra una nueva alerta para un alumno
+ *     summary: Crear nueva alerta para un alumno
+ *     description: Registra una nueva alerta en el sistema asociada a un alumno específico
  *     tags: [Alertas]
  *     security:
  *       - sessionAuth: []
@@ -1823,7 +2213,70 @@ router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/AlumnoAlerta'
+ *             type: object
+ *             required:
+ *               - alumno_id
+ *               - mensaje
+ *               - fecha_generada
+ *               - alerta_origen_id
+ *               - prioridad_id
+ *               - severidad_id
+ *               - leida
+ *               - estado
+ *               - alertas_tipo_alerta_tipo_id
+ *             properties:
+ *               alumno_id:
+ *                 type: integer
+ *                 description: ID del alumno asociado a la alerta
+ *               alerta_regla_id:
+ *                 type: integer
+ *                 description: ID de la regla que generó la alerta (opcional)
+ *               mensaje:
+ *                 type: string
+ *                 maxLength: 100
+ *                 description: Descripción del motivo de la alerta
+ *               fecha_generada:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Fecha y hora cuando se generó la alerta
+ *               fecha_resolucion:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Fecha y hora cuando se resolvió la alerta (opcional)
+ *               alerta_origen_id:
+ *                 type: integer
+ *                 description: ID del origen de la alerta
+ *               prioridad_id:
+ *                 type: integer
+ *                 description: ID del nivel de prioridad de la alerta
+ *               severidad_id:
+ *                 type: integer
+ *                 description: ID del nivel de severidad de la alerta
+ *               accion_tomada:
+ *                 type: string
+ *                 maxLength: 200
+ *                 description: Descripción de la acción tomada (opcional)
+ *               leida:
+ *                 type: boolean
+ *                 description: Indica si la alerta ha sido leída
+ *               estado:
+ *                 type: string
+ *                 maxLength: 20
+ *                 description: Estado actual de la alerta
+ *               alertas_tipo_alerta_tipo_id:
+ *                 type: integer
+ *                 description: ID del tipo de alerta
+ *             example:
+ *               alumno_id: 12345
+ *               alerta_regla_id: 1
+ *               mensaje: "El alumno muestra bajo rendimiento en matemáticas"
+ *               fecha_generada: "2023-05-15T14:30:00Z"
+ *               alerta_origen_id: 2
+ *               prioridad_id: 1
+ *               severidad_id: 3
+ *               leida: false
+ *               estado: "pendiente"
+ *               alertas_tipo_alerta_tipo_id: 5
  *     responses:
  *       201:
  *         description: Alerta creada exitosamente
@@ -1832,7 +2285,13 @@ router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle
  *             schema:
  *               $ref: '#/components/schemas/AlumnoAlerta'
  *       400:
- *         description: Datos inválidos para crear la alerta
+ *         description: |
+ *           Datos inválidos para crear la alerta. Posibles causas:
+ *           - Faltan campos requeridos
+ *           - Tipos de datos incorrectos
+ *           - Valores fuera de los límites permitidos
+ *       401:
+ *         description: No autorizado (sesión no válida o expirada)
  *       500:
  *         description: Error interno del servidor
  */
