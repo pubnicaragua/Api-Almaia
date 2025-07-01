@@ -126,13 +126,14 @@ export const DashboardHomeService = {
 
   // Función para obtener emociones generales
   async getEmotionDataGeneral(req: Request, res: Response) {
-    const { colegio_id } = req.query;
+    const { colegio_id, fecha_hasta } = req.query;
     let data;
     if (colegio_id !== undefined) {
       const { data: data_emociones, error } = await client.rpc(
         "obtener_cantidades_pregunta_3",
         {
           p_colegio_id: colegio_id || null,
+          p_fecha_hasta: fecha_hasta || undefined,
         }
       );
       if (error) {
@@ -154,13 +155,14 @@ export const DashboardHomeService = {
   },
 
   async getEmotionDataPatologia(req: Request, res: Response) {
-    const { colegio_id } = req.query;
+    const { colegio_id, fecha_hasta } = req.query;
     let data;
     if (colegio_id !== undefined) {
       const { data: data_emociones, error } = await client.rpc(
         "obtener_cantidades_por_diagnostico",
         {
           p_colegio_id: colegio_id || null,
+          p_fecha_hasta: fecha_hasta || undefined,
         }
       );
       if (error) {

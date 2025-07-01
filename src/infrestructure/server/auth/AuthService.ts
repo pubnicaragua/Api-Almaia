@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { AuditoriaesService } from "./AuditoriaService";
 import { AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
 
 // Interfaz para credenciales
@@ -15,28 +16,50 @@ const PasswordSchema = Joi.object({
 // Inicializar Supabase client
 const supabaseService = new SupabaseClientService();
 
+
 const client: SupabaseClient = supabaseService.getClient();
 // Servicio de autenticación
 export const AuthService = {
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
     try {
+      // console.log('Intentando iniciar sesión con:', email);
       // Autenticar al usuario en Supabase Auth
       const { data: authData, error: authError } =
         await client.auth.signInWithPassword({
           email,
           password,
         });
+
       if (authError || !authData.user) {
+        req.body = {
+          isSend: false,
+          tipo_auditoria_id: 1,
+          colegio_id: 0,
+          usuario_id: 0,
+          fecha: new Date().toLocaleString(),
+          descripcion: `Error de inicio de sesión para el usuario ${email}`,
+          modulo_afectado: "auth",
+          accion_realizada: "login",
+          ip_origen: req.ip,
+          referencia_id: 0, // Puedes ajustar esto según tu lógica
+          model: "Usuarios",
+        };
+        await AuditoriaesService.guardar(req, res);
         throw new Error(authError?.message || "Autenticación fallida");
       }
 
       // Buscar el usuario en la tabla usuarios por email
       const { data: userData, error: userError } = await client
         .from("usuarios")
-        .select("usuario_id, intentos_inicio_sesion")
+        .select(`
+          usuario_id,
+          intentos_inicio_sesion
+          `)
         .eq("email", email)
         .single();
+
+        console.log("Datos del usuario:", userData);  
 
       if (userError) {
         console.error("Error al buscar usuario:", userError);
@@ -52,6 +75,20 @@ export const AuthService = {
           })
           .eq("usuario_id", userData.usuario_id);
 
+        req.body = {
+          isSend: false,
+          tipo_auditoria_id: 3,
+          colegio_id: 0,
+          usuario_id: userData.usuario_id,
+          descripcion: `Inicio de sesión exitoso para el usuario ${email}`,
+          fecha: new Date().toLocaleString(),
+          modulo_afectado: "auth",
+          accion_realizada: "login",
+          ip_origen: req.ip,
+          referencia_id: 2, // Puedes ajustar esto según tu lógica
+          model: "Usuarios",
+        };
+        await AuditoriaesService.guardar(req, res);
         if (updateError) {
           console.error("Error al actualizar datos de login:", updateError);
         }

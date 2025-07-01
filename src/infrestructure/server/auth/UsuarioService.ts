@@ -31,6 +31,7 @@ const UsuarioUpdateSchema = Joi.object({
   encripted_password: Joi.string().max(35).optional(),
   nombres: Joi.string().max(35).optional(),
   apellidos: Joi.string().max(35).optional(),
+  fecha_nacimiento: Joi.date().optional(),
   rol_id: Joi.number().integer().required(),
   telefono_contacto: Joi.string().max(150).required(),
   url_foto_perfil: Joi.string().required(),
@@ -45,6 +46,7 @@ const dataPersonaService: DataService<Persona> = new DataService(
   "personas",
   "persona_id"
 );
+
 export const UsuariosService = {
   async obtener(req: Request, res: Response) {
     try {
@@ -184,8 +186,11 @@ export const UsuariosService = {
         throw new Error("La persona no existe");
       }
       Object.assign(persona, dataPersona);
+      
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
+      persona.fecha_nacimiento = req.body.fecha_nacimiento;
+
       const { data: dataIdioma, error: errorIdioma } = await client
         .from("idiomas")
         .select("*")
@@ -194,6 +199,7 @@ export const UsuariosService = {
       if (errorIdioma || !dataIdioma) {
         throw new Error("El nivel educativo no existe");
       }
+
       if (validationError) {
         responseSent = true;
         throw new Error(validationError.details[0].message);
@@ -202,20 +208,24 @@ export const UsuariosService = {
             console.log('url',usuario.url_foto_perfil);
 
         await dataService.updateById(usuarioId, usuario);
+
         const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
           await client
             .from("usuarios")
             .select("*")
             .eq("usuario_id", usuarioId)
             .single();
+
         if (errorUsuarioUpdate) {
           throw new Error(errorUsuarioUpdate.message);
         }
+
         await dataPersonaService.updateById(usuario.persona_id, persona);
+        
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error de datos",error);
 
       res.status(500).json(error);
     }

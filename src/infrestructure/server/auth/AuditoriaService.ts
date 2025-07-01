@@ -31,17 +31,18 @@ export const AuditoriaesService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
+      const { isSend = true, ...rest } = req.body;
       const auditoria: Auditoria = new Auditoria();
-      Object.assign(auditoria, req.body);
+      Object.assign(auditoria, rest);
       let responseSent = false;
-      const { error: validationError } = AuditoriaSchema.validate(req.body);
+      const { error: validationError } = AuditoriaSchema.validate(rest);
       if (validationError) {
         responseSent = true;
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
         const savedauditoria = await dataService.processData(auditoria);
-        res.status(201).json(savedauditoria);
+        if (isSend) res.status(201).json(savedauditoria);
       }
     } catch (error) {
       console.error("Error al guardar la auditoria:", error);

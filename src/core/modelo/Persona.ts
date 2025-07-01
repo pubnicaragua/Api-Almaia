@@ -8,7 +8,7 @@ export class Persona extends BaseModel {
     apellidos: string;
     genero_id: number;
     estado_civil_id: number;
-    fecha_nacimiento:Date;
+    fecha_nacimiento: Date;
     constructor(){
         super();
         this.tipo_documento = '';
