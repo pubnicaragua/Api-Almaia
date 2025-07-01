@@ -2,7 +2,7 @@ import { Colegio } from "../colegio/Colegio";
 import { Idioma } from "../configuracion/Idioma";
 import { FuncionalidadRol } from "./FuncionalidadRol";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 interface PersonaEntrada {
   persona_id: number;
   tipo_documento: string;

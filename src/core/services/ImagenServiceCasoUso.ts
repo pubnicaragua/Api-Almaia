@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export function isBase64DataUrl(input: string): boolean {
-  return /^data:([a-zA-Z0-9-+\/.]+);base64,/.test(input);
+  return /^data:([a-zA-Z0-9-+/.]+);base64,/.test(input);
 }
 
 export function extractBase64Info(base64String: string) {
