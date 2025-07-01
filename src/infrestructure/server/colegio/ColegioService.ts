@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { Colegio } from "../../../core/modelo/colegio/Colegio";
-import * as XLSX from "xlsx";
+import XLSX from "exceljs";
 import { ColegioExcel } from "../../../core/modelo/import/ColegioExcel";
 import { Fileservice } from "../../../core/services/FileService";
 import { CalendarioEscolarExcel } from "../../../core/modelo/import/CalendarioEscolarExcel";
@@ -23,7 +24,9 @@ export const ColegiosService = {
       const fileService = new Fileservice();
       const { colegio_id } = req.query;
       if (!req.file) throw new Error("Archivo no encontrado");
-      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+      const workbook = new XLSX.Workbook();
+      await workbook.xlsx.load(req.file.buffer); // Cargar el archivo Excel desde el buffer
+      // const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
 
       const ordenLectura = [
         "Colegio",
@@ -42,7 +45,26 @@ export const ColegiosService = {
       ];
       fileService.setColegio(colegio_id);
       for (const hoja of ordenLectura) {
-        const datos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja]);
+        const worksheet = workbook.getWorksheet(hoja);
+        if (!worksheet) continue;
+        // const datos = XLSX.utils.sheet_to_json(workbook.Sheets[hoja]);
+
+        // Obtiene los encabezados
+        const headers: string[] = [];
+        worksheet.getRow(1).eachCell((cell) => {
+          headers.push(cell.value?.toString() ?? "");
+        });
+
+        // Convierte las filas a objetos usando los encabezados
+        const datos: any[] = [];
+        worksheet.eachRow((row, rowNumber) => {
+          if (rowNumber === 1) return; // omitir encabezado
+          const obj: any = {};
+          row.eachCell((cell, colNumber) => {
+            obj[headers[colNumber - 1]] = cell.value;
+          });
+          datos.push(obj);
+        });
 
         switch (hoja) {
           case "Año_Academico":
