@@ -269,6 +269,7 @@ export const AlumnosService = {
       const usuarioId = parseInt(req.params.id);
       const usuario = new Usuario();
       const persona = new Persona();
+      const { encripted_password = undefined } = req.body;
       Object.assign(usuario, {
         nombre_social: req.body.nombre_social,
         email: req.body.email,
@@ -319,6 +320,20 @@ export const AlumnosService = {
           throw new Error(errorUsuarioUpdate.message);
         }
         await dataPersonaService.updateById(usuario.persona_id, persona);
+
+        if (encripted_password) {
+          const { error: updateError } = await client.rpc(
+            "cambiar_contrasena",
+            {
+              p_email: dataUsuarioUpdate.email,
+              p_nueva_contrasena: encripted_password,
+            }
+          );
+          if (updateError) {
+            throw new Error(updateError.message);
+          }
+        }
+
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {

@@ -186,8 +186,7 @@ router.get("/barra/emociones", sessionAuth, DashboardHomeService.getEmotionsData
  * @swagger
  * /api/v1/home/barra/patologias:
  *   get:
- *     tags:
- *       - Dashboard Home
+ *     tags: [Home]
  *     summary: Obtiene datos de emociones/patologías para un colegio específico
  *     description: Retorna estadísticas de patologías emocionales detectadas en formato para gráfico de barras
  *     security:
@@ -197,8 +196,14 @@ router.get("/barra/emociones", sessionAuth, DashboardHomeService.getEmotionsData
  *         name: colegio_id
  *         schema:
  *           type: integer
- *         required: true
+ *         required: false
  *         description: ID del colegio para filtrar los datos
+ *       - in: query
+ *         name: fecha_hasta
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Fecha hasta para filtrar los datos
  *     responses:
  *       200:
  *         description: Datos de patologías emocionales obtenidos correctamente
@@ -238,6 +243,19 @@ router.get("/barra/patologias", sessionAuth, DashboardHomeService.getEmotionData
  *     tags: [Home]
  *     security:
  *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: colegio_id
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: ID del colegio para filtrar los datos
+ *       - in: query
+ *         name: fecha_hasta
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Fecha hasta para filtrar los datos
  *     responses:
  *       200:
  *         description: Datos generales de emociones obtenidos correctamente
