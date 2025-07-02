@@ -163,6 +163,7 @@ export const DashboardHomeService = {
         {
           p_colegio_id: colegio_id || null,
           p_fecha_hasta: fecha_hasta || undefined,
+          p_tipo_concepto: "Patologia"
         }
       );
       if (error) {
@@ -173,6 +174,39 @@ export const DashboardHomeService = {
     } else {
       const { data: data_emociones, error } = await client.rpc(
         "obtener_cantidades_por_diagnostico"
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapPatologia(data_emociones);
+      }
+    }
+    res.json(data);
+  },
+
+  async getEmotionDataNeurodivergencia(req: Request, res: Response) {
+    const { colegio_id, fecha_hasta } = req.query;
+    let data;
+    if (colegio_id !== undefined) {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_por_diagnostico",
+        {
+          p_colegio_id: colegio_id || null,
+          p_fecha_hasta: fecha_hasta || undefined,
+          p_tipo_concepto: "Neurodivergencia"
+        }
+      );
+      if (error) {
+        console.error("Error al obtener cantidades:", error);
+      } else {
+        data = mapPatologia(data_emociones);
+      }
+    } else {
+      const { data: data_emociones, error } = await client.rpc(
+        "obtener_cantidades_por_diagnostico",
+        {
+          p_tipo_concepto: "Neurodivergencia"
+        }
       );
       if (error) {
         console.error("Error al obtener cantidades:", error);

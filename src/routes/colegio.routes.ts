@@ -109,6 +109,8 @@ router.get("/", sessionAuth, ColegiosService.obtener);
  *             comuna_id: 101
  *             region_id: 13
  *             pais_id: 1
+ *             correo_sos: "sos@colegio.cl"
+ *             correo_denuncia: "denuncia@colegio.cl"
  *     responses:
  *       201:
  *         description: Colegio creado exitosamente
@@ -150,6 +152,8 @@ router.post("/", sessionAuth, ColegiosService.guardar);
  *           example:
  *             nombre: "Colegio Ejemplo Actualizado"
  *             telefono_contacto: "+56987654321"
+ *             correo_sos: "sos@colegio.cl"
+ *             correo_denuncia: "denuncia@colegio.cl"
  *     responses:
  *       200:
  *         description: Colegio actualizado exitosamente

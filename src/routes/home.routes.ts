@@ -236,6 +236,58 @@ router.get("/barra/emociones", sessionAuth, DashboardHomeService.getEmotionsData
 router.get("/barra/patologias", sessionAuth, DashboardHomeService.getEmotionDataPatologia);
 /**
  * @swagger
+ * /api/v1/home/barra/neurodivergencias:
+ *   get:
+ *     tags: [Home]
+ *     summary: Obtiene datos de emociones/neurodivergencia para un colegio específico
+ *     description: Retorna estadísticas de neurodivergencia emocionales detectadas en formato para gráfico de barras
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: colegio_id
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: ID del colegio para filtrar los datos
+ *       - in: query
+ *         name: fecha_hasta
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: Fecha hasta para filtrar los datos
+ *     responses:
+ *       200:
+ *         description: Datos de neurodivergencia emocionales obtenidos correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                     description: Nombre de la neurodivergencia/trastorno emocional
+ *                     example: "Trastorno del Psicologico"
+ *                   value:
+ *                     type: integer
+ *                     description: Cantidad de casos detectados
+ *                     example: 6
+ *                   color:
+ *                     type: string
+ *                     description: Código hexadecimal del color para representar en el gráfico
+ *                     example: "#fde68a"
+ *       400:
+ *         description: Parámetro colegio_id faltante o inválido
+ *       401:
+ *         description: No autorizado (sesión no válida)
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get("/barra/neurodivergencias", sessionAuth, DashboardHomeService.getEmotionDataNeurodivergencia);
+/**
+ * @swagger
  * /api/v1/home/emotions/general:
  *   get:
  *     summary: Obtener datos generales de emociones

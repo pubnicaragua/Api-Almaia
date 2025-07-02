@@ -17,7 +17,7 @@ import { DocenteExcel } from "../../../core/modelo/import/DocenteExcel";
 import { AlumnoExcel } from "../../../core/modelo/import/AlumnoExcel";
 import { AulaExcel } from "../../../core/modelo/import/AulaExcel";
 
-const dataService: DataService<Colegio> = new DataService("colegios");
+const dataService: DataService<Colegio> = new DataService("colegios", "colegio_id");
 export const ColegiosService = {
   async importarExcelColegio(req: Request, res: Response) {
     try {
