@@ -57,6 +57,9 @@ function cleanIp(ip: string): string {
   }
   return ip;
 }
+
+// Habilitar la confianza en los proxies
+app.set('trust proxy', true);
 // Middleware básico
 app.use(express.json({ limit: '30mb' }));
 app.use(helmet());

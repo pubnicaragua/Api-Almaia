@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { AlumnoAlerta } from "../../../core/modelo/alumno/AlumnoAlerta";
 import Joi from "joi";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { type PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import {
   contarAlertasPendientesPorColegio,
   mapearAlertaDetalle,
@@ -143,12 +144,28 @@ export const AlumnoAlertaService = {
         if (error || !data) {
           throw new Error("El alumno no existe");
         }
+
         // Obtener información del colegio
+        let emailCorreo = "";
+        switch (bodyWithoutAnonimo.alertas_tipo_alerta_tipo_id) {
+          case 1: // SOS ALMA
+            emailCorreo = "correo_sos";
+            break;
+
+          case 2: // Denuncia
+            emailCorreo = "correo_denuncia";
+            break;
+
+          default:
+            emailCorreo = "correo_electronico";
+            break;
+        }
+
         const { data: dataColegio, error: errorColegio } = await client
           .from("colegios")
-          .select("correo_electronico")
+          .select(emailCorreo)
           .eq("colegio_id", data.colegio_id)
-          .single();
+          .single() as { data: any; error: PostgrestError | null };
 
         if (!errorColegio && dataColegio?.correo_electronico) {
           // Procesar correos: dividir por comas, limpiar espacios y filtrar vacíos
@@ -234,6 +251,7 @@ export const AlumnoAlertaService = {
       res.status(500).json({ message: error.message || "Error inesperado" });
     }
   },
+
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
