@@ -167,9 +167,9 @@ export const AlumnoAlertaService = {
           .eq("colegio_id", data.colegio_id)
           .single() as { data: any; error: PostgrestError | null };
 
-        if (!errorColegio && dataColegio?.correo_electronico) {
-          // Procesar correos: dividir por comas, limpiar espacios y filtrar vacíos
-          destinatarios = dataColegio.correo_electronico
+          if (!errorColegio && dataColegio[emailCorreo]) {
+            // Procesar correos: dividir por comas, limpiar espacios y filtrar vacíos
+          destinatarios = dataColegio[emailCorreo]
             .split(",")
             .map((email: string) => email.trim())
             .filter((email: string) => email.length > 0);
@@ -233,6 +233,7 @@ export const AlumnoAlertaService = {
 
       if (!responseSent) {
         const savedAlumnoAlerta = await dataService.processData(alumnoalerta);
+        // console.log(destinatarios);
         const email = await emailService.enviarNotificacionAlerta(
           {
             tipo: dataAlertaTipo.nombre,
