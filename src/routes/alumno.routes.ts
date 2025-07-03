@@ -2259,6 +2259,9 @@ router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle
  *               leida:
  *                 type: boolean
  *                 description: Indica si la alerta ha sido leída
+ *               anonimo:
+ *                 type: boolean
+ *                 description: Indica si la alerta ha sido anonima
  *               estado:
  *                 type: string
  *                 maxLength: 20
@@ -2275,6 +2278,7 @@ router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle
  *               prioridad_id: 1
  *               severidad_id: 3
  *               leida: false
+ *               anonimo: false
  *               estado: "pendiente"
  *               alertas_tipo_alerta_tipo_id: 5
  *     responses:

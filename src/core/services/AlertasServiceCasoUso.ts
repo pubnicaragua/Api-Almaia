@@ -110,12 +110,12 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
     const { ...rest } = alerta;
     return {
       id: rest.alumno_alerta_id,
-      student: {
+      student: rest?.alumnos ? {
         alumno_id: rest.alumnos.alumno_id,
         name: `${rest.alumnos.personas.nombres} ${rest.alumnos.personas.apellidos}`,
         course: rest.alumnos?.alumnos_cursos[0]?.cursos?.nombre_curso, // Este dato no está en la estructura original, se asume
         image: rest.alumnos.url_foto_perfil,
-      },
+      } : null,
       generationDate: new Date(rest.fecha_generada).toLocaleDateString("es-CL"),
       generationTime: new Date(rest.fecha_generada).toLocaleTimeString(
         "es-CL",
@@ -128,7 +128,7 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
         role: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
         image: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
       },
-      isAnonymous: rest.alerta_origen_id === 1, // Asumiendo que 1 significa anónimo
+      isAnonymous: rest.anonimo === 1, // Asumiendo que 1 significa anónimo
       regla: rest?.alertas_reglas?.nombre,
       origen:rest?.alertas_origenes?.nombre,
       tipo: rest?.alertas_tipos?.nombre,

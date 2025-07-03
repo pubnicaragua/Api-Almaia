@@ -97,6 +97,7 @@ export const AlumnoAlertaService = {
   async detalle(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
+      // console.log("AUI ID:", id);
       const where = { alumno_alerta_id: id }; // Convertir los parámetros de consulta en filtros
       const alumnoalertaAlerta_data = await dataService.getAll(
         [
@@ -111,9 +112,9 @@ export const AlumnoAlertaService = {
         ],
         where
       );
-
+      // console.log(alumnoalertaAlerta_data);
       const alumnoalertaAlerta = mapearAlertaDetalle(alumnoalertaAlerta_data);
-      console.log(alumnoalertaAlerta);
+      // console.log(alumnoalertaAlerta);
 
       res.json(alumnoalertaAlerta);
     } catch (error) {
@@ -126,7 +127,7 @@ export const AlumnoAlertaService = {
       let destinatarios = ["app@almaia.cl"]; // fallback por defecto
 
       const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
-      const { anonimo = false, ...bodyWithoutAnonimo } = req.body; // Establece false por defecto si es undefined
+      const { anonimo = false, alumno_id, ...bodyWithoutAnonimo } = req.body; // Establece false por defecto si es undefined
       Object.assign(alumnoalerta, bodyWithoutAnonimo);
       alumnoalerta.creado_por = req.creado_por;
       alumnoalerta.actualizado_por = req.actualizado_por;
@@ -134,16 +135,16 @@ export const AlumnoAlertaService = {
       let responseSent = false;
       const { error: validationError } = AlumnoAlertaSchema.validate(req.body);
 
-      // Verificación de alumno solo si no es anónimo (anonimo es explícitamente false)
-      if (anonimo === false) {
-        const { data, error } = await client
-          .from("alumnos")
-          .select("*")
-          .eq("alumno_id", alumnoalerta.alumno_id)
-          .single();
-        if (error || !data) {
-          throw new Error("El alumno no existe");
-        }
+      // Verificación de alumno solo si no es anónimo (anonimo es explícitamente true)
+
+      const { data, error } = await client
+        .from("alumnos")
+        .select("*")
+        .eq("alumno_id", alumno_id)
+        .single();
+      if (error || !data) {
+        throw new Error("El alumno no existe");
+      }
 
         // Obtener información del colegio
         let emailCorreo = "";
@@ -174,7 +175,7 @@ export const AlumnoAlertaService = {
             .map((email: string) => email.trim())
             .filter((email: string) => email.length > 0);
         }
-      }
+      
 
       // Resto del código permanece igual
       if (alumnoalerta.alerta_regla_id !== undefined) {
@@ -232,7 +233,7 @@ export const AlumnoAlertaService = {
       }
 
       if (!responseSent) {
-        const savedAlumnoAlerta = await dataService.processData(alumnoalerta);
+        const savedAlumnoAlerta = await dataService.processData({ ...alumnoalerta, anonimo, alumno_id: anonimo ? null : alumno_id });
         // console.log(destinatarios);
         const email = await emailService.enviarNotificacionAlerta(
           {
@@ -341,6 +342,7 @@ export const AlumnoAlertaService = {
         }
         alumnoalerta.alerta_origen_id = dataAlumnoAlerta.alerta_origen_id;
         alumnoalerta.fecha_generada = dataAlumnoAlerta.fecha_generada;
+
         if (!responseSent) {
           await dataService.updateById(id, alumnoalerta);
           res
