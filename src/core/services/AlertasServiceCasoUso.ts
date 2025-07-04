@@ -128,7 +128,7 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
         role: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
         image: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
       },
-      isAnonymous: rest.anonimo === 1, // Asumiendo que 1 significa anónimo
+      isAnonymous: rest.anonimo, // Asumiendo que 1 significa anónimo
       regla: rest?.alertas_reglas?.nombre,
       origen:rest?.alertas_origenes?.nombre,
       tipo: rest?.alertas_tipos?.nombre,
