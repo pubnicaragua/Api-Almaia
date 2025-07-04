@@ -8,6 +8,7 @@ import { type PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import {
   contarAlertasPendientesPorColegio,
   mapearAlertaDetalle,
+  // mapearAlertaDetalleV2,
   mapearAlertas,
 } from "../../../core/services/AlertasServiceCasoUso";
 import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";

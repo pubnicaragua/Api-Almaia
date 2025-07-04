@@ -12,6 +12,7 @@ import {
   isBase64DataUrl,
 } from "../../../core/services/ImagenServiceCasoUso";
 import { randomUUID } from "crypto";
+import { Alumno } from "../../../core/modelo/alumno/Alumno";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -44,6 +45,11 @@ const dataService: DataService<Usuario> = new DataService(
 );
 const dataPersonaService: DataService<Persona> = new DataService(
   "personas",
+  "persona_id"
+);
+
+const dataImageService: DataService<Alumno> = new DataService(
+  "alumnos",
   "persona_id"
 );
 
@@ -221,6 +227,12 @@ export const UsuariosService = {
         }
 
         await dataPersonaService.updateById(usuario.persona_id, persona);
+
+        await dataImageService.updateById(usuario.persona_id, {
+          url_foto_perfil: usuario?.url_foto_perfil,
+          actualizado_por: req.actualizado_por,
+          fecha_actualizacion: req.fecha_creacion
+        }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
         
         res.status(200).json(dataUsuarioUpdate);
       }

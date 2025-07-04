@@ -19,6 +19,10 @@ const dataService: DataService<Alumno> = new DataService(
   "alumnos",
   "alumno_id"
 );
+const dataImagesService: DataService<Alumno> = new DataService(
+  "alumnos",
+  "persona_id"
+);
 const AlumnoSchema = Joi.object({
   url_foto_perfil: Joi.string().max(255).optional(),
   telefono_contacto1: Joi.string().max(16).optional(),
@@ -270,15 +274,17 @@ export const AlumnosService = {
       const usuario = new Usuario();
       const persona = new Persona();
       const { encripted_password = undefined } = req.body;
+
       Object.assign(usuario, {
         nombre_social: req.body.nombre_social,
         email: req.body.email,
         telefono_contacto: req.body.telefono_contacto,
-        url_foto_perfil: req.body.url_foto_perfil,
+        url_foto_perfil: req.body.url_foto_perfil, /// IMAGENES DE PERFIL
         idioma_id: req.body.idioma_id,
       });
       usuario.actualizado_por = req.actualizado_por;
       let responseSent = false;
+
       const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
       const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
@@ -288,6 +294,7 @@ export const AlumnosService = {
       if (errorUsuario || !dataUsuario) {
         throw new Error("El usuario no existe");
       }
+
       usuario.persona_id = dataUsuario.persona_id;
       usuario.rol_id = dataUsuario.rol_id;
       usuario.idioma_id = dataUsuario.idioma_id;
@@ -299,17 +306,21 @@ export const AlumnosService = {
       if (errorPersona || !dataPersona) {
         throw new Error("La persona no existe");
       }
+
       Object.assign(persona, dataPersona);
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
       persona.fecha_nacimiento = req.body.fecha_nacimiento;
       persona.numero_documento = req.body.numero_documento;
+
       if (validationError) {
         responseSent = true;
         throw new Error(validationError.details[0].message);
       }
+
       if (!responseSent) {
-        await dataUsuarioService.updateById(usuarioId, usuario);
+
+        await dataUsuarioService.updateById(usuarioId, usuario); /// ACTUALIZA EL USUARIO
         const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
           await client
             .from("usuarios")
@@ -319,7 +330,15 @@ export const AlumnosService = {
         if (errorUsuarioUpdate) {
           throw new Error(errorUsuarioUpdate.message);
         }
-        await dataPersonaService.updateById(usuario.persona_id, persona);
+        await dataPersonaService.updateById(usuario.persona_id, persona); // ACTUALIZA LA PERSONA
+
+        // console.log(usuario?.url_foto_perfil);
+
+        await dataImagesService.updateById(usuario.persona_id, {
+          url_foto_perfil: usuario?.url_foto_perfil,
+          actualizado_por: req.actualizado_por,
+          fecha_actualizacion: req.fecha_creacion
+        }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
 
         if (encripted_password) {
           const { error: updateError } = await client.rpc(
