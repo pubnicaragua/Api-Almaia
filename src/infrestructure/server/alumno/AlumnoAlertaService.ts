@@ -271,11 +271,25 @@ export const AlumnoAlertaService = {
         }
       } else {
         const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
-        Object.assign(alumnoalerta, req.body);
+        const info = {
+          alumno_id: req.body.alumno_id,
+          alerta_regla_id: req.body.alerta_regla_id,
+          mensaje: req.body.mensaje,
+          fecha_resolucion: req.body.fecha_resolucion,
+          prioridad_id: req.body.prioridad_id,
+          // prioridad_id: req.body.alertas_prioridades.alerta_prioridad_id,
+          severidad_id: req.body.severidad_id,
+          // severidad_id: req.body.alertas_severidades.alerta_severidad_id,
+          accion_tomada: req.body.accion_tomada,
+          leida: req.body.leida,
+          estado: req.body.estado,
+          alertas_tipo_alerta_tipo_id: req.body.alertas_tipos.alerta_tipo_id,
+        };
+        Object.assign(alumnoalerta, info);
         alumnoalerta.actualizado_por = req.actualizado_por;
         let responseSent = false;
         const { error: validationError } = AlumnoAlertaUpdateSchema.validate(
-          req.body
+          info
         );
         const { data, error } = await client
           .from("alumnos")
