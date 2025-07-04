@@ -291,14 +291,20 @@ export const AlumnoAlertaService = {
         const { error: validationError } = AlumnoAlertaUpdateSchema.validate(
           info
         );
-        const { data, error } = await client
-          .from("alumnos")
-          .select("*")
-          .eq("alumno_id", alumnoalerta.alumno_id)
-          .single();
-        if (error || !data) {
-          throw new Error("El colegio no existe");
+
+        if (alumnoalerta.alumno_id !== undefined && !!alumnoalerta.alumno_id) {
+          // Verificación de alumno solo si no es anónimo (anonimo es explícitamente true
+          const { data, error } = await client
+            .from("alumnos")
+            .select("*")
+            .eq("alumno_id", alumnoalerta.alumno_id)
+            .single();
+          if (error || !data) {
+            throw new Error("El colegio no existe");
+          }
         }
+
+        console.log("CUERPO DE JSON", alumnoalerta);
         const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
           .from("alertas_reglas")
           .select("*")
@@ -307,6 +313,7 @@ export const AlumnoAlertaService = {
         if (errorAlertaRegla || !dataAlertaRegla) {
           throw new Error("El colegio no existe");
         }
+
         const { data: dataAlertaOrigen, error: errorAlertaOrigen } =
           await client
             .from("alertas_origenes")
