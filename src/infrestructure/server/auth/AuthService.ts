@@ -60,7 +60,7 @@ export const AuthService = {
         .single();
 
       if (userError) {
-        console.error("Error al buscar usuario:", userError);
+        console.error("[Auth] Error al buscar usuario:", userError);
       } else if (userData) {
         // Actualizar intentos de inicio de sesión y última fecha
         const { error: updateError } = await client

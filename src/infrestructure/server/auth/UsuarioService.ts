@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
@@ -13,6 +14,7 @@ import {
 } from "../../../core/services/ImagenServiceCasoUso";
 import { randomUUID } from "crypto";
 import { Alumno } from "../../../core/modelo/alumno/Alumno";
+import { validateDate } from "../../../helpers/dateformat";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -37,6 +39,7 @@ const UsuarioUpdateSchema = Joi.object({
   telefono_contacto: Joi.string().max(150).required(),
   url_foto_perfil: Joi.string().required(),
   persona_id: Joi.number().integer().optional(),
+  rut: Joi.string().max(20).optional(),
   idioma_id: Joi.number().integer().required(),
 });
 const dataService: DataService<Usuario> = new DataService(
@@ -127,6 +130,7 @@ export const UsuariosService = {
       res.status(500).json(error);
     }
   },
+
   async actualizar(req: Request, res: Response) {
     try {
       const usuarioId = parseInt(req.params.id);
@@ -195,7 +199,18 @@ export const UsuariosService = {
       
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
-      persona.fecha_nacimiento = req.body.fecha_nacimiento;
+      persona.numero_documento = req.body.rut;
+
+      const fecha_nacimiento: string = req.body.fecha_nacimiento;
+
+      if (fecha_nacimiento) {
+        // Validar y formatear la fecha
+        if (!validateDate(fecha_nacimiento)) {
+          throw new Error("Fecha de nacimiento inválida");
+        }
+      } 
+
+      persona.fecha_nacimiento = new Date(fecha_nacimiento);
 
       const { data: dataIdioma, error: errorIdioma } = await client
         .from("idiomas")
@@ -236,12 +251,13 @@ export const UsuariosService = {
         
         res.status(200).json(dataUsuarioUpdate);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log("Error de datos",error);
 
-      res.status(500).json(error);
+      res.status(500).json({ message: error.message || "Error inesperado"});
     }
   },
+
   async generar_clave(req: Request, res: Response) {
     try {
       const usuarioId = parseInt(req.params.id);

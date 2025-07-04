@@ -36,7 +36,7 @@ const UsuarioUpdateSchema = Joi.object({
   encripted_password: Joi.string().max(35).optional(),
   nombres: Joi.string().max(35).optional(),
   apellidos: Joi.string().max(35).optional(),
-  fecha_nacimiento: Joi.string().optional(),
+  fecha_nacimiento: Joi.date().optional(),
   numero_documento: Joi.string().optional(),
   alumno_id: Joi.number().integer().optional(),
   telefono_contacto: Joi.string().max(150).required(),
@@ -268,6 +268,7 @@ export const AlumnosService = {
       res.status(500).json({ message: (error as Error).message });
     }
   },
+
   async actualizarPerfil(req: Request, res: Response) {
     try {
       const usuarioId = parseInt(req.params.id);
@@ -310,7 +311,8 @@ export const AlumnosService = {
       Object.assign(persona, dataPersona);
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
-      persona.fecha_nacimiento = req.body.fecha_nacimiento;
+
+      persona.fecha_nacimiento = new Date(req.body.fecha_nacimiento);
       persona.numero_documento = req.body.numero_documento;
 
       if (validationError) {
