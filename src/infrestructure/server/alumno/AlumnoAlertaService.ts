@@ -33,12 +33,12 @@ const AlumnoAlertaSchema = Joi.object({
 const AlumnoAlertaUpdateSchema = Joi.object({
   alumno_id: Joi.number().integer().optional(),
   alerta_regla_id: Joi.number().integer().optional(),
-  mensaje: Joi.string().max(100).required(),
+  mensaje: Joi.string().max(100).optional(),
   fecha_resolucion: Joi.string().optional(),
   prioridad_id: Joi.number().integer().required(),
   severidad_id: Joi.number().integer().required(),
   accion_tomada: Joi.string().max(200).optional(),
-  leida: Joi.boolean().required(),
+  leida: Joi.boolean().default(true).required(),
   estado: Joi.string().max(20).required(),
   alertas_tipo_alerta_tipo_id: Joi.number().integer().optional(),
   anonimo: Joi.boolean().optional(),
@@ -283,8 +283,9 @@ export const AlumnoAlertaService = {
           accion_tomada: req.body.accion_tomada,
           leida: req.body.leida,
           estado: req.body.estado,
-          alertas_tipo_alerta_tipo_id: req.body.alertas_tipos.alerta_tipo_id,
+          alertas_tipo_alerta_tipo_id: req.body.alertas_tipos?.alerta_tipo_id,
         };
+
         Object.assign(alumnoalerta, info);
         alumnoalerta.actualizado_por = req.actualizado_por;
         let responseSent = false;
@@ -314,15 +315,18 @@ export const AlumnoAlertaService = {
           throw new Error("El colegio no existe");
         }
 
-        const { data: dataAlertaOrigen, error: errorAlertaOrigen } =
-          await client
-            .from("alertas_origenes")
-            .select("*")
-            .eq("alerta_origen_id", alumnoalerta.alerta_origen_id)
-            .single();
-        if (errorAlertaOrigen || !dataAlertaOrigen) {
-          throw new Error("El origen no existe");
+        if (alumnoalerta.alerta_origen_id) {
+          const { data: dataAlertaOrigen, error: errorAlertaOrigen } =
+            await client
+              .from("alertas_origenes")
+              .select("*")
+              .eq("alerta_origen_id", alumnoalerta.alerta_origen_id)
+              .single();
+          if (errorAlertaOrigen || !dataAlertaOrigen) {
+            throw new Error("El origen no existe");
+          }
         }
+
         const { data: dataAlertaPrioridad, error: errorAlertaPrioridad } =
           await client
             .from("alertas_prioridades")
