@@ -48,7 +48,7 @@ const dataPersonaService: DataService<Persona> = new DataService(
   "persona_id"
 );
 
-const dataImageService: DataService<Alumno> = new DataService(
+const dataImageService: DataService<Partial<Alumno>> = new DataService(
   "alumnos",
   "persona_id"
 );
