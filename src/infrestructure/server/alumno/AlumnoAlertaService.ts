@@ -235,7 +235,7 @@ export const AlumnoAlertaService = {
       }
 
       if (!responseSent) {
-        const savedAlumnoAlerta = await dataService.processData({ ...alumnoalerta, anonimo, alumno_id: anonimo ? null : alumno_id });
+        const savedAlumnoAlerta = await dataService.processData({ ...alumnoalerta, anonimo, alumno_id });
         // console.log(destinatarios);
         const email = await emailService.enviarNotificacionAlerta(
           {
