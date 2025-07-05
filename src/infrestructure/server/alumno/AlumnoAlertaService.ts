@@ -283,7 +283,7 @@ export const AlumnoAlertaService = {
           accion_tomada: req.body.accion_tomada,
           leida: req.body.leida,
           estado: req.body.estado,
-          alertas_tipo_alerta_tipo_id: req.body.alertas_tipos?.alerta_tipo_id,
+          // alertas_tipo_alerta_tipo_id: req.body.alertas_tipos?.alerta_tipo_id,
         };
 
         Object.assign(alumnoalerta, info);
