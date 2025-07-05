@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
@@ -40,12 +41,12 @@ const AlumnoAlertaUpdateSchema = Joi.object({
   accion_tomada: Joi.string().max(200).optional(),
   leida: Joi.boolean().default(true).required(),
   estado: Joi.string().max(20).required(),
-  alertas_tipo_alerta_tipo_id: Joi.number().integer().optional(),
+  // alertas_tipo_alerta_tipo_id: Joi.number().integer().optional(),
   anonimo: Joi.boolean().optional(),
 });
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
-const dataService: DataService<AlumnoAlerta> = new DataService(
+const dataService: DataService<Partial<AlumnoAlerta>> = new DataService(
   "alumnos_alertas",
   "alumno_alerta_id"
 );
@@ -336,6 +337,7 @@ export const AlumnoAlertaService = {
         if (errorAlertaPrioridad || !dataAlertaPrioridad) {
           throw new Error("La  prioridad no existe");
         }
+
         const { data: dataAlertaSeveridad, error: errorAlertaSeveridad } =
           await client
             .from("alertas_severidades")
@@ -345,14 +347,18 @@ export const AlumnoAlertaService = {
         if (errorAlertaSeveridad || !dataAlertaSeveridad) {
           throw new Error("La  severidad no existe");
         }
-        const { data: dataAlertaTipo, error: errorAlertaTipo } = await client
-          .from("alertas_tipos")
-          .select("*")
-          .eq("alerta_tipo_id", alumnoalerta.alertas_tipo_alerta_tipo_id)
-          .single();
-        if (errorAlertaTipo || !dataAlertaTipo) {
-          throw new Error("La  severidad no existe");
+
+        if (alumnoalerta.alertas_tipo_alerta_tipo_id) {
+          const { data: dataAlertaTipo, error: errorAlertaTipo } = await client
+            .from("alertas_tipos")
+            .select("*")
+            .eq("alerta_tipo_id", alumnoalerta.alertas_tipo_alerta_tipo_id)
+            .single();
+          if (errorAlertaTipo || !dataAlertaTipo) {
+            throw new Error("Alerta tipo no existe");
+          }
         }
+
         if (validationError) {
           responseSent = true;
           throw new Error(validationError.details[0].message);
@@ -369,8 +375,10 @@ export const AlumnoAlertaService = {
         alumnoalerta.alerta_origen_id = dataAlumnoAlerta.alerta_origen_id;
         alumnoalerta.fecha_generada = dataAlumnoAlerta.fecha_generada;
 
+        const { alertas_tipo_alerta_tipo_id, ...rest } = alumnoalerta;
+
         if (!responseSent) {
-          await dataService.updateById(id, alumnoalerta);
+          await dataService.updateById(id, rest);
           res
             .status(200)
             .json({ message: "AlumnoAlerta actualizado correctamente" });
