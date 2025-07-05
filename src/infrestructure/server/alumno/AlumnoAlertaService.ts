@@ -9,7 +9,7 @@ import { type PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import {
   contarAlertasPendientesPorColegio,
   mapearAlertaDetalle,
-  // mapearAlertaDetalleV2,
+  mapearAlertaDetalleV2,
   mapearAlertas,
 } from "../../../core/services/AlertasServiceCasoUso";
 import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
@@ -38,6 +38,7 @@ const AlumnoAlertaUpdateSchema = Joi.object({
   fecha_resolucion: Joi.string().optional(),
   prioridad_id: Joi.number().integer().required(),
   severidad_id: Joi.number().integer().required(),
+  responsable_actual_id: Joi.number().integer().required(),
   accion_tomada: Joi.string().max(200).optional(),
   leida: Joi.boolean().default(true).required(),
   estado: Joi.string().max(20).required(),
@@ -115,10 +116,10 @@ export const AlumnoAlertaService = {
         where
       );
       // console.log(alumnoalertaAlerta_data);
-      const alumnoalertaAlerta = mapearAlertaDetalle(alumnoalertaAlerta_data);
+      const alumnoalertaAlerta = mapearAlertaDetalleV2(alumnoalertaAlerta_data);
       // console.log(alumnoalertaAlerta);
 
-      res.json(alumnoalertaAlerta);
+      res.json(alumnoalertaAlerta[0]);
     } catch (error) {
       console.error("Error al obtener la alerta del alumnoalerta:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -278,6 +279,7 @@ export const AlumnoAlertaService = {
           mensaje: req.body.mensaje,
           fecha_resolucion: req.body.fecha_resolucion,
           prioridad_id: req.body.prioridad_id,
+          responsable_actual_id: req.body.responsable_actual_id,
           // prioridad_id: req.body.alertas_prioridades.alerta_prioridad_id,
           severidad_id: req.body.severidad_id,
           // severidad_id: req.body.alertas_severidades.alerta_severidad_id,
@@ -306,7 +308,7 @@ export const AlumnoAlertaService = {
           }
         }
 
-        console.log("CUERPO DE JSON", alumnoalerta);
+        // console.log("CUERPO DE JSON", alumnoalerta);
         const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
           .from("alertas_reglas")
           .select("*")
