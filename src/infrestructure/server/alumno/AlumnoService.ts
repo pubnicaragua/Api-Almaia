@@ -274,7 +274,7 @@ export const AlumnosService = {
       const usuarioId = parseInt(req.params.id);
       const usuario = new Usuario();
       const persona = new Persona();
-      const { encripted_password = undefined } = req.body;
+      const { encripted_password = undefined, ...rest } = req.body;
 
       Object.assign(usuario, {
         nombre_social: req.body.nombre_social,
@@ -286,7 +286,7 @@ export const AlumnosService = {
       usuario.actualizado_por = req.actualizado_por;
       let responseSent = false;
 
-      const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
+      const { error: validationError } = UsuarioUpdateSchema.validate(rest);
       const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
         .select("*")
@@ -343,7 +343,7 @@ export const AlumnosService = {
             fecha_actualizacion: req.fecha_creacion
           }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
 
-        if (encripted_password) {
+        if (encripted_password && String(encripted_password).trim() !== "") {
           const { error: updateError } = await client.rpc(
             "cambiar_contrasena",
             {

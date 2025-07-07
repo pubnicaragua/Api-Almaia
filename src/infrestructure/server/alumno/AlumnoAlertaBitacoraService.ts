@@ -122,11 +122,10 @@ guardar: async (req: Request, res: Response) => {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const alumnoAlertaBitacora: AlumnoAlertaBitacora =
-        new AlumnoAlertaBitacora();
+      const alumnoAlertaBitacora: AlumnoAlertaBitacora = new AlumnoAlertaBitacora();
       Object.assign(alumnoAlertaBitacora, req.body);
-      alumnoAlertaBitacora.creado_por = req.creado_por;
       alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
+      alumnoAlertaBitacora.fecha_actualizacion = new Date().toISOString();
       await dataService.updateById(id, alumnoAlertaBitacora);
       res
         .status(200)
