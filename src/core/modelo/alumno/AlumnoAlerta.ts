@@ -12,6 +12,7 @@ export class AlumnoAlerta extends BaseModel {
   severidad_id: number;
   accion_tomada?: string;
   leida: boolean;
+  anonimo: boolean;
   responsable_actual_id?: number;
   estado: string;
   alertas_tipo_alerta_tipo_id: number;
@@ -25,6 +26,7 @@ export class AlumnoAlerta extends BaseModel {
     this.prioridad_id = 0;
     this.severidad_id = 0;
     this.leida = false;
+    this.anonimo = false;
     this.estado = "";
     this.alertas_tipo_alerta_tipo_id = 0;
   }

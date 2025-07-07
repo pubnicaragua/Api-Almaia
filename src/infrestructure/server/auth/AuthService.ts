@@ -37,11 +37,11 @@ export const AuthService = {
           tipo_auditoria_id: 1,
           colegio_id: 0,
           usuario_id: 0,
-          fecha: new Date().toLocaleString(),
+          fecha: new Date().toISOString(),
           descripcion: `Error de inicio de sesión para el usuario ${email}`,
           modulo_afectado: "auth",
           accion_realizada: "login",
-          ip_origen: req.ip,
+          ip_origen: req.connection.remoteAddress || req.ip,
           referencia_id: 0, // Puedes ajustar esto según tu lógica
           model: "Usuarios",
         };
@@ -59,10 +59,8 @@ export const AuthService = {
         .eq("email", email)
         .single();
 
-        console.log("Datos del usuario:", userData);  
-
       if (userError) {
-        console.error("Error al buscar usuario:", userError);
+        console.error("[Auth] Error al buscar usuario:", userError);
       } else if (userData) {
         // Actualizar intentos de inicio de sesión y última fecha
         const { error: updateError } = await client
@@ -81,10 +79,10 @@ export const AuthService = {
           colegio_id: 0,
           usuario_id: userData.usuario_id,
           descripcion: `Inicio de sesión exitoso para el usuario ${email}`,
-          fecha: new Date().toLocaleString(),
+          fecha: new Date().toISOString(),
           modulo_afectado: "auth",
           accion_realizada: "login",
-          ip_origen: req.ip,
+          ip_origen: req.connection.remoteAddress || req.ip,
           referencia_id: 2, // Puedes ajustar esto según tu lógica
           model: "Usuarios",
         };

@@ -13,7 +13,7 @@ const AlumnoTareaSchema = Joi.object({
   fecha_programacion: Joi.string().required(),
   materia_id: Joi.number().integer().required(),
   color: Joi.string().max(50).required(),
-  tipo_tarea: Joi.string().max(6).required(),
+  tipo_tarea: Joi.string().max(8).required(),
   descripcion_tarea: Joi.string().max(100).required(),
   estado_tarea: Joi.string().max(11).required(),
 });

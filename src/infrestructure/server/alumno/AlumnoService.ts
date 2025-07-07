@@ -19,6 +19,10 @@ const dataService: DataService<Alumno> = new DataService(
   "alumnos",
   "alumno_id"
 );
+const dataImagesService: DataService<Partial<Alumno>> = new DataService(
+  "alumnos",
+  "persona_id"
+);
 const AlumnoSchema = Joi.object({
   url_foto_perfil: Joi.string().max(255).optional(),
   telefono_contacto1: Joi.string().max(16).optional(),
@@ -27,16 +31,16 @@ const AlumnoSchema = Joi.object({
   colegio_id: Joi.number().integer().required(),
 });
 const UsuarioUpdateSchema = Joi.object({
-  nombre_social: Joi.string().max(50).required(),
-  email: Joi.string().max(150).required(),
+  nombre_social: Joi.string().max(50).optional(),
+  email: Joi.string().max(150).optional(),
   encripted_password: Joi.string().max(35).optional(),
   nombres: Joi.string().max(35).optional(),
   apellidos: Joi.string().max(35).optional(),
-  fecha_nacimiento: Joi.string().optional(),
+  fecha_nacimiento: Joi.date().optional(),
   numero_documento: Joi.string().optional(),
   alumno_id: Joi.number().integer().optional(),
-  telefono_contacto: Joi.string().max(150).required(),
-  url_foto_perfil: Joi.string().max(255).required(),
+  telefono_contacto: Joi.string().max(150).optional(),
+  url_foto_perfil: Joi.string().max(255).optional(),
   persona_id: Joi.number().integer().optional(),
   idioma_id: Joi.number().integer().optional(),
 });
@@ -264,20 +268,24 @@ export const AlumnosService = {
       res.status(500).json({ message: (error as Error).message });
     }
   },
+
   async actualizarPerfil(req: Request, res: Response) {
     try {
       const usuarioId = parseInt(req.params.id);
       const usuario = new Usuario();
       const persona = new Persona();
+      const { encripted_password = undefined } = req.body;
+
       Object.assign(usuario, {
         nombre_social: req.body.nombre_social,
         email: req.body.email,
         telefono_contacto: req.body.telefono_contacto,
-        url_foto_perfil: req.body.url_foto_perfil,
+        url_foto_perfil: req.body.url_foto_perfil, /// IMAGENES DE PERFIL
         idioma_id: req.body.idioma_id,
       });
       usuario.actualizado_por = req.actualizado_por;
       let responseSent = false;
+
       const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
       const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
@@ -287,6 +295,7 @@ export const AlumnosService = {
       if (errorUsuario || !dataUsuario) {
         throw new Error("El usuario no existe");
       }
+
       usuario.persona_id = dataUsuario.persona_id;
       usuario.rol_id = dataUsuario.rol_id;
       usuario.idioma_id = dataUsuario.idioma_id;
@@ -298,17 +307,22 @@ export const AlumnosService = {
       if (errorPersona || !dataPersona) {
         throw new Error("La persona no existe");
       }
+
       Object.assign(persona, dataPersona);
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
-      persona.fecha_nacimiento = req.body.fecha_nacimiento;
+
+      persona.fecha_nacimiento = new Date(req.body.fecha_nacimiento);
       persona.numero_documento = req.body.numero_documento;
+
       if (validationError) {
         responseSent = true;
         throw new Error(validationError.details[0].message);
       }
+
       if (!responseSent) {
-        await dataUsuarioService.updateById(usuarioId, usuario);
+
+        await dataUsuarioService.updateById(usuarioId, usuario); /// ACTUALIZA EL USUARIO
         const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
           await client
             .from("usuarios")
@@ -318,7 +332,30 @@ export const AlumnosService = {
         if (errorUsuarioUpdate) {
           throw new Error(errorUsuarioUpdate.message);
         }
-        await dataPersonaService.updateById(usuario.persona_id, persona);
+        await dataPersonaService.updateById(usuario.persona_id, persona); // ACTUALIZA LA PERSONA
+
+        // console.log(usuario?.url_foto_perfil);
+
+        if (usuario.url_foto_perfil)
+          await dataImagesService.updateById(usuario.persona_id, {
+            url_foto_perfil: usuario?.url_foto_perfil,
+            actualizado_por: req.actualizado_por,
+            fecha_actualizacion: req.fecha_creacion
+          }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
+
+        if (encripted_password) {
+          const { error: updateError } = await client.rpc(
+            "cambiar_contrasena",
+            {
+              p_email: dataUsuarioUpdate.email,
+              p_nueva_contrasena: encripted_password,
+            }
+          );
+          if (updateError) {
+            throw new Error(updateError.message);
+          }
+        }
+
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {

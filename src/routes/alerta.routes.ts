@@ -9,6 +9,7 @@ import { AlertaTiposService } from '../infrestructure/server/alertas/AlertaTipoS
 import { MotorAlertasService } from '../infrestructure/server/alertas/MotorAlertaService';
 import { MotorInformesService } from '../infrestructure/server/alertas/MotorInformeService';
 import { MotorPreguntasService } from '../infrestructure/server/alertas/MotorPreguntaService';
+import { AlertaEstadosService } from '../infrestructure/server/alertas/AlertaEstadoService';
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ const ruta_alertas_prioridades = '/alertas_prioridades';
 const ruta_alertas_reglas = '/alertas_reglas';
 const ruta_alertas_severidades = '/alertas_severidades';
 const ruta_alertas_tipos = '/alertas_tipos';
+const ruta_alertas_estado = '/alertas_estado';
 const ruta_motores_alertas = '/motores_alertas';
 const ruta_motores_informes = '/motores_informes';
 const ruta_motores_preguntas = '/motores_preguntas';
@@ -830,6 +832,130 @@ router.delete(ruta_alertas_tipos+'/:id', sessionAuth, AlertaTiposService.elimina
 
 /**
  * @swagger
+ * /api/v1/alertas/alertas_estado:
+ *   get:
+ *     summary: Obtener todos los estado de alertas
+ *     description: Retorna una lista de todos los estado de alertas registrados
+ *     tags: [Alertas - Estado]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: alerta_estado_id
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: ID del estado a buscar
+ *       - in: path
+ *         name: nombre_alerta_estado
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: nombre del estado a buscar
+ *     responses:
+ *       200:
+ *         description: Lista de estado obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AlertaEstado'
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(ruta_alertas_estado+'/', sessionAuth, AlertaEstadosService.obtener);
+
+/**
+ * @swagger
+ * /api/v1/alertas/alertas_estado:
+ *   post:
+ *     summary: Crear un nuevo estado de alerta
+ *     description: Registra un nuevo estado de alerta en el sistema
+ *     tags: [Alertas - Estado]
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlertaEstado'
+ *           example:
+ *             nombre_alerta_estado: "Pendiente"
+ *     responses:
+ *       201:
+ *         description: Estado creado exitosamente
+ *       400:
+ *         description: Datos de entrada inválidos
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post(ruta_alertas_estado+'/', sessionAuth, AlertaEstadosService.guardar);
+
+/**
+ * @swagger
+ * /api/v1/alertas/alertas_estado/{id}:
+ *   put:
+ *     summary: Actualizar un estado de alerta
+ *     description: Actualiza los datos de un estado de alerta existente
+ *     tags: [Alertas - Estado]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del estado a actualizar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AlertaEstado'
+ *           example:
+ *             nombre_alerta_estado: "Pendiente"
+ *             activo: true
+ *     responses:
+ *       200:
+ *         description: Estado actualizado exitosamente
+ *       404:
+ *         description: Estado no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put(ruta_alertas_estado+'/:id', sessionAuth, AlertaEstadosService.actualizar);
+
+/**
+ * @swagger
+ * /api/v1/alertas/alertas_estado/{id}:
+ *   delete:
+ *     summary: Eliminar un estado de alerta
+ *     description: Elimina un estado de alerta del sistema
+ *     tags: [Alertas - Estado]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID del estado a eliminar
+ *     responses:
+ *       200:
+ *         description: Estado eliminado exitosamente
+ *       404:
+ *         description: Estado no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.delete(ruta_alertas_estado+'/:id', sessionAuth, AlertaEstadosService.eliminar);
+
+/**
+ * @swagger
  * /api/v1/alertas/motores_alertas:
  *   get:
  *     summary: Obtener todos los motores de alertas
@@ -1233,6 +1359,21 @@ router.delete(ruta_motores_preguntas+'/:id', sessionAuth, MotorPreguntasService.
  *           description: Nombre del tipo
  *       required:
  *         - nombre
+ * 
+ *     AlertaEstado:
+ *       type: object
+ *       properties:
+ *         alerta_estado_id:
+ *           type: integer
+ *           description: ID único del estado
+ *         nombre_alerta_estado:
+ *           type: string
+ *           description: Nombre del estado
+ *         activo:
+ *           type: boolean
+ *           description: Estatus del estado
+ *       required:
+ *         - nombre_alerta_estado
  * 
  *     MotorAlerta:
  *       type: object

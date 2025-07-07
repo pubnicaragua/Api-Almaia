@@ -110,12 +110,12 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
     const { ...rest } = alerta;
     return {
       id: rest.alumno_alerta_id,
-      student: {
+      student: rest?.alumnos ? {
         alumno_id: rest.alumnos.alumno_id,
         name: `${rest.alumnos.personas.nombres} ${rest.alumnos.personas.apellidos}`,
         course: rest.alumnos?.alumnos_cursos[0]?.cursos?.nombre_curso, // Este dato no está en la estructura original, se asume
         image: rest.alumnos.url_foto_perfil,
-      },
+      } : null,
       generationDate: new Date(rest.fecha_generada).toLocaleDateString("es-CL"),
       generationTime: new Date(rest.fecha_generada).toLocaleTimeString(
         "es-CL",
@@ -128,7 +128,7 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
         role: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
         image: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
       },
-      isAnonymous: rest.alerta_origen_id === 1, // Asumiendo que 1 significa anónimo
+      isAnonymous: rest.anonimo, // Asumiendo que 1 significa anónimo
       regla: rest?.alertas_reglas?.nombre,
       origen:rest?.alertas_origenes?.nombre,
       tipo: rest?.alertas_tipos?.nombre,
@@ -152,6 +152,61 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
                 "es-CL"
               ),
               fechaCompromiso: rest.fecha_generada,
+              observaciones: "Acción registrada en el sistema",
+            },
+          ]
+        : [],
+    };
+  });
+}
+export function mapearAlertaDetalleV2(alertas: any[]): any[] {
+  return alertas.map((alerta) => {
+    const { ...rest } = alerta;
+    return {
+      alumno_alerta_id: rest.alumno_alerta_id,
+      alumno: rest?.alumnos ? {
+        alumno_id: rest.alumnos.alumno_id,
+        nombre: `${rest.alumnos.personas.nombres} ${rest.alumnos.personas.apellidos}`,
+        cursos: rest.alumnos?.alumnos_cursos[0]?.cursos?.nombre_curso, // Este dato no está en la estructura original, se asume
+        imagen: rest.alumnos.url_foto_perfil,
+      } : null,
+      fecha_generada: new Date(rest.fecha_generada).toLocaleDateString("es-CL"),
+      // fecha_generada: new Date(rest.fecha_generada).toLocaleTimeString(
+      //   "es-CL",
+      //   { hour: "2-digit", minute: "2-digit" }
+      // ),
+      responsable: {
+        nombre: `${rest?.personas?.nombres || " "} ${
+          rest?.personas?.apellidos || " "
+        }`,
+        rol: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
+        imagen: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
+      },
+      estado: rest.estado,
+      anonimo: rest.anonimo, // Asumiendo que 1 significa anónimo
+      regla: rest?.alertas_reglas?.nombre,
+      origen:rest?.alertas_origenes?.nombre,
+      tipo: rest?.alertas_tipos?.nombre,
+      prioridad:rest?.alertas_prioridades?.nombre,
+      prioridad_id: rest?.prioridad_id,
+      severidad: rest?.alertas_severidades?.nombre,
+      severidad_id: rest?.severidad_id,
+      descripcion: rest?.mensaje,
+      accion_tomada: rest.accion_tomada
+        ? [
+            {
+              fecha: new Date(rest.fecha_actualizacion).toLocaleDateString(
+                "es-CL"
+              ),
+              hora: new Date(rest.fecha_actualizacion).toLocaleTimeString(
+                "es-CL",
+                { hour: "2-digit", minute: "2-digit", hour12: true }
+              ),
+              usuario_responsable: `${rest.personas.nombres} ${rest.personas.apellidos}`,
+              accion_realizada: new Date(rest.accion_tomada).toLocaleDateString(
+                "es-CL"
+              ),
+              fecha_compromiso: rest.fecha_generada,
               observaciones: "Acción registrada en el sistema",
             },
           ]
