@@ -88,8 +88,8 @@ jobs:
       uses: anchore/scan-action@v3
       with:
         image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-        fail-build: false
-        # severity-cutoff: high
+        fail-build: true
+        severity-cutoff: high
 
   deploy:
     needs: docker-build
