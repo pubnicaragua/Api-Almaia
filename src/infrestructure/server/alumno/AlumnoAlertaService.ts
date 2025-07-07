@@ -381,9 +381,11 @@ export const AlumnoAlertaService = {
 
         if (!responseSent) {
           await dataService.updateById(id, rest);
+
+          
           res
             .status(200)
-            .json({ message: "AlumnoAlerta actualizado correctamente" });
+            .json({ message: "Alumno Alerta actualizado correctamente" });
         }
       }
     } catch (error) {

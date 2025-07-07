@@ -31,16 +31,16 @@ const AlumnoSchema = Joi.object({
   colegio_id: Joi.number().integer().required(),
 });
 const UsuarioUpdateSchema = Joi.object({
-  nombre_social: Joi.string().max(50).required(),
-  email: Joi.string().max(150).required(),
+  nombre_social: Joi.string().max(50).optional(),
+  email: Joi.string().max(150).optional(),
   encripted_password: Joi.string().max(35).optional(),
   nombres: Joi.string().max(35).optional(),
   apellidos: Joi.string().max(35).optional(),
   fecha_nacimiento: Joi.date().optional(),
   numero_documento: Joi.string().optional(),
   alumno_id: Joi.number().integer().optional(),
-  telefono_contacto: Joi.string().max(150).required(),
-  url_foto_perfil: Joi.string().max(255).required(),
+  telefono_contacto: Joi.string().max(150).optional(),
+  url_foto_perfil: Joi.string().max(255).optional(),
   persona_id: Joi.number().integer().optional(),
   idioma_id: Joi.number().integer().optional(),
 });
@@ -336,11 +336,12 @@ export const AlumnosService = {
 
         // console.log(usuario?.url_foto_perfil);
 
-        await dataImagesService.updateById(usuario.persona_id, {
-          url_foto_perfil: usuario?.url_foto_perfil,
-          actualizado_por: req.actualizado_por,
-          fecha_actualizacion: req.fecha_creacion
-        }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
+        if (usuario.url_foto_perfil)
+          await dataImagesService.updateById(usuario.persona_id, {
+            url_foto_perfil: usuario?.url_foto_perfil,
+            actualizado_por: req.actualizado_por,
+            fecha_actualizacion: req.fecha_creacion
+          }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
 
         if (encripted_password) {
           const { error: updateError } = await client.rpc(

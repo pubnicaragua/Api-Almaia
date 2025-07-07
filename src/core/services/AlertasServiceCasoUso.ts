@@ -182,6 +182,7 @@ export function mapearAlertaDetalleV2(alertas: any[]): any[] {
         rol: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
         imagen: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
       },
+      estado: rest.estado,
       anonimo: rest.anonimo, // Asumiendo que 1 significa anónimo
       regla: rest?.alertas_reglas?.nombre,
       origen:rest?.alertas_origenes?.nombre,
