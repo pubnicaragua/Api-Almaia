@@ -309,13 +309,15 @@ export const AlumnoAlertaService = {
         }
 
         // console.log("CUERPO DE JSON", alumnoalerta);
-        const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
-          .from("alertas_reglas")
-          .select("*")
-          .eq("alerta_regla_id", alumnoalerta.alerta_regla_id)
-          .single();
-        if (errorAlertaRegla || !dataAlertaRegla) {
-          throw new Error("El colegio no existe");
+        if (alumnoalerta.alerta_regla_id) {
+          const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
+            .from("alertas_reglas")
+            .select("*")
+            .eq("alerta_regla_id", alumnoalerta.alerta_regla_id)
+            .single();
+          if (errorAlertaRegla || !dataAlertaRegla) {
+            throw new Error("El colegio no existe");
+          }
         }
 
         if (alumnoalerta.alerta_origen_id) {
