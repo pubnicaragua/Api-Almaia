@@ -131,7 +131,9 @@ export const AlumnoAlertaService = {
 
       const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
       const { anonimo = false, alumno_id, ...bodyWithoutAnonimo } = req.body; // Establece false por defecto si es undefined
+      
       Object.assign(alumnoalerta, bodyWithoutAnonimo);
+
       alumnoalerta.creado_por = req.creado_por;
       alumnoalerta.actualizado_por = req.actualizado_por;
 
