@@ -147,8 +147,29 @@ guardar: async (req: Request, res: Response) => {
       const id = parseInt(req.params.id);
       const alumnoAlertaBitacora: AlumnoAlertaBitacora = new AlumnoAlertaBitacora();
       Object.assign(alumnoAlertaBitacora, req.body);
+      
       alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
-      alumnoAlertaBitacora.fecha_actualizacion = new Date().toISOString();
+      alumnoAlertaBitacora.fecha_actualizacion = req.fecha_creacion;
+
+      if (isBase64DataUrl(alumnoAlertaBitacora.url_archivo || " ")) {
+        const { mimeType, base64Data } = extractBase64Info(
+          alumnoAlertaBitacora.url_archivo || " "
+        );
+        const buffer = Buffer.from(base64Data, "base64");
+        const extension = getExtensionFromMime(mimeType);
+        const fileName = `${randomUUID()}.${extension}`;
+        const client_file = req.supabase;
+
+        const { error } = await client_file.storage
+          .from("bitacoras")
+          .upload(`documents/${fileName}`, buffer, {
+            contentType: mimeType,
+            upsert: true,
+          });
+        if (error) throw error;
+        alumnoAlertaBitacora.url_archivo = getURL(client_file, 'bitacoras', `documents/${fileName}`);
+      }
+
       await dataService.updateById(id, alumnoAlertaBitacora);
       res
         .status(200)
