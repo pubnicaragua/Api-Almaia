@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { AlertaTipo } from "../../../core/modelo/alerta/AlertaTipo";
 
-const dataService: DataService<AlertaTipo> = new DataService("alertas_origenes");
+const dataService: DataService<AlertaTipo> = new DataService("alertas_tipos");
 export const AlertaTiposService = {
     async obtener(req: Request, res: Response) {
         try {
