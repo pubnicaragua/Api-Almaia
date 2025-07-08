@@ -58,7 +58,7 @@ export const sessionAuth = async (
 
     req.creado_por = data_user?.[0]?.usuario_id;
     req.actualizado_por = data_user?.[0]?.usuario_id;
-    req.fecha_creacion = new Date().toISOString();
+    req.fecha_creacion = new Date().toUTCString();
     req.user = data_user?.[0];
     req.supabase = client;
     req.supabaseAdmin = admin;
