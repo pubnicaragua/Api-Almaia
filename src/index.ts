@@ -1,5 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import './infrestructure/config/cronjobs';
@@ -21,6 +21,7 @@ import PreguntasRouters from './routes/preguntas.routes';
 import DocentesRouters from './routes/docente.routes';
 import ColegioRouters from './routes/colegio.routes';
 import PersonaRouters from './routes/persona.routes';
+
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
@@ -65,7 +66,7 @@ app.use(express.json({ limit: '30mb' }));
 app.use(helmet());
 app.use(express.urlencoded({ extended: true, limit: '30mb' }));
 // Configuración de CORS
-const corsOptions = {
+const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
   console.log(`Origen: ${origin}`);
    
@@ -83,7 +84,8 @@ const corsOptions = {
       callback(new Error('Origen no permitido por CORS'));
     }
   },
-  optionsSuccessStatus: 200 // Para navegadores legacy
+  optionsSuccessStatus: 200, // Para navegadores legacy
+  // allowedHeaders: ['*']
 };
 
 // Aplicar CORS con las opciones configuradas

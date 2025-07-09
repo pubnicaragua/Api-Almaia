@@ -131,7 +131,6 @@ guardar: async (req: Request, res: Response) => {
         });
 
       if (error) throw error;
-      console.log('aca');
       alumnoAlertaBitacora.url_archivo = getURL(client_file, 'bitacoras', `documents/${fileName}`);
     }
 

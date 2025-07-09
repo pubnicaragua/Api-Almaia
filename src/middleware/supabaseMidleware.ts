@@ -64,7 +64,7 @@ export const sessionAuth = async (
     req.supabaseAdmin = admin;
 
     try {
-      console.log('Header Date-Zone:', req.headers['Date-Zone']);
+      console.log('Header Date-Zone:', req.headers['date-zone']);
     } catch (error: any) {
       console.log(error);
     }
