@@ -65,7 +65,6 @@ export const sessionAuth = async (
 
     try {
       console.log('Header Date-Zone:', req.headers['Date-Zone']);
-      console.log('Header Date-Zone:', req.headers);
     } catch (error: any) {
       console.log(error);
     }

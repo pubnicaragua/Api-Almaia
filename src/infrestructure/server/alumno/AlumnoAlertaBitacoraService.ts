@@ -23,7 +23,7 @@ const AlumnoAlertaBitacoraSchema = Joi.object({
   alerta_prioridad_id:Joi.number().optional(),
   alerta_severidad_id:Joi.number().optional(),
   responsable_id:Joi.number().optional(),
-  url_archivo: Joi.string().max(255).optional(),
+  url_archivo: Joi.string().optional(),
 });
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -114,6 +114,7 @@ guardar: async (req: Request, res: Response) => {
     alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
 
     if (isBase64DataUrl(alumnoAlertaBitacora.url_archivo || " ")) {
+      
       const { mimeType, base64Data } = extractBase64Info(
         alumnoAlertaBitacora.url_archivo || " "
       );
@@ -128,7 +129,9 @@ guardar: async (req: Request, res: Response) => {
           contentType: mimeType,
           upsert: true,
         });
+
       if (error) throw error;
+      console.log('aca');
       alumnoAlertaBitacora.url_archivo = getURL(client_file, 'bitacoras', `documents/${fileName}`);
     }
 
@@ -147,7 +150,7 @@ guardar: async (req: Request, res: Response) => {
       const id = parseInt(req.params.id);
       const alumnoAlertaBitacora: AlumnoAlertaBitacora = new AlumnoAlertaBitacora();
       Object.assign(alumnoAlertaBitacora, req.body);
-      
+
       alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
       alumnoAlertaBitacora.fecha_actualizacion = req.fecha_creacion;
 
