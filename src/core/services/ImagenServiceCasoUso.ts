@@ -19,6 +19,10 @@ export function getExtensionFromMime(mimeType: string): string {
     'image/png': 'png',
     'application/pdf': 'pdf',
     'text/plain': 'txt',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+    'application/msword': 'doc',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',  
+    'application/vnd.ms-excel': 'xls',  
   };
   return map[mimeType] || 'bin';
 }
