@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { Pregunta } from "../../../core/modelo/preguntasRespuestas/Pregunta";
 import { DataService } from "../DataService";
@@ -49,7 +50,7 @@ export const PreguntaService = {
       );
       const pregunta = pregunta_data[0];
       res.json(pregunta);
-      res.json(pregunta);
+      // res.json(pregunta);
     } catch (error) {
       console.error("Error al obtener la pregunta:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -143,7 +144,16 @@ export const PreguntaService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
-  motor_pregunta() {
-    console.log("Ejecutando motor de preguntas...");
+  async motor_pregunta() {
+    try {
+      console.log("Ejecutando motor de preguntas...");
+      const { error } = await client.rpc('ejecutar_generacion_preguntas_por_colegios');
+      if (error) {
+        throw error;
+      }
+      console.log("Finalizando motor de preguntas...");
+    } catch (error: any) {
+      console.error(error.message)
+    }
   },
 };
