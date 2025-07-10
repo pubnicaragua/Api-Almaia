@@ -85,7 +85,7 @@ const corsOptions: CorsOptions = {
     }
   },
   optionsSuccessStatus: 200, // Para navegadores legacy
-  allowedHeaders: ['*']
+  allowedHeaders: ['date-zone', 'Content-Type', 'Authorization', 'x-almaia-access'],
 };
 
 // Aplicar CORS con las opciones configuradas
