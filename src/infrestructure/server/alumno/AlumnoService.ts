@@ -11,6 +11,8 @@ import { buscarAlumnos } from "../../../core/services/AlumnoServicioCasoUso";
 import { mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
 import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
 import { mapearDatosAlumno } from "../../../core/services/PerfilServiceCasoUso";
+import { extractBase64Info, getExtensionFromMime, getURL, isBase64DataUrl } from "../../../core/services/ImagenServiceCasoUso";
+import { randomUUID } from "crypto";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -40,7 +42,7 @@ const UsuarioUpdateSchema = Joi.object({
   numero_documento: Joi.string().optional(),
   alumno_id: Joi.number().integer().optional(),
   telefono_contacto: Joi.string().max(150).optional(),
-  url_foto_perfil: Joi.string().max(255).optional(),
+  url_foto_perfil: Joi.string().optional(),
   persona_id: Joi.number().integer().optional(),
   idioma_id: Joi.number().integer().optional(),
 });
@@ -322,7 +324,33 @@ export const AlumnosService = {
 
       if (!responseSent) {
 
+        if (usuario.url_foto_perfil)
+          if (isBase64DataUrl(usuario.url_foto_perfil || " ")) {
+            const { mimeType, base64Data } = extractBase64Info(
+              usuario.url_foto_perfil || " "
+            );
+            const buffer = Buffer.from(base64Data, "base64");
+            const extension = getExtensionFromMime(mimeType);
+            const fileName = `${randomUUID()}.${extension}`;
+            const client_file = req.supabase;
+
+            const { error } = await client_file.storage
+              .from("user-profile")
+              .upload(`private/${fileName}`, buffer, {
+                contentType: mimeType,
+                upsert: true,
+              });
+            if (error) throw error;
+            usuario.url_foto_perfil = getURL(client_file, 'user-profile', `private/${fileName}`);
+          }
+
         await dataUsuarioService.updateById(usuarioId, usuario); /// ACTUALIZA EL USUARIO
+        await dataImagesService.updateById(usuario.persona_id, {
+          url_foto_perfil: usuario?.url_foto_perfil,
+          actualizado_por: req.actualizado_por,
+          fecha_actualizacion: req.fecha_creacion
+        }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
+
         const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
           await client
             .from("usuarios")
@@ -334,14 +362,6 @@ export const AlumnosService = {
         }
         await dataPersonaService.updateById(usuario.persona_id, persona); // ACTUALIZA LA PERSONA
 
-        // console.log(usuario?.url_foto_perfil);
-
-        if (usuario.url_foto_perfil)
-          await dataImagesService.updateById(usuario.persona_id, {
-            url_foto_perfil: usuario?.url_foto_perfil,
-            actualizado_por: req.actualizado_por,
-            fecha_actualizacion: req.fecha_creacion
-          }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
 
         if (encripted_password && String(encripted_password).trim() !== "") {
           const { error: updateError } = await client.rpc(
