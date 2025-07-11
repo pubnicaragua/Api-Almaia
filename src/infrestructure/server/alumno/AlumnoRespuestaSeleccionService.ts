@@ -5,6 +5,7 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 import { AlumnoRespuestaSeleccion } from "../../../core/modelo/preguntasRespuestas/AlumnoRespuestaSeleccion";
+import moment from "moment";
 
 const dataService: DataService<AlumnoRespuestaSeleccion> = new DataService(
   "alumnos_respuestas_seleccion",
@@ -21,40 +22,73 @@ export const AlumnoRespuestaSeleccionService = {
   async obtener(req: Request, res: Response) {
     try {
       const { colegio_id, ...where } = req.query;
-      const finalWhere = {
-  ...where,
-  activo: true,
-  respondio: false,
-};
+
+      // const finalWhere = {
+      //   ...where,
+      //   activo: true,
+      //   respondio: false,
+      //   'fecha_creacion::date': moment().format('YYYY-MM-DD'),
+      // };
+
       let respuestaEnviada = false;
-      if (colegio_id !== undefined) {
-        const alumnos_cursos = await obtenerRelacionados({
-          tableFilter: "alumnos",
-          filterField: "colegio_id",
-          filterValue: colegio_id,
-          idField: "alumno_id",
-          tableIn: "alumnos_respuestas_seleccion",
-          inField: "alumno_id",
-          selectFields: `*,
-                          alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)
-                          preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono)),
-                          respuestas_posibles(respuesta_posible_id,nombre)`,
-        });
-        respuestaEnviada = true;
-        res.json(alumnos_cursos);
-      }
-      if (!respuestaEnviada) {
-        const alumnoRespuestaSeleccion = await dataService.getAll(
+
+      // if (colegio_id !== undefined) {
+      //   const alumnos_cursos = await obtenerRelacionados({
+      //     tableFilter: "alumnos",
+      //     filterField: "colegio_id",
+      //     filterValue: colegio_id,
+      //     idField: "alumno_id",
+      //     tableIn: "alumnos_respuestas_seleccion",
+      //     inField: "alumno_id",
+      //     selectFields: `*,
+      //                     alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)
+      //                     preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono)),
+      //                     respuestas_posibles(respuesta_posible_id,nombre)`,
+      //   });
+      //   respuestaEnviada = true;
+      //   res.json(alumnos_cursos);
+      // }
+      // if (!respuestaEnviada) {
+      //   const alumnoRespuestaSeleccion = await dataService.getAll(
+      //     [
+      //       "*",
+      //       "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
+      //       "preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono))",
+      //       "respuestas_posibles(respuesta_posible_id,nombre)",
+      //     ],
+      //     finalWhere
+      //   );
+
+      //   res.json(alumnoRespuestaSeleccion);
+      // }
+
+      let query = client
+        .from('alumnos_respuestas_seleccion')
+        .select(
           [
             "*",
             "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
             "preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono))",
             "respuestas_posibles(respuesta_posible_id,nombre)",
-          ],
-          finalWhere
-        );
-        res.json(alumnoRespuestaSeleccion);
+          ].join(',')
+        )
+        .eq('activo', true)
+        .eq('respondio', false)
+        .gte('fecha_creacion::date', moment().format('YYYY-MM-DD'))
+        .order('fecha_creacion', { ascending: false });
+
+      Object.keys(where).forEach((key) => {
+        query = query.eq(key, where[key]);
+      });  
+
+      const { data, error } = await query.returns<any[]>();
+
+      if (error) {
+        console.error("Error al obtener las respuestas de los alumnos:", error);
+        throw error;
       }
+
+      res.status(200).json(data);
     } catch (error) {
       console.error("Error al obtener el curso del alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
