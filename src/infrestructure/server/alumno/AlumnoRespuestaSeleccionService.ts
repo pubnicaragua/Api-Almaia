@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import Joi from "joi";
@@ -30,7 +32,7 @@ export const AlumnoRespuestaSeleccionService = {
       //   'fecha_creacion::date': moment().format('YYYY-MM-DD'),
       // };
 
-      let respuestaEnviada = false;
+      // let respuestaEnviada = false;
 
       // if (colegio_id !== undefined) {
       //   const alumnos_cursos = await obtenerRelacionados({
