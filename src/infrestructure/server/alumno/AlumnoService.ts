@@ -9,7 +9,7 @@ import { Usuario } from "../../../core/modelo/auth/Usuario";
 import { Persona } from "../../../core/modelo/Persona";
 import { buscarAlumnos } from "../../../core/services/AlumnoServicioCasoUso";
 import { mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
-import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
+import { mapEmotions, mapEmotionsPromedio } from "../../../core/services/DashboardServiceCasoUso";
 import { mapearDatosAlumno } from "../../../core/services/PerfilServiceCasoUso";
 import { extractBase64Info, getExtensionFromMime, getURL, isBase64DataUrl } from "../../../core/services/ImagenServiceCasoUso";
 import { randomUUID } from "crypto";
@@ -173,35 +173,50 @@ export const AlumnosService = {
         data = mapEmotions(data_emociones);
       }
     }
-    // Emociones simuladas
     const emociones = data;
-    const datosComparativa: ComparativaDato[] = [
+    // Emociones para el grafico en promedio
+    let data_emociones_prom_result: ComparativaDato[] = [];
+    const { data: data_emociones_promedio, error } = await client.rpc(
+      "obtener_cantidades_pregunta_3_por_alumno_promedio",
       {
-        emocion: "Feliz",
-        alumno: 2.0, // Punto más alejado (y=110)
-        promedio: 1.5, // Punto más cercano (y=128)
-      },
-      {
-        emocion: "Triste",
-        alumno: 1.9, // x=290
-        promedio: 1.6, // x=272
-      },
-      {
-        emocion: "Estresada",
-        alumno: 1.5, // y=277
-        promedio: 1.2, // y=257
-      },
-      {
-        emocion: "Enojada",
-        alumno: 1.5,
-        promedio: 1.2,
-      },
-      {
-        emocion: "Ansiosa",
-        alumno: 1.9,
-        promedio: 1.6,
-      },
-    ];
+        p_colegio_id: colegio_id || null,
+        p_alumno_id: alumnoId,
+      }
+    );
+    if (error) {
+      console.error("Error al obtener cantidades en promedio:", error);
+    } else {
+      data_emociones_prom_result = mapEmotionsPromedio(data_emociones_promedio);
+    }
+    // Emociones simuladas
+    const datosComparativa: ComparativaDato[] = data_emociones_prom_result ? data_emociones_prom_result : [];
+    // const datosComparativa: ComparativaDato[] = [
+    //   {
+    //     emocion: "Feliz",
+    //     alumno: 2.0, // Punto más alejado (y=110)
+    //     promedio: 1.5, // Punto más cercano (y=128)
+    //   },
+    //   {
+    //     emocion: "Triste",
+    //     alumno: 1.9, // x=290
+    //     promedio: 1.6, // x=272
+    //   },
+    //   {
+    //     emocion: "Estresada",
+    //     alumno: 1.5, // y=277
+    //     promedio: 1.2, // y=257
+    //   },
+    //   {
+    //     emocion: "Enojada",
+    //     alumno: 1.5,
+    //     promedio: 1.2,
+    //   },
+    //   {
+    //     emocion: "Ansiosa",
+    //     alumno: 1.9,
+    //     promedio: 1.6,
+    //   },
+    // ];
     res.json({
       alumno,
       ficha,
