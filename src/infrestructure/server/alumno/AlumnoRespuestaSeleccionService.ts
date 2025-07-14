@@ -70,14 +70,14 @@ export const AlumnoRespuestaSeleccionService = {
           [
             "*",
             "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email)",
-            "preguntas(pregunta_id,texto_pregunta,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono))",
+            "preguntas(pregunta_id,texto_pregunta,horario,grupo_preguntas,tipo_pregunta_id,nivel_educativo_id,template_code,respuestas_posibles(respuesta_posible_id,nombre,icono))",
             "respuestas_posibles(respuesta_posible_id,nombre)",
           ].join(',')
         )
         .eq('activo', true)
         .eq('respondio', false)
         .gte('fecha_creacion::date', moment().format('YYYY-MM-DD'))
-        .order('fecha_creacion', { ascending: false });
+        .order('fecha_creacion', { ascending: true });
 
       Object.keys(where).forEach((key) => {
         query = query.eq(key, where[key]);
