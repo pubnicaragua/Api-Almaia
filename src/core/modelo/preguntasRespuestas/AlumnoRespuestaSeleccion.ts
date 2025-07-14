@@ -1,7 +1,7 @@
 import { BaseModel } from "../BaseModel";
 
 export class AlumnoRespuestaSeleccion extends BaseModel {
-    alumno_respuesta_id?: number;
+    alumno_respuesta_seleccion_id?: number;
     alumno_id: number;
     pregunta_id: number;
     respuesta_posible_id: number;
