@@ -328,6 +328,7 @@ export const AlumnoRespuestaSeleccionService = {
         respuesta_posible_id,
         tipo_pregunta_id,
         respuestas_posibles,
+        respuesta_posible_txt,
         id_registro
       } = req.body;
 
@@ -335,6 +336,7 @@ export const AlumnoRespuestaSeleccionService = {
         respuesta_posible_id,
         tipo_pregunta_id,
         respuestas_posibles,
+        respuesta_posible_txt,
         id_registro
       }, { abortEarly: false });
 
@@ -460,9 +462,27 @@ export const AlumnoRespuestaSeleccionService = {
             res.status(400).json({ message: "Tipo de pregunta no soportado para esta operación." });
         }
       } else {
-        // throw new Error("Tipo de pregunta no soportado para esta operación.");
-        res.status(400).json({ message: "Tipo de pregunta no soportado para esta operación." });
-        return;
+        if (!id_registro) {
+          res.status(400).json({ message: "Falta el ID del registro." });
+          return;
+        }
+
+        const { error } = await client
+          .from("alumnos_respuestas")
+          .update({
+            respuesta: respuesta_posible_txt,
+            respondio: true,
+            actualizado_por: req.actualizado_por,
+            fecha_actualizacion: new Date(),
+            activo: true
+          })
+          .match({ alumno_respuesta: id_registro });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        res.status(201).json({ message: "Respuesta actualizada correctamente." });
       }
     } catch (error) {
       console.log('======================================');
