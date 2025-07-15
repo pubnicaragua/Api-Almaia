@@ -385,7 +385,7 @@ export const AlumnoRespuestaSeleccionService = {
                   respuesta_posible_id: respuesta_posible_id,
                   respondio: true,
                   actualizado_por: req.actualizado_por,
-                  fecha_actualizacion: new Date(),
+                  fecha_actualizacion: req.fecha_creacion || new Date(),
                   activo: true
                 })
                 .match({ alumno_respuesta_seleccion_id: id_registro });
@@ -424,7 +424,7 @@ export const AlumnoRespuestaSeleccionService = {
                         respuesta_posible_id: respuesta.respuesta_posible_id,
                         respondio: true,
                         actualizado_por: req.actualizado_por,
-                        fecha_actualizacion: new Date(),
+                        fecha_actualizacion: req.fecha_creacion || new Date(),
                         activo: true
                       })
                       .match({ alumno_respuesta_seleccion_id: id_registro });
@@ -444,7 +444,7 @@ export const AlumnoRespuestaSeleccionService = {
                         creado_por: req.creado_por,
                         actualizado_por: req.actualizado_por,
                         fecha_creacion: rowOriginal.fecha_creacion,
-                        fecha_actualizacion: new Date(),
+                        fecha_actualizacion: req.fecha_creacion || new Date(),
                         activo: true
                       });
 
@@ -473,7 +473,7 @@ export const AlumnoRespuestaSeleccionService = {
             respuesta: respuesta_posible_txt,
             respondio: true,
             actualizado_por: req.actualizado_por,
-            fecha_actualizacion: new Date(),
+            fecha_actualizacion: req.fecha_creacion || new Date(),
             activo: true
           })
           .match({ alumno_respuesta: id_registro });
