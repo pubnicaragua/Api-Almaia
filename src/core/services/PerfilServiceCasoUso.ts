@@ -33,7 +33,7 @@ export function mapearDatos(data: PerfilEntrada): Perfil {
       nombre: data.roles.nombre,
       descripcion: data.roles.descripcion
     },
-    funcionalidades:mapearFuncionalidades(data.roles.funcionalidades_roles)
+    funcionalidades: mapearFuncionalidades(data.roles.funcionalidades_roles)
   };
 }
 export function mapearDatosAlumno(data: PerfilEntrada): Perfil { 
@@ -74,6 +74,7 @@ export function mapearDatosAlumno(data: PerfilEntrada): Perfil {
 function mapearFuncionalidades(funcionalidades_roles: FuncionalidadRol[]) {
   return funcionalidades_roles.map(fr => ({
     id: fr.funcionalidad_id,
-    nombre: fr.funcionalidades?.descripcion
+    nombre: fr.funcionalidades?.nombre,
+    descripcion: fr.funcionalidades?.descripcion,
   }));
 }

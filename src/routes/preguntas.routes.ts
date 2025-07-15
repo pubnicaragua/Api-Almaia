@@ -18,6 +18,7 @@ const ruta_respuestas_posibles_preguntas = '/respuestas_posibles_preguntas';
 const ruta_respuestas_seleccion = '/respuestas_selecccion';
 const ruta_tipos_oficios = '/tipos_oficios';
 const ruta_tipos_preguntas = '/tipos_preguntas';
+// const ruta_respuestas = '/respuestas';
 
 /**
  * @swagger
@@ -422,6 +423,7 @@ router.post( ruta_alumno_respuesta, sessionAuth, AlumnoRespuestaService.guardar)
  *         description: Error interno del servidor  
  */  
 router.post( '/responder', sessionAuth, AlumnoRespuestaSeleccionService.responder);
+
 /**  
  * @swagger  
  * /preguntas/responder_multiple:  
@@ -493,6 +495,91 @@ router.post( '/responder', sessionAuth, AlumnoRespuestaSeleccionService.responde
  *                   example: "Error interno del servidor"  
  */  
 router.post( '/responder_multiple', sessionAuth, AlumnoRespuestaSeleccionService.responderMultiple);
+
+/**  
+ * @swagger  
+ * /api/v1/preguntas/responder_preguntas/omniresponder/:  
+ *   put:  
+ *     summary: Registrar las distintas respuestas, ya sean de seleccion o respuesta abierta del alumno  
+ *     description: Permite que un alumno registre sus respuestas para una pregunta (preguntas de selección unica, múltiple o respuesta abierta)  
+ *     tags:  
+ *       - Respuestas de Alumnos  
+ *     security:  
+ *       - bearerAuth: []  
+ *     requestBody:  
+ *       required: true  
+ *       content:  
+ *         application/json:  
+ *           schema:  
+ *             type: object  
+ *             required:  
+ *               - id_registro  
+ *               - tipo_pregunta_id
+ *               - respuesta_posible_id  
+ *               - respuestas_posibles  
+ *             properties:  
+ *               id_registro:  
+ *                 type: integer  
+ *                 description: ID del registro de la pregunta a responder
+ *                 example: 123  
+ *               respuesta_posible_id:  
+ *                 type: integer  
+ *                 description: ID del registro de la respuesta posible a responder
+ *                 example: 123  
+ *               tipo_pregunta_id:  
+ *                 type: integer  
+ *                 description: ID del tipo de pregunta
+ *                 example: 456  
+ *               respuestas_posibles:  
+ *                 type: array  
+ *                 description: Array de IDs de respuestas seleccionadas  
+ *                 items:  
+ *                   type: object  
+ *                   properties:
+ *                    respuesta_posible_id:
+ *                    type: integer 
+ *                    description: ID de la respuesta posible seleccionada 
+ *                 example: [
+ *                    { "respuesta_posible_id": 789 },
+ *                    { "respuesta_posible_id": 790 },  
+ *                    { "respuesta_posible_id": 791 }
+ *                  ] 
+ *                 minItems: 1  
+ *     responses:  
+ *       200:  
+ *         description: Respuestas procesadas correctamente  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Respuestas procesadas correctamente."  
+ *       400:  
+ *         description: Datos inválidos o incompletos  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Datos inválidos o incompletos."  
+ *       401:  
+ *         description: No autorizado - Token inválido  
+ *       500:  
+ *         description: Error interno del servidor  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Error interno del servidor"  
+ */  
+router.put('/responder_preguntas/omniresponder/', sessionAuth, AlumnoRespuestaSeleccionService.omniresponder);
 
 
 router.post('/cambiar-estado', AlumnoRespuestaSeleccionService.cambiarEstadoRespuesta);  

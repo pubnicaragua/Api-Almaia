@@ -5,6 +5,8 @@ import { AlumnoAlertaBitacora } from "../../../core/modelo/alumno/AlumnoAlertaBi
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
+import { extractBase64Info, getExtensionFromMime, getURL, isBase64DataUrl } from "../../../core/services/ImagenServiceCasoUso";
+import { randomUUID } from "crypto";
 
 const dataService: DataService<AlumnoAlertaBitacora> = new DataService(
   "alumnos_alertas_bitacoras",
@@ -21,7 +23,7 @@ const AlumnoAlertaBitacoraSchema = Joi.object({
   alerta_prioridad_id:Joi.number().optional(),
   alerta_severidad_id:Joi.number().optional(),
   responsable_id:Joi.number().optional(),
-  url_archivo: Joi.string().max(255).optional(),
+  url_archivo: Joi.string().optional(),
 });
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -110,6 +112,29 @@ guardar: async (req: Request, res: Response) => {
     }
     alumnoAlertaBitacora.creado_por = req.creado_por;
     alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
+
+    if (isBase64DataUrl(alumnoAlertaBitacora.url_archivo || " ")) {
+      
+      const { mimeType, base64Data } = extractBase64Info(
+        alumnoAlertaBitacora.url_archivo || " "
+      );
+      const buffer = Buffer.from(base64Data, "base64");
+      const extension = getExtensionFromMime(mimeType);
+      const fileName = `${randomUUID()}.${extension}`;
+      const client_file = req.supabase;
+
+      const { error } = await client_file.storage
+        .from("bitacoras")
+        .upload(`documents/${fileName}`, buffer, {
+          contentType: mimeType,
+          upsert: true,
+        });
+
+      if (error) throw error;
+      alumnoAlertaBitacora.url_archivo = getURL(client_file, 'bitacoras', `documents/${fileName}`);
+    }
+
+
     // Guarda la bitácora
     const saved = await dataService.processData(alumnoAlertaBitacora);
     res.status(201).json(saved);
@@ -122,11 +147,31 @@ guardar: async (req: Request, res: Response) => {
   async actualizar(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      const alumnoAlertaBitacora: AlumnoAlertaBitacora =
-        new AlumnoAlertaBitacora();
+      const alumnoAlertaBitacora: AlumnoAlertaBitacora = new AlumnoAlertaBitacora();
       Object.assign(alumnoAlertaBitacora, req.body);
-      alumnoAlertaBitacora.creado_por = req.creado_por;
+
       alumnoAlertaBitacora.actualizado_por = req.actualizado_por;
+      alumnoAlertaBitacora.fecha_actualizacion = req.fecha_creacion;
+
+      if (isBase64DataUrl(alumnoAlertaBitacora.url_archivo || " ")) {
+        const { mimeType, base64Data } = extractBase64Info(
+          alumnoAlertaBitacora.url_archivo || " "
+        );
+        const buffer = Buffer.from(base64Data, "base64");
+        const extension = getExtensionFromMime(mimeType);
+        const fileName = `${randomUUID()}.${extension}`;
+        const client_file = req.supabase;
+
+        const { error } = await client_file.storage
+          .from("bitacoras")
+          .upload(`documents/${fileName}`, buffer, {
+            contentType: mimeType,
+            upsert: true,
+          });
+        if (error) throw error;
+        alumnoAlertaBitacora.url_archivo = getURL(client_file, 'bitacoras', `documents/${fileName}`);
+      }
+
       await dataService.updateById(id, alumnoAlertaBitacora);
       res
         .status(200)

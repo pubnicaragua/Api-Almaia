@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { AlertaPrioridad } from "../../../core/modelo/alerta/AlertaPrioridad";
@@ -8,7 +9,8 @@ const dataService: DataService<AlertaPrioridad> = new DataService(
 export const AlertaPrioridadsService = {
   async obtener(req: Request, res: Response) {
     try {
-      const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+      const { colegio_id, ...where } = req.query; // Convertir los parámetros de consulta en filtros
+
       const alertaPrioridad = await dataService.getAll(["*"], where);
 
       res.json(alertaPrioridad);

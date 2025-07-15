@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ComparativaDato } from "../modelo/alumno/ComparativaDato";
 import { AlertData } from "../modelo/dashboard/AlertData";
 import { Emotion } from "../modelo/dashboard/Emotion";
 import { emotionColors } from "../modelo/dashboard/EmotionColor";
@@ -13,6 +14,24 @@ export function mapEmotions(
     value: r.cantidad,
     color: emotionColors[r.nombre] || "#000000", // color por defecto si no está
   }));
+}
+
+export function mapEmotionsPromedio(
+  respuestas: {
+    nombre: string;
+    cantidad_alumno: number,
+    proporcion_alumno: number,
+    porcentaje_alumno: number,
+    cantidad_global: number,
+    proporcion_global: number,
+    porcentaje_global: number
+  }[]
+): ComparativaDato[] {
+  return respuestas.map((r) => ({
+    name: r.nombre,
+    alumno: r.proporcion_alumno,
+    promedio: r.porcentaje_global, // color por defecto si no está
+  } as any));
 }
 export function mapPatologia(
   respuestas: { diagnostico: string; cantidad: number }[]

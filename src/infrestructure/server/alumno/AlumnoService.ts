@@ -9,8 +9,10 @@ import { Usuario } from "../../../core/modelo/auth/Usuario";
 import { Persona } from "../../../core/modelo/Persona";
 import { buscarAlumnos } from "../../../core/services/AlumnoServicioCasoUso";
 import { mapearAlertas } from "../../../core/services/AlertasServiceCasoUso";
-import { mapEmotions } from "../../../core/services/DashboardServiceCasoUso";
+import { mapEmotions, mapEmotionsPromedio } from "../../../core/services/DashboardServiceCasoUso";
 import { mapearDatosAlumno } from "../../../core/services/PerfilServiceCasoUso";
+import { extractBase64Info, getExtensionFromMime, getURL, isBase64DataUrl } from "../../../core/services/ImagenServiceCasoUso";
+import { randomUUID } from "crypto";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -40,7 +42,7 @@ const UsuarioUpdateSchema = Joi.object({
   numero_documento: Joi.string().optional(),
   alumno_id: Joi.number().integer().optional(),
   telefono_contacto: Joi.string().max(150).optional(),
-  url_foto_perfil: Joi.string().max(255).optional(),
+  url_foto_perfil: Joi.string().optional(),
   persona_id: Joi.number().integer().optional(),
   idioma_id: Joi.number().integer().optional(),
 });
@@ -171,35 +173,50 @@ export const AlumnosService = {
         data = mapEmotions(data_emociones);
       }
     }
-    // Emociones simuladas
     const emociones = data;
-    const datosComparativa: ComparativaDato[] = [
+    // Emociones para el grafico en promedio
+    let data_emociones_prom_result: ComparativaDato[] = [];
+    const { data: data_emociones_promedio, error } = await client.rpc(
+      "obtener_cantidades_pregunta_3_por_alumno_promedio",
       {
-        emocion: "Feliz",
-        alumno: 2.0, // Punto más alejado (y=110)
-        promedio: 1.5, // Punto más cercano (y=128)
-      },
-      {
-        emocion: "Triste",
-        alumno: 1.9, // x=290
-        promedio: 1.6, // x=272
-      },
-      {
-        emocion: "Estresada",
-        alumno: 1.5, // y=277
-        promedio: 1.2, // y=257
-      },
-      {
-        emocion: "Enojada",
-        alumno: 1.5,
-        promedio: 1.2,
-      },
-      {
-        emocion: "Ansiosa",
-        alumno: 1.9,
-        promedio: 1.6,
-      },
-    ];
+        p_colegio_id: colegio_id || null,
+        p_alumno_id: alumnoId,
+      }
+    );
+    if (error) {
+      console.error("Error al obtener cantidades en promedio:", error);
+    } else {
+      data_emociones_prom_result = mapEmotionsPromedio(data_emociones_promedio);
+    }
+    // Emociones simuladas
+    const datosComparativa: ComparativaDato[] = data_emociones_prom_result ? data_emociones_prom_result : [];
+    // const datosComparativa: ComparativaDato[] = [
+    //   {
+    //     emocion: "Feliz",
+    //     alumno: 2.0, // Punto más alejado (y=110)
+    //     promedio: 1.5, // Punto más cercano (y=128)
+    //   },
+    //   {
+    //     emocion: "Triste",
+    //     alumno: 1.9, // x=290
+    //     promedio: 1.6, // x=272
+    //   },
+    //   {
+    //     emocion: "Estresada",
+    //     alumno: 1.5, // y=277
+    //     promedio: 1.2, // y=257
+    //   },
+    //   {
+    //     emocion: "Enojada",
+    //     alumno: 1.5,
+    //     promedio: 1.2,
+    //   },
+    //   {
+    //     emocion: "Ansiosa",
+    //     alumno: 1.9,
+    //     promedio: 1.6,
+    //   },
+    // ];
     res.json({
       alumno,
       ficha,
@@ -274,7 +291,7 @@ export const AlumnosService = {
       const usuarioId = parseInt(req.params.id);
       const usuario = new Usuario();
       const persona = new Persona();
-      const { encripted_password = undefined } = req.body;
+      const { encripted_password = undefined, ...rest } = req.body;
 
       Object.assign(usuario, {
         nombre_social: req.body.nombre_social,
@@ -286,7 +303,7 @@ export const AlumnosService = {
       usuario.actualizado_por = req.actualizado_por;
       let responseSent = false;
 
-      const { error: validationError } = UsuarioUpdateSchema.validate(req.body);
+      const { error: validationError } = UsuarioUpdateSchema.validate(rest);
       const { data: dataUsuario, error: errorUsuario } = await client
         .from("usuarios")
         .select("*")
@@ -322,7 +339,33 @@ export const AlumnosService = {
 
       if (!responseSent) {
 
+        if (usuario.url_foto_perfil)
+          if (isBase64DataUrl(usuario.url_foto_perfil || " ")) {
+            const { mimeType, base64Data } = extractBase64Info(
+              usuario.url_foto_perfil || " "
+            );
+            const buffer = Buffer.from(base64Data, "base64");
+            const extension = getExtensionFromMime(mimeType);
+            const fileName = `${randomUUID()}.${extension}`;
+            const client_file = req.supabase;
+
+            const { error } = await client_file.storage
+              .from("user-profile")
+              .upload(`private/${fileName}`, buffer, {
+                contentType: mimeType,
+                upsert: true,
+              });
+            if (error) throw error;
+            usuario.url_foto_perfil = getURL(client_file, 'user-profile', `private/${fileName}`);
+          }
+
         await dataUsuarioService.updateById(usuarioId, usuario); /// ACTUALIZA EL USUARIO
+        await dataImagesService.updateById(usuario.persona_id, {
+          url_foto_perfil: usuario?.url_foto_perfil,
+          actualizado_por: req.actualizado_por,
+          fecha_actualizacion: req.fecha_creacion
+        }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
+
         const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
           await client
             .from("usuarios")
@@ -334,16 +377,8 @@ export const AlumnosService = {
         }
         await dataPersonaService.updateById(usuario.persona_id, persona); // ACTUALIZA LA PERSONA
 
-        // console.log(usuario?.url_foto_perfil);
 
-        if (usuario.url_foto_perfil)
-          await dataImagesService.updateById(usuario.persona_id, {
-            url_foto_perfil: usuario?.url_foto_perfil,
-            actualizado_por: req.actualizado_por,
-            fecha_actualizacion: req.fecha_creacion
-          }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
-
-        if (encripted_password) {
+        if (encripted_password && String(encripted_password).trim() !== "") {
           const { error: updateError } = await client.rpc(
             "cambiar_contrasena",
             {

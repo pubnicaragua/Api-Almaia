@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { AlertaEstado } from "../../../core/modelo/alerta/AlertaEstado";
@@ -14,7 +15,7 @@ const AlertaEstadoUpdateSchema = Joi.object({
 export const AlertaEstadosService = {
     async obtener(req: Request, res: Response) {
         try {
-          const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
+          const { colegio_id, ...where } = req.query; // Convertir los parámetros de consulta en filtros
           const alertaEstado = await dataService.getAll(["*"], where);
           res.json(alertaEstado);
 

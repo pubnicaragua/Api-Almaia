@@ -29,6 +29,7 @@ const AlumnoAlertaSchema = Joi.object({
   leida: Joi.boolean().required(),
   estado: Joi.string().max(20).required(),
   anonimo: Joi.boolean().optional(),
+  responsable_actual_id: Joi.number().integer().optional(),
   alertas_tipo_alerta_tipo_id: Joi.number().integer().required(),
 });
 const AlumnoAlertaUpdateSchema = Joi.object({
@@ -131,7 +132,9 @@ export const AlumnoAlertaService = {
 
       const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
       const { anonimo = false, alumno_id, ...bodyWithoutAnonimo } = req.body; // Establece false por defecto si es undefined
+
       Object.assign(alumnoalerta, bodyWithoutAnonimo);
+
       alumnoalerta.creado_por = req.creado_por;
       alumnoalerta.actualizado_por = req.actualizado_por;
 

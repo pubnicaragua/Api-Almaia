@@ -1,5 +1,5 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import './infrestructure/config/cronjobs';
@@ -21,6 +21,7 @@ import PreguntasRouters from './routes/preguntas.routes';
 import DocentesRouters from './routes/docente.routes';
 import ColegioRouters from './routes/colegio.routes';
 import PersonaRouters from './routes/persona.routes';
+
 const app: Application = express();
 const PORT = process.env.PORT || 3000;
 
@@ -65,9 +66,9 @@ app.use(express.json({ limit: '30mb' }));
 app.use(helmet());
 app.use(express.urlencoded({ extended: true, limit: '30mb' }));
 // Configuración de CORS
-const corsOptions = {
+const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-  console.log(`Origen: ${origin}`);
+  // console.log(`Origen: ${origin}`);
    
     // Permitir solicitudes sin origen (como apps móviles o curl)
     if (!origin) return callback(null, true);
@@ -83,7 +84,8 @@ const corsOptions = {
       callback(new Error('Origen no permitido por CORS'));
     }
   },
-  optionsSuccessStatus: 200 // Para navegadores legacy
+  optionsSuccessStatus: 200, // Para navegadores legacy
+  allowedHeaders: ['date-zone', 'Date-Zone', 'Content-Type', 'Authorization', 'x-almaia-access'],
 };
 
 // Aplicar CORS con las opciones configuradas
@@ -98,7 +100,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   // Lista blanca de IPs permitidas
   const allowedIps = ['::1', '127.0.0.1'];
  const allowAllIpDesarrollo = true;
-  console.log(`IP: ${clientIp}`);
+  // console.log(`IP: ${clientIp}`);
 
   // Si es una IP permitida o tiene el header correcto, continuar
   if (allowAllIpDesarrollo|| allowedIps.includes(clientIp) || customHeader === 'x-almaia-access') {
