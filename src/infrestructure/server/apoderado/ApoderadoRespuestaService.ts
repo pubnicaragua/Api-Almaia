@@ -34,14 +34,9 @@ export const ApoderadoRespuestaService = {
   async obtener(req: Request, res: Response) {
     try {
       const {
-        // respondio = false,
+        respondio = false,
         fecha = moment().format('YYYY-MM-DD'),
         ...where } = req.query; // Convertir los parámetros de consulta en filtros
-
-      // let is_answered: number | null = null;
-      // if (respondio) {
-      //   is_answered = 1;
-      // }
 
 
       let query = client
@@ -56,13 +51,18 @@ export const ApoderadoRespuestaService = {
           ].join(',')
         )
         .eq('activo', true)
-        // .eq('respuesta_posible_id', is_answered)
         .gte('fecha_creacion::date', fecha)
         .order('fecha_creacion', { ascending: true });
 
       Object.keys(where).forEach((key) => {
         query = query.eq(key, where[key]);
       });
+
+      if (respondio) {
+        query = query.not('respuesta_posible_id', 'is', null);
+      } else if (!respondio) {
+        query = query.is('respuesta_posible_id', null);
+      }
 
       const { data, error } = await query.returns<any[]>();
 
