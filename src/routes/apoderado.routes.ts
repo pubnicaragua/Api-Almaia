@@ -721,6 +721,91 @@ router.put(ruta_apoderados_respuestas+'/:id', sessionAuth, ApoderadoRespuestaSer
  */
 router.delete(ruta_apoderados_respuestas+'/:id', sessionAuth, ApoderadoRespuestaService.eliminar);
 
+/**  
+ * @swagger  
+ * /api/v1/apoderados/apoderados_respuestas/responder_preguntas/:  
+ *   put:  
+ *     summary: Registrar las distintas respuestas, ya sean de seleccion o respuesta abierta del apoderado  
+ *     description: Permite que un apoderado registre sus respuestas para una pregunta (preguntas de selección unica, múltiple o respuesta abierta)  
+ *     tags:  
+ *       - Respuestas de apoderados  
+ *     security:  
+ *       - bearerAuth: []  
+ *     requestBody:  
+ *       required: true  
+ *       content:  
+ *         application/json:  
+ *           schema:  
+ *             type: object  
+ *             required:  
+ *               - id_registro  
+ *               - tipo_pregunta_id
+ *               - respuesta_posible_id  
+ *               - respuestas_posibles  
+ *             properties:  
+ *               id_registro:  
+ *                 type: integer  
+ *                 description: ID del registro de la pregunta a responder
+ *                 example: 123  
+ *               respuesta_posible_id:  
+ *                 type: integer  
+ *                 description: ID del registro de la respuesta posible a responder
+ *                 example: 123  
+ *               tipo_pregunta_id:  
+ *                 type: integer  
+ *                 description: ID del tipo de pregunta
+ *                 example: 456  
+ *               respuestas_posibles:  
+ *                 type: array  
+ *                 description: Array de IDs de respuestas seleccionadas  
+ *                 items:  
+ *                   type: object  
+ *                   properties:
+ *                    respuesta_posible_id:
+ *                    type: integer 
+ *                    description: ID de la respuesta posible seleccionada 
+ *                 example: [
+ *                    { "respuesta_posible_id": 789 },
+ *                    { "respuesta_posible_id": 790 },  
+ *                    { "respuesta_posible_id": 791 }
+ *                  ] 
+ *                 minItems: 1  
+ *     responses:  
+ *       200:  
+ *         description: Respuestas procesadas correctamente  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Respuestas procesadas correctamente."  
+ *       400:  
+ *         description: Datos inválidos o incompletos  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Datos inválidos o incompletos."  
+ *       401:  
+ *         description: No autorizado - Token inválido  
+ *       500:  
+ *         description: Error interno del servidor  
+ *         content:  
+ *           application/json:  
+ *             schema:  
+ *               type: object  
+ *               properties:  
+ *                 message:  
+ *                   type: string  
+ *                   example: "Error interno del servidor"  
+ */  
+router.put(ruta_apoderados_respuestas + '/responder_preguntas/', sessionAuth, ApoderadoRespuestaService.responderpregunta);
+
 /**
  * @swagger
  * components:
