@@ -45,7 +45,7 @@ export const ApoderadoRespuestaService = {
           [
             "*",
             "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
-            "preguntas(pregunta_id,texto_pregunta,respuestas_posibles(respuesta_posible_id,nombre))",
+            "preguntas(pregunta_id,texto_pregunta,horario,grupo_preguntas,tipo_pregunta_id,template_code,respuestas_posibles(respuesta_posible_id,nombre))",
             "apoderados(apoderado_id,personas(persona_id,nombres,apellidos),telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2)",
             "respuestas_posibles(respuesta_posible_id,nombre)",
           ].join(',')
