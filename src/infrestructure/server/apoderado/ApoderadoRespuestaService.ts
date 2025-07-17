@@ -51,6 +51,7 @@ export const ApoderadoRespuestaService = {
           ].join(',')
         )
         .eq('activo', true)
+        .eq('respondio', respondio)
         .gte('fecha_creacion::date', fecha)
         .order('fecha_creacion', { ascending: true });
 
@@ -58,11 +59,11 @@ export const ApoderadoRespuestaService = {
         query = query.eq(key, where[key]);
       });
 
-      if (respondio) {
-        query = query.not('respuesta_posible_id', 'is', null);
-      } else if (!respondio) {
-        query = query.is('respuesta_posible_id', null);
-      }
+      // if (respondio) {
+      //   query = query.not('respuesta_posible_id', 'is', null);
+      // } else if (!respondio) {
+      //   query = query.is('respuesta_posible_id', null);
+      // }
 
       const { data, error } = await query.returns<any[]>();
 
@@ -261,6 +262,7 @@ export const ApoderadoRespuestaService = {
                 .from("apoderados_respuestas")
                 .update({
                   respuesta_posible_id: respuesta_posible_id,
+                  respondio: true,
                   actualizado_por: req.actualizado_por,
                   fecha_actualizacion: req.fecha_creacion || new Date(),
                   activo: true
@@ -299,6 +301,7 @@ export const ApoderadoRespuestaService = {
                       .from("apoderados_respuestas")
                       .update({
                         respuesta_posible_id: respuesta.respuesta_posible_id,
+                        respondio: true,
                         actualizado_por: req.actualizado_por,
                         fecha_actualizacion: req.fecha_creacion || new Date(),
                         activo: true
@@ -316,6 +319,7 @@ export const ApoderadoRespuestaService = {
                         alumno_id: rowOriginal.alumno_id,
                         apoderado_id: rowOriginal.apoderado_id,
                         pregunta_id: rowOriginal.pregunta_id,
+                        respondio: true,
                         respuesta_posible_id: respuesta.respuesta_posible_id,
                         creado_por: req.creado_por,
                         actualizado_por: req.actualizado_por,
@@ -338,7 +342,27 @@ export const ApoderadoRespuestaService = {
             res.status(400).json({ message: "Tipo de pregunta no soportado para esta operación." });
         }
       } else {
-        res.status(400).json({ message: "Tipo de pregunta no soportado para esta operación." });
+        if (!id_registro) {
+          res.status(400).json({ message: "Falta el ID del registro." });
+          return;
+        }
+
+        const { error } = await client
+          .from("apoderados_respuestas")
+          .update({
+            respuesta_txt: respuesta_posible_txt,
+            respondio: true,
+            actualizado_por: req.actualizado_por,
+            fecha_actualizacion: req.fecha_creacion || new Date(),
+            activo: true
+          })
+          .match({ apoderado_respuesta_id: id_registro });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        res.status(201).json({ message: "Respuesta actualizada correctamente." });
       }
     } catch (error) {
       console.error("Error al eliminar la apoderadorespuesta:", error);
