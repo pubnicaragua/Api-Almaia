@@ -585,6 +585,8 @@ router.put('/responder_preguntas/omniresponder/', sessionAuth, AlumnoRespuestaSe
 router.post('/cambiar-estado', AlumnoRespuestaSeleccionService.cambiarEstadoRespuesta);  
 router.post('/cambiar-estado-multiple',AlumnoRespuestaSeleccionService.cambiarEstadoRespuestaMultiple);
 
+router.put('/responder_preguntas/omni_cambiar_estado',AlumnoRespuestaSeleccionService.omniCambiarEstadoPreguntas);
+
 /**
  * @swagger
  * /api/v1/preguntas/alumnos_respuestas/{id}:
