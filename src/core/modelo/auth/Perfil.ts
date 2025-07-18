@@ -28,6 +28,7 @@ export type Perfil = {
     estado_civil_id: number;
     fecha_nacimiento:string;
   };
+  docentes?: any[]
   rol: {
     rol_id: number;
     nombre: string;

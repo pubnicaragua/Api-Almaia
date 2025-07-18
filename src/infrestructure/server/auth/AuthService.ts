@@ -31,6 +31,7 @@ export const AuthService = {
           password,
         });
 
+
       if (authError || !authData.user) {
         req.body = {
           isSend: false,
