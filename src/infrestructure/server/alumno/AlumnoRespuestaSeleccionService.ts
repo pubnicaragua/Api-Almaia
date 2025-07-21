@@ -467,6 +467,28 @@ export const AlumnoRespuestaSeleccionService = {
           return;
         }
 
+        if (!respuesta_posible_txt) {
+          res.status(400).json({ message: "Falta el texto de la respuesta." });
+          return;
+        }
+
+        const { data: rowOriginal, error: errorSelect } = await client.from("alumnos_respuestas")
+          .select("*").match({ alumno_respuesta: id_registro }).single();
+
+        if (errorSelect) {
+          throw new Error(errorSelect.message);
+        }
+
+        if (!rowOriginal) {
+          res.status(404).json({ message: "Registro no encontrado." });
+          return;
+        }
+
+        if (rowOriginal.respondio) {
+          res.status(400).json({ message: "La respuesta ya ha sido respondida." });
+          return;
+        } 
+
         const { error } = await client
           .from("alumnos_respuestas")
           .update({
@@ -575,7 +597,8 @@ async cambiarEstadoRespuestaMultiple(req: Request, res: Response) {
       tipo_pregunta_id,
       id_registro, 
       nuevo_estado
-     } = req.body;    
+     } = req.body; 
+     
 
     const { error: validationError } = CambiarEstadoSchema.validate({
       tipo_pregunta_id,

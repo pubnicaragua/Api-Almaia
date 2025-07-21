@@ -33,6 +33,21 @@ export function mapearDatos(data: PerfilEntrada): Perfil {
       nombre: data.roles.nombre,
       descripcion: data.roles.descripcion
     },
+    docentes: (Array.isArray(data.personas.docentes) && data.personas.docentes.length > 0) 
+      ? data.personas.docentes.map(docente => ({
+      docente_id: docente.docente_id,
+      especialidad: docente.especialidad,
+      colegios: docente.colegios,
+      docentes_cursos: docente.docentes_cursos.map(dc => ({
+        // curso_id: dc.curso_id,
+        ano_escolar: dc.ano_escolar,
+        cursos: {
+            curso_id: dc.cursos.curso_id,
+            grado_id: dc.cursos.grado_id,
+            nombre_curso: dc.cursos.nombre_curso
+          }
+        }))
+      })) : [],
     funcionalidades: mapearFuncionalidades(data.roles.funcionalidades_roles)
   };
 }

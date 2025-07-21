@@ -12,6 +12,7 @@ interface PersonaEntrada {
   genero_id: number;
   estado_civil_id: number;
   fecha_nacimiento:string;
+  docentes: DocentesEntrada[];
 }
 
 interface RolEntrada {
@@ -34,7 +35,32 @@ interface UsuariosColegioEntrada {
       usuarios_colegio_id: number
 }
 
+interface DocentesEntrada {
+  colegios: ColegiosEntrada
+  docente_id: number
+  especialidad: string
+  docentes_cursos: DocentesCursosEntrada[]
+}
 
+export interface ColegiosEntrada {
+  nombre: string
+  colegio_id: number
+  dependencia: string
+  tipo_colegio: string
+  nombre_fantasia: string
+}
+
+export interface DocentesCursosEntrada {
+  cursos: CursosEntrada
+  curso_id: number
+  ano_escolar: number
+}
+
+export interface CursosEntrada {
+  curso_id: number
+  grado_id: number
+  nombre_curso: string
+}
 
 
 export interface PerfilEntrada {
