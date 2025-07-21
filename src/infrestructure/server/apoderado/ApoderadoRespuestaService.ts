@@ -347,6 +347,11 @@ export const ApoderadoRespuestaService = {
           return;
         }
 
+        if (!respuesta_posible_txt) {
+          res.status(400).json({ message: "Falta el texto de la respuesta." });
+          return;
+        }
+
         const { error } = await client
           .from("apoderados_respuestas")
           .update({
