@@ -59,7 +59,9 @@ export const ApoderadoRespuestaService = {
       });
 
       // if (respondio) {
+      
       //   query = query.not('respuesta_posible_id', 'is', null);
+
       // } else if (!respondio) {
       //   query = query.is('respuesta_posible_id', null);
       // }

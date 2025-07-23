@@ -22,17 +22,19 @@ export const InformeGeneralService = {
   async obtener(req: Request, res: Response) {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const informesGenerales_data = await dataService.getAll(
-        [
-          "*",
-          "creado_por:usuarios!informes_generales_creado_por_fkey(usuario_id,personas(persona_id,nombres,apellidos))",
-          "actualizado_por:usuarios!informes_generales_actualizado_por_fkey(usuario_id,personas(persona_id,nombres,apellidos))",
-          "cursos(*)"
-        ],
-        where
-      );
-      const informesGenerales= mapearInformesConNombres(informesGenerales_data)
-      res.json(informesGenerales);
+      const { curso_id } = where; // Extraer curso_id si existe
+      //si curso_id es string entonces guardarlo en un arreglo
+      if (typeof curso_id === "string") {
+        where.curso_id = [curso_id];
+      }
+      //si hay cursos entonces filtrar por cursos
+      const { data, error } = await client.rpc('obtener_informes_con_cursos', {
+        colegio_id_param: where.colegio_id,
+        cursos_param: where.curso_id  // ← esto es clave
+      });
+      let response = data;
+      if (data === null) response = []
+      res.json(response);
     } catch (error) {
       console.error("Error al obtener el informe general:", error);
       res.status(500).json({ message: "Error interno del servidor" });
