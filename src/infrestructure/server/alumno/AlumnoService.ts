@@ -59,7 +59,7 @@ export const AlumnosService = {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       dataService.setClient(req.supabase);
-      const alumnos = await dataService.getAll(
+      let alumnos = await dataService.getAll(
         [
           "*",
           "personas(persona_id,nombres,apellidos,fecha_nacimiento,numero_documento,usuarios(usuario_id,rol_id))",
@@ -68,7 +68,29 @@ export const AlumnosService = {
         ],
         where
       );
-      res.json(alumnos);
+      const rawCursoIds = where['cursos.curso_id'];
+
+      let cursoIdArray: number[] = [];
+
+      if (rawCursoIds) {
+        if (Array.isArray(rawCursoIds)) {
+          // Si viene como array tipo ["33", "35"]
+          cursoIdArray = rawCursoIds.map(id => Number(id)).filter(id => !isNaN(id));
+        } else if (typeof rawCursoIds === 'string') {
+          // Si viene como string tipo "33,35"
+          cursoIdArray = rawCursoIds
+            .split(',')
+            .map(id => Number(id.trim()))
+            .filter(id => !isNaN(id));
+        }
+      }
+
+      // ✅ Luego haces el filtrado
+      const alumnosFiltrados = alumnos.filter(alumno =>
+        alumno?.cursos?.some(curso => cursoIdArray.includes(curso.curso_id))
+      );
+  
+      res.json(alumnosFiltrados);
     } catch (error) {
       console.error("Error al obtener el alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -484,41 +506,41 @@ export const AlumnosService = {
     }
   },
   async obtenerPerfil(req: Request, res: Response) {
-      const { data: usuario_data, error: error_usuario } = await req.supabase
-        .from("usuarios")
-        .select(
-          "*,idiomas(*),usuarios_colegios(*,colegios(colegio_id,nombre)),personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion,funcionalidades_roles(*,funcionalidad_rol_id,funcionalidades(*,funcionalidad_id)))"
-        )
-        .eq("usuario_id", req.user.usuario_id)
-        .single();
-      if (error_usuario) {
-        throw new Error(error_usuario.message);
-      }
-      
-      const data = mapearDatosAlumno(usuario_data);
-      
-      const usuario = data.usuario;
-      const persona = data.persona;
-      const rol = data.rol;
-      const funcionalidades= data.funcionalidades
-      const { data: alumno_data, error: error_alumno } = await req.supabase
-        .from("alumnos")
-        .select(
-          "*,alumnos_apoderados(*,apoderados(*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento)))"
-        )
-        .eq("persona_id", data.persona.persona_id);
-      if (error_alumno) {
-        throw new Error(error_alumno.message);
-      }
+    const { data: usuario_data, error: error_usuario } = await req.supabase
+      .from("usuarios")
+      .select(
+        "*,idiomas(*),usuarios_colegios(*,colegios(colegio_id,nombre)),personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion,funcionalidades_roles(*,funcionalidad_rol_id,funcionalidades(*,funcionalidad_id)))"
+      )
+      .eq("usuario_id", req.user.usuario_id)
+      .single();
+    if (error_usuario) {
+      throw new Error(error_usuario.message);
+    }
+
+    const data = mapearDatosAlumno(usuario_data);
+
+    const usuario = data.usuario;
+    const persona = data.persona;
+    const rol = data.rol;
+    const funcionalidades = data.funcionalidades
+    const { data: alumno_data, error: error_alumno } = await req.supabase
+      .from("alumnos")
+      .select(
+        "*,alumnos_apoderados(*,apoderados(*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento)))"
+      )
+      .eq("persona_id", data.persona.persona_id);
+    if (error_alumno) {
+      throw new Error(error_alumno.message);
+    }
     const apoderados = alumno_data[0]?.alumnos_apoderados
 
-  
-      res.json({
-        usuario,
-        persona,
-        rol,
-        funcionalidades,
-        apoderados
-      });
-    },
+
+    res.json({
+      usuario,
+      persona,
+      rol,
+      funcionalidades,
+      apoderados
+    });
+  },
 };
