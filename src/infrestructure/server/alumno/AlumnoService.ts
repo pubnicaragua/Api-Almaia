@@ -428,10 +428,9 @@ export const AlumnosService = {
     }
   },
   async buscar(req: Request, res: Response) {
-    const { termino } = req.body;
+    const { termino, cursos } = req.body;
     const { colegio_id } = req.query;
 
-    console.log("Termino de búsqueda:", termino);
     if (!termino || typeof termino !== "string") {
       throw new Error(
         "Debe proporcionar un campo 'termino' en el cuerpo de la solicitud"
@@ -440,11 +439,7 @@ export const AlumnosService = {
 
     try {
       let resultados;
-      if (colegio_id !== undefined) {
-        resultados = await buscarAlumnos(client, termino, colegio_id);
-      } else {
-        resultados = await buscarAlumnos(client, termino);
-      }
+      resultados = await buscarAlumnos(client, termino, colegio_id, cursos);
       if (resultados === null) {
         resultados = [];
       }

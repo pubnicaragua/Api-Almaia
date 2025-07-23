@@ -27,6 +27,7 @@ export const InformeGeneralService = {
           "*",
           "creado_por:usuarios!informes_generales_creado_por_fkey(usuario_id,personas(persona_id,nombres,apellidos))",
           "actualizado_por:usuarios!informes_generales_actualizado_por_fkey(usuario_id,personas(persona_id,nombres,apellidos))",
+          "cursos(*)"
         ],
         where
       );
