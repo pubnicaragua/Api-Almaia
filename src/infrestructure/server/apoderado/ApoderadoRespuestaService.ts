@@ -38,7 +38,6 @@ export const ApoderadoRespuestaService = {
         fecha = moment().format('YYYY-MM-DD'),
         ...where } = req.query; // Convertir los parámetros de consulta en filtros
 
-
       let query = client
         .from('apoderados_respuestas')
         .select(
@@ -52,7 +51,7 @@ export const ApoderadoRespuestaService = {
         )
         .eq('activo', true)
         .eq('respondio', respondio)
-        .gte('fecha_creacion::date', fecha)
+        // .gte('fecha_creacion::date', fecha)
         .order('fecha_creacion', { ascending: true });
 
       Object.keys(where).forEach((key) => {
