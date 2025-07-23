@@ -69,7 +69,8 @@ export const AlumnosService = {
         where
       );
       const rawCursoIds = where['cursos.curso_id'];
-
+      let alumnosFiltrados = alumnos;
+      console.log("Raw curso IDs:", rawCursoIds);
       let cursoIdArray: number[] = [];
 
       if (rawCursoIds) {
@@ -83,13 +84,11 @@ export const AlumnosService = {
             .map(id => Number(id.trim()))
             .filter(id => !isNaN(id));
         }
-      }
+        alumnosFiltrados = alumnos.filter(alumno =>
+          alumno?.cursos?.some(curso => cursoIdArray.includes(curso.curso_id))
+        );
+      };
 
-      // ✅ Luego haces el filtrado
-      const alumnosFiltrados = alumnos.filter(alumno =>
-        alumno?.cursos?.some(curso => cursoIdArray.includes(curso.curso_id))
-      );
-  
       res.json(alumnosFiltrados);
     } catch (error) {
       console.error("Error al obtener el alumno:", error);
@@ -432,6 +431,7 @@ export const AlumnosService = {
     const { termino } = req.body;
     const { colegio_id } = req.query;
 
+    console.log("Termino de búsqueda:", termino);
     if (!termino || typeof termino !== "string") {
       throw new Error(
         "Debe proporcionar un campo 'termino' en el cuerpo de la solicitud"
