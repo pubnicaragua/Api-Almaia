@@ -202,30 +202,45 @@ export const AuthService = {
     }
   },
 
+  async RestorePassword(req: Request, res: Response) {
+    try {
+      console.log("restableciendo contraseña del usuario");
+      const passwordSchema = Joi.object({
+        email: Joi.string().email().required(), // O usa email si lo prefieres
+        newPassword: Joi.string().min(6).required(),
+        pass: Joi.string().min(6).required(),
+      });
+      const { error, value } = passwordSchema.validate(req.body);
 
-  // async updatePassword(req: Request, res: Response) {
-  //   const passwordSchema = Joi.object({
-  //     userId: Joi.string().required(), // O usa email si lo prefieres
-  //     newPassword: Joi.string().min(6).required(),
-  //   });
-  //   const { error, value } = passwordSchema.validate(req.body);
+      if (error) {
+        throw new Error(error.details[0].message);
+      }
+      const { email, newPassword, pass } = value;
+      console.log("🔐 Restableciendo contraseña para el usuario:", email, newPassword, pass);
 
-  //   if (error) {
-  //     return res.status(400).json({ error: error.details[0].message });
-  //   }
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
 
-  //   const { userId, newPassword } = value;
+      const { data: usuario } = await admin.from("view_auth_users").select("*").eq("email", email).single();
+      console.log("🤵Usuario ===>:", usuario);
+      if (!usuario) throw new Error("Usuario no encontrado");
 
-  //   const { data, error: updateError } = await client.auth.admin.updateUserById(userId, {
-  //     password: newPassword,
-  //   });
+      const { data, error: updateError } = await admin.auth.admin.updateUserById(usuario.id, {
+        password: newPassword,
+      });
+      if (updateError) throw new Error(updateError.message);
 
-  //   if (updateError) {
-  //     return res.status(500).json({ error: updateError.message });
-  //   }
-
-  //   return res.status(200).json({ message: 'Contraseña actualizada correctamente', user: data });
-  // }
+      res.status(200).json({
+        message: "Contraseña actualizada correctamente",
+        data: data,
+      });
+    } catch (err: any) {
+      console.error("Error inesperado:", err);
+      res.status(400).json({
+        message: "Error al actualizar la contraseña",
+        error: err.message || "Error interno del servidor",
+      });
+    }
+  },
   async updatePassword(req: Request, res: Response) {
     try {
       console.log("Actualizando contraseña del usuario");
