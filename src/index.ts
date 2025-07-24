@@ -68,16 +68,16 @@ app.use(express.urlencoded({ extended: true, limit: '30mb' }));
 // Configuración de CORS
 const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-  // console.log(`Origen: ${origin}`);
-   
+    // console.log(`Origen: ${origin}`);
+
     // Permitir solicitudes sin origen (como apps móviles o curl)
     if (!origin) return callback(null, true);
-    
+
     // Lista de dominios permitidos (ajusta según tus necesidades)
     const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-    : [];
-   
+      ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+      : [];
+
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -96,17 +96,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   const rawIp = req.ip || req.connection.remoteAddress || '';
   const clientIp = cleanIp(rawIp);
   const customHeader = req.headers['x-almaia-access'];
-  
+
   // Lista blanca de IPs permitidas
   const allowedIps = ['::1', '127.0.0.1'];
- const allowAllIpDesarrollo = true;
+  const allowAllIpDesarrollo = true;
   // console.log(`IP: ${clientIp}`);
 
   // Si es una IP permitida o tiene el header correcto, continuar
-  if (allowAllIpDesarrollo|| allowedIps.includes(clientIp) || customHeader === 'x-almaia-access') {
+  if (allowAllIpDesarrollo || allowedIps.includes(clientIp) || customHeader === 'x-almaia-access') {
     return next();
   }
-  
+
   // Si no cumple los requisitos, denegar acceso
   res.status(403).json({ message: 'Acceso denegado' });
 });

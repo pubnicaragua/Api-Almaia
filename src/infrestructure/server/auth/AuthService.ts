@@ -2,8 +2,7 @@
 import { Request, Response } from "express";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { AuditoriaesService } from "./AuditoriaService";
-import { AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
-
+import { createClient, AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
 // Interfaz para credenciales
 import Joi from "joi";
 const PasswordSchema = Joi.object({
@@ -141,8 +140,14 @@ export const AuthService = {
 
   async changePassword(req: Request, res: Response) {
     let responseSent = false; // Bandera para rastrear si se envió una respuesta
-
     try {
+      const datos = {
+        currentPassword: '123456',
+        newPassword: 'abcdef',
+        confirmPassword: 'abcdef',
+        token: 'eyJhbGciOiJIUzI1NiIsImtpZCI6InFVT0RLSDVyYTh6T2loSEUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2d4dnRwaHFubGpscnNlbGhnd3JhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyYzBiMjBkYy1jNjA5LTQzMjctODAwYi0xOWFhYmRmZWE2YjkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzUzMzg3MTM2LCJpYXQiOjE3NTMzODM1MzYsImVtYWlsIjoiYXN0cm9yZWFsMDMxQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzUzMzgzNTM2fV0sInNlc3Npb25faWQiOiJkZjIyN2Q5Mi1iOGNjLTQ4MDQtYWYwYi1hZTk2NjQ2MGUxODkiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.B30e81gJ6vVP3IMIlhCcHLfUTLxEjxdpbmr2fUHsx4Q',
+        refreshToken: 'eyJhbGciOiJIUzI1NiIsImtpZCI6InFVT0RLSDVyYTh6T2loSEUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2d4dnRwaHFubGpscnNlbGhnd3JhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyYzBiMjBkYy1jNjA5LTQzMjctODAwYi0xOWFhYmRmZWE2YjkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzUzMzg3MTM2LCJpYXQiOjE3NTMzODM1MzYsImVtYWlsIjoiYXN0cm9yZWFsMDMxQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzUzMzgzNTM2fV0sInNlc3Npb25faWQiOiJkZjIyN2Q5Mi1iOGNjLTQ4MDQtYWYwYi1hZTk2NjQ2MGUxODkiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.B30e81gJ6vVP3IMIlhCcHLfUTLxEjxdpbmr2fUHsx4Q',
+      };
       // Validar la estructura de la solicitud
       const { error: validationError, value } = PasswordSchema.validate(
         req.body
@@ -196,27 +201,51 @@ export const AuthService = {
       }
     }
   },
+
+
+  // async updatePassword(req: Request, res: Response) {
+  //   const passwordSchema = Joi.object({
+  //     userId: Joi.string().required(), // O usa email si lo prefieres
+  //     newPassword: Joi.string().min(6).required(),
+  //   });
+  //   const { error, value } = passwordSchema.validate(req.body);
+
+  //   if (error) {
+  //     return res.status(400).json({ error: error.details[0].message });
+  //   }
+
+  //   const { userId, newPassword } = value;
+
+  //   const { data, error: updateError } = await client.auth.admin.updateUserById(userId, {
+  //     password: newPassword,
+  //   });
+
+  //   if (updateError) {
+  //     return res.status(500).json({ error: updateError.message });
+  //   }
+
+  //   return res.status(200).json({ message: 'Contraseña actualizada correctamente', user: data });
+  // }
   async updatePassword(req: Request, res: Response) {
     try {
-      const { userId, newPassword } = req.body;
-      if (!userId || !newPassword) {
-        throw new Error("userId y newPassword son requeridos");
+      console.log("Actualizando contraseña del usuario");
+      const passwordSchema = Joi.object({
+        userId: Joi.string().required(), // O usa email si lo prefieres
+        newPassword: Joi.string().min(6).required(),
+      });
+      const { error, value } = passwordSchema.validate(req.body);
+
+      if (error) {
+        throw new Error(error.details[0].message);
       }
-      const { data: usuarioData, error: userError } = await client
-        .from("usuarios")
-        .select("email, auth_id")
-        .eq("usuario_id", userId)
-        .single();
-      if (userError || !usuarioData) {
-        throw new Error(userError?.message || "No se pudo obtener el usuario");
-      }
-      const { data, error: updateError } = await client.rpc(
-        "cambiar_contrasena",
-        {
-          p_email: usuarioData.email,
-          p_nueva_contrasena: newPassword,
-        }
-      );
+      const { userId, newPassword } = value;
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+
+      const { data, error: updateError } = await admin.auth.admin.updateUserById(userId, {
+        password: newPassword,
+      });
+      console.log("Datos de usuario actualizados:", data);
+
       if (updateError) {
         throw new Error(updateError.message);
       }
@@ -232,4 +261,5 @@ export const AuthService = {
       });
     }
   },
+
 };

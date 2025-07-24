@@ -5,7 +5,7 @@ export class SupabaseAdminService {
   private supabase: SupabaseClient;
 
   constructor() {
-  
+
     const { SUPABASE_HOST, SUPABASE_PASSWORD_ADMIN } = process.env;
     if (!SUPABASE_HOST || !SUPABASE_PASSWORD_ADMIN) {
       throw new Error("Faltan variables de entorno de Supabase");
