@@ -59,7 +59,7 @@ export const AlumnoRespuestaSeleccionService = {
         .eq('activo', true)
         .eq('respondio', respondio)
         .gte('fecha_creacion::date', fecha)
-        .order('fecha_creacion', { ascending: true });
+        .order('alumno_respuesta_seleccion_id', { ascending: true });
 
       Object.keys(where).forEach((key) => {
         query = query.eq(key, where[key]);
