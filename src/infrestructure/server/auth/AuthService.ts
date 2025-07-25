@@ -243,23 +243,39 @@ export const AuthService = {
   },
   async updatePassword(req: Request, res: Response) {
     try {
-      console.log("Actualizando contraseña del usuario");
-      const passwordSchema = Joi.object({
-        userId: Joi.string().required(), // O usa email si lo prefieres
-        newPassword: Joi.string().min(6).required(),
-      });
-      const { error, value } = passwordSchema.validate(req.body);
+      const UUID = req?.user?.auth_id;
+      const EMAIL = req?.user?.email;
+      if (!UUID || !EMAIL) {
+        throw new Error('Usuario no autorizado');
+      };
 
-      if (error) {
-        throw new Error(error.details[0].message);
-      }
-      const { userId, newPassword } = value;
       const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+      const passwordSchema = Joi.object({
+        newPassword: Joi.string().min(6).required(),
+        currentPassword: Joi.string().min(6).required(),
+      });
 
-      const { data, error: updateError } = await admin.auth.admin.updateUserById(userId, {
+      const { error: schemeError, value: body } = passwordSchema.validate(req.body);
+      const { newPassword, currentPassword } = body;
+
+      if (schemeError) {
+        throw new Error(schemeError.details[0].message);
+      }
+      // Intentar loguear al usuario con la contraseña actual
+      const { data: DataPassword, error: ErrorLoginWithPassword } = await admin.auth.signInWithPassword({
+        email: EMAIL,
+        password: currentPassword
+      });
+      //si no se puede loguear con la contraseña actual, lanzar error
+      if (ErrorLoginWithPassword) {
+        throw new Error("Contraseña incorrecta");
+      }
+
+      //si la contraseña actual es correcta, actualizar la contraseña
+
+      const { data, error: updateError } = await admin.auth.admin.updateUserById(UUID, {
         password: newPassword,
       });
-      console.log("Datos de usuario actualizados:", data);
 
       if (updateError) {
         throw new Error(updateError.message);
