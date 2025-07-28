@@ -84,12 +84,10 @@ export const MotorAlertasService = {
     }
   },
     async ejecutar_motor() {
-    console.log('ejecutando motor alertas');
     const { error } = await client.rpc('generar_alertas_emocionales');
     if(error){
       console.error(error.message)
     }
-    console.log('finalizo motor alertas');
  
   },
 };

@@ -10,7 +10,6 @@ export const CalendarioEscolarsService = {
             const calendariosEscolares = await dataService.getAll(["*"], where);
             res.json(calendariosEscolares);              
         } catch (error) {
-            console.log(error);
             res.status(500).json(error);
         }
     },

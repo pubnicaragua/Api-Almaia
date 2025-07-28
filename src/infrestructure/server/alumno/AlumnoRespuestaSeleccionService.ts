@@ -1,12 +1,9 @@
-/* eslint-disable no-fallthrough */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import Joi from "joi";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 import { AlumnoRespuestaSeleccion } from "../../../core/modelo/preguntasRespuestas/AlumnoRespuestaSeleccion";
 import moment from "moment";
 import { distinctPorCampo } from "../../../helpers/objectformat";
@@ -507,7 +504,6 @@ export const AlumnoRespuestaSeleccionService = {
         res.status(201).json({ message: "Respuesta actualizada correctamente." });
       }
     } catch (error) {
-      console.log('======================================');
       console.error(error);
       res.status(500).json({ message: 'Error Interno del Servidor' });
     }
@@ -516,7 +512,6 @@ export const AlumnoRespuestaSeleccionService = {
   async cambiarEstadoRespuesta(req: Request, res: Response) {    
   try {    
     const { alumno_id, pregunta_id, nuevo_estado, fecha } = req.body;    
-    // console.log('cambiar estado');  
     
     if (!alumno_id || !pregunta_id || typeof nuevo_estado !== 'boolean') {    
       throw new Error("Faltan datos obligatorios o el estado no es válido.");    

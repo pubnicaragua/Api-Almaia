@@ -28,7 +28,7 @@ export const CalendarioFechaImportantesService = {
       ], req.query);
             res.json(fechasImportantes);
     } catch (error) {
-      console.log(error);
+      (error);
       
       res.status(500).json(error);
     }

@@ -22,8 +22,6 @@ export const PerfilService = {
       .eq("usuario_id", req.user.usuario_id)
       .single();
 
-      // console.log("usuario_data", usuario_data.personas.docentes[0].docentes_cursos);
-
     if (error_usuario) {
       throw new Error(error_usuario.message);
     }

@@ -5,13 +5,6 @@ import { AuditoriaesService } from "./AuditoriaService";
 import { createClient, AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
 // Interfaz para credenciales
 import Joi from "joi";
-const PasswordSchema = Joi.object({
-  currentPassword: Joi.string().min(6).required(),
-  newPassword: Joi.string().min(6).required(),
-  token: Joi.string().min(6).required(),
-  refreshToken: Joi.string().min(6).required(),
-  confirmPassword: Joi.string().valid(Joi.ref("newPassword")).required(),
-});
 // Inicializar Supabase client
 const supabaseService = new SupabaseClientService();
 
@@ -22,7 +15,6 @@ export const AuthService = {
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
     try {
-      // console.log('Intentando iniciar sesión con:', email);
       // Autenticar al usuario en Supabase Auth
       const { data: authData, error: authError } =
         await client.auth.signInWithPassword({
@@ -138,73 +130,9 @@ export const AuthService = {
     }
   },
 
-  async changePassword(req: Request, res: Response) {
-    let responseSent = false; // Bandera para rastrear si se envió una respuesta
-    try {
-      const datos = {
-        currentPassword: '123456',
-        newPassword: 'abcdef',
-        confirmPassword: 'abcdef',
-        token: 'eyJhbGciOiJIUzI1NiIsImtpZCI6InFVT0RLSDVyYTh6T2loSEUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2d4dnRwaHFubGpscnNlbGhnd3JhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyYzBiMjBkYy1jNjA5LTQzMjctODAwYi0xOWFhYmRmZWE2YjkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzUzMzg3MTM2LCJpYXQiOjE3NTMzODM1MzYsImVtYWlsIjoiYXN0cm9yZWFsMDMxQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzUzMzgzNTM2fV0sInNlc3Npb25faWQiOiJkZjIyN2Q5Mi1iOGNjLTQ4MDQtYWYwYi1hZTk2NjQ2MGUxODkiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.B30e81gJ6vVP3IMIlhCcHLfUTLxEjxdpbmr2fUHsx4Q',
-        refreshToken: 'eyJhbGciOiJIUzI1NiIsImtpZCI6InFVT0RLSDVyYTh6T2loSEUiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2d4dnRwaHFubGpscnNlbGhnd3JhLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIyYzBiMjBkYy1jNjA5LTQzMjctODAwYi0xOWFhYmRmZWE2YjkiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzUzMzg3MTM2LCJpYXQiOjE3NTMzODM1MzYsImVtYWlsIjoiYXN0cm9yZWFsMDMxQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWxfdmVyaWZpZWQiOnRydWV9LCJyb2xlIjoiYXV0aGVudGljYXRlZCIsImFhbCI6ImFhbDEiLCJhbXIiOlt7Im1ldGhvZCI6InBhc3N3b3JkIiwidGltZXN0YW1wIjoxNzUzMzgzNTM2fV0sInNlc3Npb25faWQiOiJkZjIyN2Q5Mi1iOGNjLTQ4MDQtYWYwYi1hZTk2NjQ2MGUxODkiLCJpc19hbm9ueW1vdXMiOmZhbHNlfQ.B30e81gJ6vVP3IMIlhCcHLfUTLxEjxdpbmr2fUHsx4Q',
-      };
-      // Validar la estructura de la solicitud
-      const { error: validationError, value } = PasswordSchema.validate(
-        req.body
-      );
-
-      if (validationError) {
-        res.status(400).json({ error: validationError.details[0].message });
-        responseSent = true; // Marcar respuesta como enviada
-      }
-
-      if (!responseSent) {
-        // Establecer la sesión con Supabase
-        const { error: setSessionError } = await client.auth.setSession({
-          access_token: value.token,
-          refresh_token: value.refreshToken,
-        });
-
-        if (setSessionError) {
-          res.status(400).json({ error: setSessionError.message });
-          responseSent = true; // Marcar respuesta como enviada
-        }
-
-        if (!responseSent) {
-          // Cambiar la contraseña del usuario
-          const { data: updateData, error: passwordError } =
-            await client.auth.updateUser({
-              password: value.newPassword,
-            });
-
-          if (passwordError) {
-            res.status(400).json({ error: passwordError.message });
-            responseSent = true; // Marcar respuesta como enviada
-          }
-
-          if (!responseSent) {
-            // Respuesta exitosa
-            res.status(200).json({
-              message: "Contraseña cambiada exitosamente.",
-              user: updateData,
-            });
-            responseSent = true; // Marcar respuesta como enviada
-          }
-        }
-      }
-    } catch (err) {
-      if (!responseSent) {
-        res.status(500).json({
-          error: "Error interno del servidor.",
-          details: (err as Error).message || "Ocurrió un error desconocido.",
-        });
-      }
-    }
-  },
 
   async RestorePassword(req: Request, res: Response) {
     try {
-      console.log("restableciendo contraseña del usuario");
       const passwordSchema = Joi.object({
         email: Joi.string().email().required(), // O usa email si lo prefieres
         newPassword: Joi.string().min(4).required(),
@@ -216,12 +144,10 @@ export const AuthService = {
         throw new Error(error.details[0].message);
       }
       const { email, newPassword, pass } = value;
-      console.log("🔐 Restableciendo contraseña para el usuario:", email, newPassword, pass);
 
       const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
 
       const { data: usuario } = await admin.from("view_auth_users").select("*").eq("email", email).single();
-      console.log("🤵Usuario ===>:", usuario);
       if (!usuario) throw new Error("Usuario no encontrado");
 
       const { data, error: updateError } = await admin.auth.admin.updateUserById(usuario.id, {

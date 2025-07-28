@@ -6,9 +6,7 @@ const dataService: DataService<ConfiguracionComuna> = new DataService("configura
 export const ConfiguracionComunaService = {
   async obtener(req: Request, res: Response) {
     try {
-      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const configuracioncomuna = await dataService.getAll(["*"], where);
-      res.json(configuracioncomuna);*/
+  
       const configuraciones_comunas=[
         {
           "configuracion_comuna_id": 1,

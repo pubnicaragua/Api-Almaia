@@ -42,7 +42,6 @@ export async function obtenerRelacionados({
     .in(inField, ids);  
   
   // Solo aplicar ordenamiento si se proporciona el parámetro  
-  console.log('ordenar',orderBy);
   
   if (orderBy) {  
     query = query.order(orderBy.field, { ascending: orderBy.ascending });  

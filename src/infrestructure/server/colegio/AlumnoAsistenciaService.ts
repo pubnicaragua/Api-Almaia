@@ -81,7 +81,6 @@ export const AlumnoAsistenciasService = {
         res.status(201).json(resultado);
       }
     } catch (error) {
-      console.log(error);
 
       res.status(500).json(error);
     }

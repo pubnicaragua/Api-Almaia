@@ -83,7 +83,6 @@ export const AlumnoTareasService = {
         res.status(201).json(resultado);
       }
     } catch (error) {
-      console.log(error);
       res.status(500).json(error);
     }
   },
@@ -116,7 +115,6 @@ export const AlumnoTareasService = {
         res.json(resultado);
       }
     } catch (error) {
-      console.log(error);
 
       res.status(500).json(error);
     }

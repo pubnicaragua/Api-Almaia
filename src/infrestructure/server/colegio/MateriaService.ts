@@ -55,7 +55,6 @@ export const MateriasService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        console.log(materia);
 
         const savedMateria = await dataService.processData(materia);
         res.status(201).json(savedMateria);

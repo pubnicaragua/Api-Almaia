@@ -70,7 +70,6 @@ export const AlumnosService = {
       );
       const rawCursoIds = where['cursos.curso_id'];
       let alumnosFiltrados = alumnos;
-      console.log("Raw curso IDs:", rawCursoIds);
       let cursoIdArray: number[] = [];
 
       if (rawCursoIds) {
@@ -211,33 +210,7 @@ export const AlumnosService = {
     }
     // Emociones simuladas
     const datosComparativa: ComparativaDato[] = data_emociones_prom_result ? data_emociones_prom_result : [];
-    // const datosComparativa: ComparativaDato[] = [
-    //   {
-    //     emocion: "Feliz",
-    //     alumno: 2.0, // Punto más alejado (y=110)
-    //     promedio: 1.5, // Punto más cercano (y=128)
-    //   },
-    //   {
-    //     emocion: "Triste",
-    //     alumno: 1.9, // x=290
-    //     promedio: 1.6, // x=272
-    //   },
-    //   {
-    //     emocion: "Estresada",
-    //     alumno: 1.5, // y=277
-    //     promedio: 1.2, // y=257
-    //   },
-    //   {
-    //     emocion: "Enojada",
-    //     alumno: 1.5,
-    //     promedio: 1.2,
-    //   },
-    //   {
-    //     emocion: "Ansiosa",
-    //     alumno: 1.9,
-    //     promedio: 1.6,
-    //   },
-    // ];
+
     res.json({
       alumno,
       ficha,

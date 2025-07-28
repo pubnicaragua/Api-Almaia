@@ -26,7 +26,6 @@ export const UsuarioCursosService = {
       );
       res.json(usuariocursos);
     } catch (error) {
-      console.log(error);
       
       res.status(500).json(error);
     }
@@ -54,7 +53,6 @@ export const UsuarioCursosService = {
         .eq("usuarios_colegio_id", usuariocurso.usuarios_colegio_id)
         .single();
       if (errorUsuario || !dataUsuario) {
-        console.log(error);
         
         throw new Error("El Usuario no existe");
       } 
@@ -68,7 +66,6 @@ export const UsuarioCursosService = {
         res.status(201).json(usuariocursoCreado);
       }
     } catch (error) {
-      console.log(error);
       
       res.status(500).json(error);
     }

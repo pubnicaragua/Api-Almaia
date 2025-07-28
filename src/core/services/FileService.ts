@@ -560,7 +560,6 @@ export class Fileservice {
     }
   }
   procesarCargosDirectivos({ data }: { data: any }) {
-    console.log(data);
   }
   async procesarDirectivos({
     data,
@@ -1091,7 +1090,6 @@ export class Fileservice {
           activo: true,
         } as Curso;
       });
-      console.log(await datosMapeados);
 
       // Upsert (insertar o actualizar si ya existe)
       const { data: cursos, error } = await this.client
@@ -1119,7 +1117,6 @@ export class Fileservice {
     apoderados: Apoderado[];
   } | null> {
     try {
-      console.log("incio a procesar alumnos");
 
       // Validación básica
       if (!data || data.length === 0) {
@@ -1237,7 +1234,6 @@ export class Fileservice {
         }
 
         // 4. Procesamos apoderado 1 si existe
-                      console.log(" 4. Procesamos apoderado 1 si existe");
 
         if (item.RUT_APODERADO_1) {
           const apoderado1Id = Math.floor(Math.random() * 1000000); // Generar ID temporal
@@ -1276,7 +1272,6 @@ export class Fileservice {
         }
 
         // 5. Procesamos apoderado 2 si existe
-              console.log("5. Procesamos apoderado 2 si existe");
 
         if (item.RUT_APODERADO_2) {
           const apoderado2Id = Math.floor(Math.random() * 1000000); // Generar ID temporal
@@ -1319,7 +1314,6 @@ export class Fileservice {
       const todasLasPersonas = [...personasData, ...personasApoderadosData];
 
       // 1. Insertamos todas las personas primero
-      console.log("1. Insertamos todas las personas primero");
 
       const { data: personasInsertadas, error: errorPersonas } =
         await this.client
@@ -1330,7 +1324,6 @@ export class Fileservice {
       if (errorPersonas) throw errorPersonas;
 
       // 2. Insertamos alumnos
-      console.log(" 2. Insertamos alumnos");
 
       const alumnosParaInsertar = alumnosData.map((alumno, index) => ({
         ...alumno,
@@ -1346,7 +1339,6 @@ export class Fileservice {
       if (errorAlumnos) throw errorAlumnos;
 
       // 3. Insertamos usuarios de alumnos
-      console.log(" 3. Insertamos usuarios de alumnos");
 
       const usuariosParaInsertar = usuariosData
         .map((usuario, index) => ({
@@ -1367,7 +1359,6 @@ export class Fileservice {
       }
 
       // 4. Insertamos relaciones usuario-colegio
-      console.log(" 4. Insertamos relaciones usuario-colegio");
 
       if (usuariosInsertados.length > 0) {
         const relacionesParaInsertar = usuariosColegioData
@@ -1389,7 +1380,6 @@ export class Fileservice {
       }
 
       // 5. Insertamos apoderados
-      console.log(" 5. Insertamos apoderados");
 
       const apoderadosParaInsertar = apoderadosData
         .map((apoderado) => {
@@ -1512,10 +1502,6 @@ export class Fileservice {
         .select("*");
 
       if (errorAulas) throw errorAulas;
-
-      console.log(
-        `Se procesaron ${aulasInsertadas?.length || 0} aulas exitosamente`
-      );
 
       return (aulasInsertadas as Aula[]) || [];
     } catch (error) {

@@ -91,7 +91,6 @@ async obtener(req: Request, res: Response) {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        console.log(persona);
 
         const savedPersona = await dataService.processData(persona);
         res.status(201).json(savedPersona);

@@ -97,39 +97,6 @@ router.post('/registro', AuthService.register);
 
 /**
  * @swagger
- * /api/v1/auth/change-password:
- *   post:
- *     summary: Cambio de contraseña
- *     description: Permite a un usuario cambiar su contraseña
- *     tags:
- *       - Autenticación
- *     security:
- *       - sessionAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               currentPassword:
- *                 type: string
- *                 example: contraseñaActual123
- *               newPassword:
- *                 type: string
- *                 example: nuevaContraseña456
- *     responses:
- *       200:
- *         description: Contraseña cambiada exitosamente
- *       401:
- *         description: Contraseña actual incorrecta
- *       500:
- *         description: Error del servidor
- */
-router.post('/change-password', sessionAuth, AuthService.changePassword);
-
-/**
- * @swagger
  * /api/v1/auth/update-password:
  *   post:
  *     summary: Actualizacion de contraseña
@@ -145,7 +112,7 @@ router.post('/change-password', sessionAuth, AuthService.changePassword);
  *           schema:
  *             type: object
  *             properties:
- *               userId:
+ *               currentPassword:
  *                 type: number
  *                 example: 0
  *               newPassword:
@@ -160,27 +127,35 @@ router.post('/change-password', sessionAuth, AuthService.changePassword);
 
 router.post('/update-password', sessionAuth, AuthService.updatePassword);
 
-// Roles
-
 /**
  * @swagger
- * /api/v1/auth/roles:
- *   get:
- *     summary: Obtener todos los roles
- *     description: Retorna una lista de todos los roles disponibles
+ * /api/v1/auth/restore-password:
+ *   post:
+ *     summary: Actualizacion de contraseña
+ *     description: Permite actualizar la contraseña de un usuario
  *     tags:
- *       - Roles
+ *       - Autenticación
  *     security:
  *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *               newPassword:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *               pass:
+ *                 type: string
+ *                 example: 123456
  *     responses:
  *       200:
- *         description: Lista de roles
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Rol'
+ *         description: Contraseña actualizada exitosamente
  *       500:
  *         description: Error del servidor
  */

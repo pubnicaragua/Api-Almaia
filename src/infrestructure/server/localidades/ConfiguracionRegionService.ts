@@ -6,9 +6,6 @@ const dataService: DataService<ConfiguracionRegion> = new DataService("configura
 export const ConfiguracionRegionService = {
   async obtener(req: Request, res: Response) {
     try {
-      /*const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-      const configuracionregion = await dataService.getAll(["*"], where);
-      res.json(configuracionregion);*/
       const configuracionesregiones = [
         {
           "configuracion_region_id": 1,

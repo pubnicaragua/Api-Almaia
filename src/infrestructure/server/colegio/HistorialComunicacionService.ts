@@ -61,8 +61,6 @@ export const HistorialComunicacionsService = {
 
      
     } catch (error) {
-        console.log(error);
-        
       res.status(500).json(error);
     }
   },
@@ -108,8 +106,6 @@ export const HistorialComunicacionsService = {
         res.status(201).json(historialcomunicacionCreado);
       }
     } catch (error) {
-        console.log(error);
-        
       res.status(500).json(error);
     }
   },
