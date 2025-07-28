@@ -207,8 +207,8 @@ export const AuthService = {
       console.log("restableciendo contraseña del usuario");
       const passwordSchema = Joi.object({
         email: Joi.string().email().required(), // O usa email si lo prefieres
-        newPassword: Joi.string().min(6).required(),
-        pass: Joi.string().min(6).required(),
+        newPassword: Joi.string().min(4).required(),
+        pass: Joi.string().min(4).required(),
       });
       const { error, value } = passwordSchema.validate(req.body);
 
@@ -250,9 +250,10 @@ export const AuthService = {
       };
 
       const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+      
       const passwordSchema = Joi.object({
-        newPassword: Joi.string().min(6).required(),
-        currentPassword: Joi.string().min(6).required(),
+        newPassword: Joi.string().min(4).required(),
+        currentPassword: Joi.string().min(4).required(),
       });
 
       const { error: schemeError, value: body } = passwordSchema.validate(req.body);
