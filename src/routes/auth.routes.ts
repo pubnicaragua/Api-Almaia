@@ -192,6 +192,36 @@ router.post('/restore-password', AuthService.RestorePassword);
  *         description: Error del servidor
  */
 router.post('/solicitar/cambio/password', AuthService.solicitar_cambio_password);
+/**
+ * @swagger
+ * /api/v1/auth/solicitar/cambio/password:
+ *   post:
+ *     summary: Actualizacion de contraseña
+ *     description: Permite actualizar la contraseña de un usuario
+ *     tags:
+ *       - Autenticación
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: number
+ *                 example: 0
+ *               newPassword:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada exitosamente
+ *       500:
+ *         description: Error del servidor
+ */
+router.put('/update-password/clave-dinamica', AuthService.updatePassword_By_ClaveDinamica);
 
 // Roles
 
