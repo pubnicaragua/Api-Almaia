@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { Alumno } from "../../../core/modelo/alumno/Alumno";
 import Joi from "joi";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { ComparativaDato } from "../../../core/modelo/alumno/ComparativaDato";
 import { Usuario } from "../../../core/modelo/auth/Usuario";
@@ -253,6 +253,7 @@ export const AlumnosService = {
   },
   async actualizar(req: Request, res: Response) {
     try {
+
       const id = parseInt(req.params.id);
       const alumno: Alumno = new Alumno();
       Object.assign(alumno, req.body);
@@ -282,9 +283,11 @@ export const AlumnosService = {
 
   async actualizarPerfil(req: Request, res: Response) {
     try {
-      const usuarioId = parseInt(req.params.id);
+      const usuarioId = req.user.usuario_id;
       const usuario = new Usuario();
       const persona = new Persona();
+      const UserDataSession = req.user
+      const AuthID = req.user.auth_id;
       const { encripted_password = undefined, ...rest } = req.body;
 
       Object.assign(usuario, {
@@ -354,11 +357,23 @@ export const AlumnosService = {
           }
 
         await dataUsuarioService.updateById(usuarioId, usuario); /// ACTUALIZA EL USUARIO
+
         await dataImagesService.updateById(usuario.persona_id, {
           url_foto_perfil: usuario?.url_foto_perfil,
           actualizado_por: req.actualizado_por,
           fecha_actualizacion: req.fecha_creacion
         }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
+
+        //Actualizar en la tabla auth users
+        const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+        if (usuario?.email) {
+          const { data: UserDataSession, error: updateAuthUserError } = await admin.auth.admin.updateUserById(AuthID, {
+            email: usuario?.email
+          });
+
+          console.log(UserDataSession)
+          if (updateAuthUserError) throw new Error(updateAuthUserError.message);
+        }
 
         const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
           await client
@@ -388,6 +403,7 @@ export const AlumnosService = {
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: (error as Error).message });
     }
   },
