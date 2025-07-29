@@ -102,7 +102,13 @@ export const AuthService = {
 
     // Validación básica
     if (!email || !password) {
-      res.status(400).json({ message: "Email y contraseña son requeridos." });
+
+      throw new Error("Email y contraseña son requeridos❌");
+      // res.status(400).json({ message: "" });
+    }
+    if (password.length < 6) {
+      throw new Error("La contraseña deber tener 6 caracteres como minimo❌");
+      // res.status(400).json({ message: "" });
     }
 
     try {
@@ -112,7 +118,8 @@ export const AuthService = {
       });
 
       if (error) {
-        res.status(400).json({ message: error.message });
+        throw new Error(error.message);
+        // res.status(400).json({ message:  });
       }
 
       res.status(200).json({
@@ -176,7 +183,7 @@ export const AuthService = {
       };
 
       const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
-      
+
       const passwordSchema = Joi.object({
         newPassword: Joi.string().min(4).required(),
         currentPassword: Joi.string().min(4).required(),
@@ -186,6 +193,7 @@ export const AuthService = {
       const { newPassword, currentPassword } = body;
 
       if (schemeError) {
+        console.log("error de esquema ====>", schemeError)
         throw new Error(schemeError.details[0].message);
       }
       // Intentar loguear al usuario con la contraseña actual
@@ -205,6 +213,7 @@ export const AuthService = {
       });
 
       if (updateError) {
+        console.log("error en insertar nueva pass==>", updateError)
         throw new Error(updateError.message);
       }
       res.status(200).json({
