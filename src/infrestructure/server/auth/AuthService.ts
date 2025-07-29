@@ -4,7 +4,8 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { AuditoriaesService } from "./AuditoriaService";
 import { createClient, AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
 // Interfaz para credenciales
-import Joi from "joi";
+import Joi, { object } from "joi";
+import { EmailService } from "../../../core/services/EmailService";
 // Inicializar Supabase client
 const supabaseService = new SupabaseClientService();
 
@@ -138,24 +139,81 @@ export const AuthService = {
   },
 
 
+  async solicitar_cambio_password(req: Request, res: Response) {
+    const email = req.body.email
+    console.log("ENtraaaaa =============>")
+    try {
+      if (!email) throw new Error("email requerido");
+      console.log("EMail === >", email)
+      //Buscamos el usuario por el email para obtener el auth id
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+      const { data: usuario } = await admin.from("view_auth_users").select("*").eq("email", email).single();
+      console.log(usuario)
+      if (usuario === null) throw new Error("Usuario no registrado");
+      //guardamos la solicitud y la obtenemos para obtener el auth pass
+      const { data: solicitud, error: ErrorAlGuardarSolicitud } = await client.from("solicitudes_cambio_password").insert({
+        user_auth_id: usuario.id
+      }).select("*").single()
+      console.log(solicitud)
+      if (ErrorAlGuardarSolicitud) throw new Error(ErrorAlGuardarSolicitud.message);
+      const authPass = solicitud.authorization_pass
+      console.log(authPass)
+
+
+      const enviarEmail = new EmailService().enviarEmailRestorePassword(email, authPass)
+      // await enviarEmail()
+      //general
+
+
+      res.status(200).json({
+        message: "Solicitud enviada",
+        data: {},
+      });
+    } catch (error: any) {
+      console.error("Error inesperado:", error);
+      res.status(400).json({
+        message: error.message,
+        error: error,
+      });
+    }
+  },
+
   async RestorePassword(req: Request, res: Response) {
     try {
       const passwordSchema = Joi.object({
         email: Joi.string().email().required(), // O usa email si lo prefieres
-        newPassword: Joi.string().min(4).required(),
-        pass: Joi.string().min(4).required(),
+        newPassword: Joi.string().min(6).required(),
+        pass: Joi.string().min(6).required(),
       });
-      const { error, value } = passwordSchema.validate(req.body);
 
-      if (error) {
-        throw new Error(error.details[0].message);
-      }
+      //validar esquema
+      const { error, value } = passwordSchema.validate(req.body);
+      if (error) throw new Error(error.details[0].message);
       const { email, newPassword, pass } = value;
 
+      //buscar el auth id por el email
       const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
-
       const { data: usuario } = await admin.from("view_auth_users").select("*").eq("email", email).single();
-      if (!usuario) throw new Error("Usuario no encontrado");
+      if (!usuario) throw new Error("Usuario no encontradoooo");
+
+      //Validar si codigo de autorizacion
+      const { data: solicitud, error: errorSoliitud } = await client.from("solicitudes_cambio_password").select("*").eq("user_auth_id", usuario?.id).eq("authorization_pass", pass).single()
+      if (errorSoliitud) throw new Error("codigo de autorizacion incorrecto");
+      if (!solicitud) throw new Error("No se ha generado ninguna solicitud");
+      if (solicitud?.used_pass) throw new Error("codigo de autorizacion ya fue usado");
+
+      const authPass = solicitud.authorization_pass;
+      if (authPass !== pass) throw new Error("codigo mal formado");
+      //si el codigo de autorizacion es correcto y no ha sido usado entonces deja pasar y marcamos como usado
+      await client.from("solicitudes_cambio_password").update({
+        used_pass: true
+      }).eq("user_auth_id", usuario?.id).eq("authorization_pass", pass)
+
+
+
+
+
+
 
       const { data, error: updateError } = await admin.auth.admin.updateUserById(usuario.id, {
         password: newPassword,
@@ -185,8 +243,8 @@ export const AuthService = {
       const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
 
       const passwordSchema = Joi.object({
-        newPassword: Joi.string().min(4).required(),
-        currentPassword: Joi.string().min(4).required(),
+        newPassword: Joi.string().min(6).required(),
+        currentPassword: Joi.string().min(6).required(),
       });
 
       const { error: schemeError, value: body } = passwordSchema.validate(req.body);
@@ -209,6 +267,49 @@ export const AuthService = {
       //si la contraseña actual es correcta, actualizar la contraseña
 
       const { data, error: updateError } = await admin.auth.admin.updateUserById(UUID, {
+        password: newPassword,
+      });
+
+      if (updateError) {
+        console.log("error en insertar nueva pass==>", updateError)
+        throw new Error(updateError.message);
+      }
+      res.status(200).json({
+        message: "Contraseña actualizada correctamente",
+        data: data,
+      });
+    } catch (err: any) {
+      console.error("Error inesperado:", err);
+      res.status(400).json({
+        message: "Error al actualizar la contraseña",
+        error: err.message || "Error interno del servidor",
+      });
+    }
+  },
+  async updatePassword_By_ClaveDinamica(req: Request, res: Response) {
+    try {
+
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+
+      const passwordSchema = Joi.object({
+        user_id: Joi.number().required(),
+        newPassword: Joi.string().min(6).required(),
+
+      });
+
+      const { error: schemeError, value: body } = passwordSchema.validate(req.body);
+      const { newPassword, user_id } = body;
+
+      if (schemeError) {
+        console.log("error de esquema ====>", schemeError)
+        throw new Error(schemeError.details[0].message);
+      }
+
+      const { data: user, error } = await client.from("usuarios").select("auth_id").eq("usuario_id", user_id).single()
+      if (!user) throw new Error("Usuario no existe");
+      //guardar contraseña directamente
+
+      const { data, error: updateError } = await admin.auth.admin.updateUserById(user?.auth_id, {
         password: newPassword,
       });
 
