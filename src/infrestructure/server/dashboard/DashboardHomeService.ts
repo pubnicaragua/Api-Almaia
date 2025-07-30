@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
-import { RecentAlert } from "../../../core/modelo/dashboard/RecentAlert";
 import { DonutData } from "../../../core/modelo/dashboard/DonutData";
-import { ImportantDate } from "../../../core/modelo/dashboard/ImportantDate";
 import { Emotion } from "../../../core/modelo/dashboard/Emotion";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";

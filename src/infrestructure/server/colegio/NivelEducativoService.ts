@@ -17,7 +17,6 @@ export const NivelEducativosService = {
       const nivelesEducativos = await dataService.getAll(["*"], where);
       res.json(nivelesEducativos);
     } catch (error) {
-      console.log(error);
 
       res.status(500).json(error);
     }

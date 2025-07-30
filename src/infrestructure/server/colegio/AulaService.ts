@@ -77,7 +77,6 @@ export const AulasService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-        console.log(aula);
 
         const savedAula = await dataService.processData(aula);
         res.status(201).json(savedAula);

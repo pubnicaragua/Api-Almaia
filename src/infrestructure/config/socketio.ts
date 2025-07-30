@@ -31,4 +31,3 @@ io.on('connection', (socket) => {
   });
 });
 
-console.log('Socket.IO server corriendo en el puerto 3000');

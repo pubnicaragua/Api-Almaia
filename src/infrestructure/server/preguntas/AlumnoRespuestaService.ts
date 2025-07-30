@@ -90,8 +90,6 @@ export const AlumnoRespuestaService = {
         .eq("tipo_pregunta_id", alumno.tipo_pregunta_id)
         .single();
       if (errorTipoPregunta || !dataTipoPregunta) {
-        console.log(errorTipoPregunta);
-
         throw new Error("El tipo de pregunta no existe");
       }
       if (validationError) {

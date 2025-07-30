@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { DataService } from "../DataService";
 import { Alumno } from "../../../core/modelo/alumno/Alumno";
 import Joi from "joi";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { ComparativaDato } from "../../../core/modelo/alumno/ComparativaDato";
 import { Usuario } from "../../../core/modelo/auth/Usuario";
@@ -59,7 +59,7 @@ export const AlumnosService = {
     try {
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       dataService.setClient(req.supabase);
-      const alumnos = await dataService.getAll(
+      let alumnos = await dataService.getAll(
         [
           "*",
           "personas(persona_id,nombres,apellidos,fecha_nacimiento,numero_documento,usuarios(usuario_id,rol_id))",
@@ -68,7 +68,27 @@ export const AlumnosService = {
         ],
         where
       );
-      res.json(alumnos);
+      const rawCursoIds = where['cursos.curso_id'];
+      let alumnosFiltrados = alumnos;
+      let cursoIdArray: number[] = [];
+
+      if (rawCursoIds) {
+        if (Array.isArray(rawCursoIds)) {
+          // Si viene como array tipo ["33", "35"]
+          cursoIdArray = rawCursoIds.map(id => Number(id)).filter(id => !isNaN(id));
+        } else if (typeof rawCursoIds === 'string') {
+          // Si viene como string tipo "33,35"
+          cursoIdArray = rawCursoIds
+            .split(',')
+            .map(id => Number(id.trim()))
+            .filter(id => !isNaN(id));
+        }
+        alumnosFiltrados = alumnos.filter(alumno =>
+          alumno?.cursos?.some(curso => cursoIdArray.includes(curso.curso_id))
+        );
+      };
+
+      res.json(alumnosFiltrados);
     } catch (error) {
       console.error("Error al obtener el alumno:", error);
       res.status(500).json({ message: "Error interno del servidor" });
@@ -190,33 +210,7 @@ export const AlumnosService = {
     }
     // Emociones simuladas
     const datosComparativa: ComparativaDato[] = data_emociones_prom_result ? data_emociones_prom_result : [];
-    // const datosComparativa: ComparativaDato[] = [
-    //   {
-    //     emocion: "Feliz",
-    //     alumno: 2.0, // Punto más alejado (y=110)
-    //     promedio: 1.5, // Punto más cercano (y=128)
-    //   },
-    //   {
-    //     emocion: "Triste",
-    //     alumno: 1.9, // x=290
-    //     promedio: 1.6, // x=272
-    //   },
-    //   {
-    //     emocion: "Estresada",
-    //     alumno: 1.5, // y=277
-    //     promedio: 1.2, // y=257
-    //   },
-    //   {
-    //     emocion: "Enojada",
-    //     alumno: 1.5,
-    //     promedio: 1.2,
-    //   },
-    //   {
-    //     emocion: "Ansiosa",
-    //     alumno: 1.9,
-    //     promedio: 1.6,
-    //   },
-    // ];
+
     res.json({
       alumno,
       ficha,
@@ -259,6 +253,7 @@ export const AlumnosService = {
   },
   async actualizar(req: Request, res: Response) {
     try {
+
       const id = parseInt(req.params.id);
       const alumno: Alumno = new Alumno();
       Object.assign(alumno, req.body);
@@ -288,9 +283,11 @@ export const AlumnosService = {
 
   async actualizarPerfil(req: Request, res: Response) {
     try {
-      const usuarioId = parseInt(req.params.id);
+      const usuarioId = req.user.usuario_id;
       const usuario = new Usuario();
       const persona = new Persona();
+      const UserDataSession = req.user
+      const AuthID = req.user.auth_id;
       const { encripted_password = undefined, ...rest } = req.body;
 
       Object.assign(usuario, {
@@ -360,11 +357,23 @@ export const AlumnosService = {
           }
 
         await dataUsuarioService.updateById(usuarioId, usuario); /// ACTUALIZA EL USUARIO
+
         await dataImagesService.updateById(usuario.persona_id, {
           url_foto_perfil: usuario?.url_foto_perfil,
           actualizado_por: req.actualizado_por,
           fecha_actualizacion: req.fecha_creacion
         }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
+
+        //Actualizar en la tabla auth users
+        const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+        if (usuario?.email) {
+          const { data: UserDataSession, error: updateAuthUserError } = await admin.auth.admin.updateUserById(AuthID, {
+            email: usuario?.email
+          });
+
+          console.log(UserDataSession)
+          if (updateAuthUserError) throw new Error(updateAuthUserError.message);
+        }
 
         const { data: dataUsuarioUpdate, error: errorUsuarioUpdate } =
           await client
@@ -394,6 +403,7 @@ export const AlumnosService = {
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: (error as Error).message });
     }
   },
@@ -407,7 +417,7 @@ export const AlumnosService = {
     }
   },
   async buscar(req: Request, res: Response) {
-    const { termino } = req.body;
+    const { termino, cursos } = req.body;
     const { colegio_id } = req.query;
 
     if (!termino || typeof termino !== "string") {
@@ -418,11 +428,7 @@ export const AlumnosService = {
 
     try {
       let resultados;
-      if (colegio_id !== undefined) {
-        resultados = await buscarAlumnos(client, termino, colegio_id);
-      } else {
-        resultados = await buscarAlumnos(client, termino);
-      }
+      resultados = await buscarAlumnos(client, termino, colegio_id, cursos);
       if (resultados === null) {
         resultados = [];
       }
@@ -484,41 +490,41 @@ export const AlumnosService = {
     }
   },
   async obtenerPerfil(req: Request, res: Response) {
-      const { data: usuario_data, error: error_usuario } = await req.supabase
-        .from("usuarios")
-        .select(
-          "*,idiomas(*),usuarios_colegios(*,colegios(colegio_id,nombre)),personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion,funcionalidades_roles(*,funcionalidad_rol_id,funcionalidades(*,funcionalidad_id)))"
-        )
-        .eq("usuario_id", req.user.usuario_id)
-        .single();
-      if (error_usuario) {
-        throw new Error(error_usuario.message);
-      }
-      
-      const data = mapearDatosAlumno(usuario_data);
-      
-      const usuario = data.usuario;
-      const persona = data.persona;
-      const rol = data.rol;
-      const funcionalidades= data.funcionalidades
-      const { data: alumno_data, error: error_alumno } = await req.supabase
-        .from("alumnos")
-        .select(
-          "*,alumnos_apoderados(*,apoderados(*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento)))"
-        )
-        .eq("persona_id", data.persona.persona_id);
-      if (error_alumno) {
-        throw new Error(error_alumno.message);
-      }
+    const { data: usuario_data, error: error_usuario } = await req.supabase
+      .from("usuarios")
+      .select(
+        "*,idiomas(*),usuarios_colegios(*,colegios(colegio_id,nombre)),personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento),roles(rol_id,nombre,descripcion,funcionalidades_roles(*,funcionalidad_rol_id,funcionalidades(*,funcionalidad_id)))"
+      )
+      .eq("usuario_id", req.user.usuario_id)
+      .single();
+    if (error_usuario) {
+      throw new Error(error_usuario.message);
+    }
+
+    const data = mapearDatosAlumno(usuario_data);
+
+    const usuario = data.usuario;
+    const persona = data.persona;
+    const rol = data.rol;
+    const funcionalidades = data.funcionalidades
+    const { data: alumno_data, error: error_alumno } = await req.supabase
+      .from("alumnos")
+      .select(
+        "*,alumnos_apoderados(*,apoderados(*,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id,fecha_nacimiento)))"
+      )
+      .eq("persona_id", data.persona.persona_id);
+    if (error_alumno) {
+      throw new Error(error_alumno.message);
+    }
     const apoderados = alumno_data[0]?.alumnos_apoderados
 
-  
-      res.json({
-        usuario,
-        persona,
-        rol,
-        funcionalidades,
-        apoderados
-      });
-    },
+
+    res.json({
+      usuario,
+      persona,
+      rol,
+      funcionalidades,
+      apoderados
+    });
+  },
 };

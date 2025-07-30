@@ -38,7 +38,6 @@ export const ApoderadoRespuestaService = {
         fecha = moment().format('YYYY-MM-DD'),
         ...where } = req.query; // Convertir los parámetros de consulta en filtros
 
-
       let query = client
         .from('apoderados_respuestas')
         .select(
@@ -52,18 +51,13 @@ export const ApoderadoRespuestaService = {
         )
         .eq('activo', true)
         .eq('respondio', respondio)
-        .gte('fecha_creacion::date', fecha)
+        // .gte('fecha_creacion::date', fecha)
         .order('fecha_creacion', { ascending: true });
 
       Object.keys(where).forEach((key) => {
         query = query.eq(key, where[key]);
       });
 
-      // if (respondio) {
-      //   query = query.not('respuesta_posible_id', 'is', null);
-      // } else if (!respondio) {
-      //   query = query.is('respuesta_posible_id', null);
-      // }
 
       const { data, error } = await query.returns<any[]>();
 
@@ -73,17 +67,6 @@ export const ApoderadoRespuestaService = {
 
       res.status(200).json(data);
 
-      // const apoderadorespuestas = await dataService.getAll(
-      //   [
-      //     "*",
-      //     "alumnos(alumno_id,url_foto_perfil,personas(persona_id,nombres,apellidos))",
-      //     "preguntas(pregunta_id,texto_pregunta,respuestas_posibles(respuesta_posible_id,nombre))",
-      //     "apoderados(apoderado_id,personas(persona_id,nombres,apellidos),telefono_contacto1,telefono_contacto2,email_contacto1,email_contacto2)",
-      //     "respuestas_posibles(respuesta_posible_id,nombre)",
-      //   ],
-      //   where
-      // );
-      // res.json(apoderadorespuestas);
     } catch (error) {
       console.error("Error al obtener la apoderadorespuesta:", error);
       res.status(500).json({ message: "Error interno del servidor" });

@@ -226,7 +226,6 @@ export const UsuariosService = {
         throw new Error(validationError.details[0].message);
       }
       if (!responseSent) {
-            console.log('url',usuario.url_foto_perfil);
 
         await dataService.updateById(usuarioId, usuario);
 
@@ -252,7 +251,6 @@ export const UsuariosService = {
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error: any) {
-      console.log("Error de datos",error);
 
       res.status(500).json({ message: error.message || "Error inesperado"});
     }

@@ -31,7 +31,6 @@ export const AlumnoAlertaBitacoraService = {
   async obtener(req: Request, res: Response) {
     try {
       const { colegio_id, ...where } = req.query;
-      console.log(colegio_id);
       const alumnoAlertaBitacora = await dataService.getAll(["*,alumnos_alertas(*,responsable:personas(*))"], where);
       res.json(alumnoAlertaBitacora);
     } catch (error) {

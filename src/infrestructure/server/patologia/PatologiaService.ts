@@ -6,9 +6,6 @@ const dataService:DataService<Patologia> = new DataService("patologias");
 export const PatologiaService = {
      async obtener(req: Request, res: Response) {
             try {
-               /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-                const patologia = await dataService.getAll(["*"],where);
-                res.json(patologia);*/
 
                 const patologias = [
                     {

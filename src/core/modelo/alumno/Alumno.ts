@@ -7,10 +7,15 @@ export class Alumno extends BaseModel {
     telefono_contacto1?: string;
     email?: string;
     telefono_contacto2?: string;
-    persona_id:number
-    constructor(){
+    persona_id: number;
+    cursos?: Array<
+        {
+            curso_id: number
+        }
+    >;
+    constructor() {
         super();
         this.colegio_id = 0;
-        this.persona_id=0;
+        this.persona_id = 0;
     }
-  }
+}

@@ -610,7 +610,7 @@ const ruta_alumnos_diarios = '/diarios';
  *       in: cookie
  *       name: session
  */
-router.get('/', sessionAuth,sessionAuth, AlumnosService.obtener);
+router.get('/', sessionAuth, sessionAuth, AlumnosService.obtener);
 /**
  * @swagger
  * /api/v1/alumnos/racha:
@@ -1430,7 +1430,7 @@ router.get('/perfil', sessionAuth, AlumnosService.obtenerPerfil);
  *               nullable: true
  *               example: null
  */
-router.get('/detalle/:alumnoId',sessionAuth, AlumnosService.getAlumnoDetalle);
+router.get('/detalle/:alumnoId', sessionAuth, AlumnosService.getAlumnoDetalle);
 
 /**
  * @swagger
@@ -1760,7 +1760,7 @@ router.put(ruta_actividades + '/:id', sessionAuth, ActividadsService.actualizar)
  *       scheme: bearer
  *       bearerFormat: JWT
  */
-router.put( '/perfil/:id', sessionAuth, AlumnosService.actualizarPerfil);
+router.put('/perfil/update', sessionAuth, AlumnosService.actualizarPerfil);
 
 /**
  * @swagger
@@ -1967,7 +1967,7 @@ router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
  *                   type: string
  *                   example: "Error al contar alertas pendientes"
  */
-router.get(ruta_alumnos_alertas+"/conteo", sessionAuth, AlumnoAlertaService.contarAlertasPendientes);
+router.get(ruta_alumnos_alertas + "/conteo", sessionAuth, AlumnoAlertaService.contarAlertasPendientes);
 /**
  * @swagger
  * /api/v1/alumnos/buscar:
@@ -2197,7 +2197,7 @@ router.post("/buscar", sessionAuth, AlumnosService.buscar);
  *               example: 2
  *           description: Tipo de alerta
  */
-router.get(ruta_alumnos_alertas+"/:id", sessionAuth, AlumnoAlertaService.detalle);
+router.get(ruta_alumnos_alertas + "/:id", sessionAuth, AlumnoAlertaService.detalle);
 
 /**
  * @swagger
@@ -3758,7 +3758,7 @@ router.delete(ruta_alumnos_notificaciones + '/:id', sessionAuth, AlumnoNotificac
  *       500:
  *         description: Error interno del servidor
  */
-router.get(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.obtener)
+router.get(ruta_alumnos_actividades + '/', sessionAuth, AlumnoActividadService.obtener)
 /**
  * @swagger
  * /api/v1/alumnos/alumnos_actividades:
@@ -3807,7 +3807,7 @@ router.get(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.obten
  *       500:
  *         description: Error interno del servidor
  */
-router.post(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.guardar)
+router.post(ruta_alumnos_actividades + '/', sessionAuth, AlumnoActividadService.guardar)
 /**
  * @swagger
  * /api/v1/alumnos/alumnos_actividades:
@@ -3855,7 +3855,7 @@ router.post(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.guar
  *       500:
  *         description: Error interno del servidor
  */
-router.put(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.actualizar)
+router.put(ruta_alumnos_actividades + '/', sessionAuth, AlumnoActividadService.actualizar)
 /**
  * @swagger
  * /api/v1/alumnos/alumnos_actividades:
@@ -3883,7 +3883,7 @@ router.put(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.actua
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.eliminar)
+router.delete(ruta_alumnos_actividades + '/', sessionAuth, AlumnoActividadService.eliminar)
 /**
  * @swagger
  * /api/v1/alumnos/permisos:
@@ -3935,7 +3935,7 @@ router.delete(ruta_alumnos_actividades+'/',sessionAuth,AlumnoActividadService.el
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.obtener)
+router.get(ruta_alumnos_permisos + '/', sessionAuth, AlumnoPermisoAutorsService.obtener)
 /**
  * @swagger
  * /api/v1/alumnos/permisos:
@@ -3993,7 +3993,7 @@ router.get(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.obte
  *       500:
  *         description: Error interno del servidor
  */
-router.post(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.guardar)
+router.post(ruta_alumnos_permisos + '/', sessionAuth, AlumnoPermisoAutorsService.guardar)
 /**
  * @swagger
  * /api/v1/alumnos/permisos:
@@ -4052,7 +4052,7 @@ router.post(ruta_alumnos_permisos+'/',sessionAuth,AlumnoPermisoAutorsService.gua
  *       500:
  *         description: Error interno del servidor
  */
-router.put(ruta_alumnos_permisos+'/:id',sessionAuth,AlumnoPermisoAutorsService.actualizar)
+router.put(ruta_alumnos_permisos + '/:id', sessionAuth, AlumnoPermisoAutorsService.actualizar)
 
 
 /**
@@ -4077,7 +4077,7 @@ router.put(ruta_alumnos_permisos+'/:id',sessionAuth,AlumnoPermisoAutorsService.a
  *       500:
  *         description: Error del servidor
  */
-router.get(ruta_alumnos_diarios+'/',sessionAuth,AlumnoDiarioService.obtener)
+router.get(ruta_alumnos_diarios + '/', sessionAuth, AlumnoDiarioService.obtener)
 /**
  * @swagger
  * /api/v1/alumnos/diarios/:
@@ -4111,7 +4111,7 @@ router.get(ruta_alumnos_diarios+'/',sessionAuth,AlumnoDiarioService.obtener)
  *       500:
  *         description: Error del servidor
  */
-router.post(ruta_alumnos_diarios+'/',sessionAuth,AlumnoDiarioService.guardar)
+router.post(ruta_alumnos_diarios + '/', sessionAuth, AlumnoDiarioService.guardar)
 /**
  * @swagger
  * /api/v1/alumnos/diarios/{id}:
@@ -4153,7 +4153,7 @@ router.post(ruta_alumnos_diarios+'/',sessionAuth,AlumnoDiarioService.guardar)
  *       500:
  *         description: Error del servidor
  */
-router.put(ruta_alumnos_diarios+'/:id',sessionAuth,AlumnoDiarioService.actualizar)
+router.put(ruta_alumnos_diarios + '/:id', sessionAuth, AlumnoDiarioService.actualizar)
 /**
  * @swagger
  * /api/v1/alumnos/consentimiento/{id}:
@@ -4228,7 +4228,7 @@ router.put('/consentimiento/:id', sessionAuth, AlumnosService.establecer_consent
  *       500:
  *         description: Error del servidor
  */
-router.delete(ruta_alumnos_diarios+'/:id',sessionAuth,AlumnoDiarioService.eliminar)
+router.delete(ruta_alumnos_diarios + '/:id', sessionAuth, AlumnoDiarioService.eliminar)
 /**
  * @swagger
  * /api/v1/alumnos/permisos:

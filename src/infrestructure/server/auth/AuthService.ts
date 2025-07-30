@@ -2,17 +2,10 @@
 import { Request, Response } from "express";
 import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { AuditoriaesService } from "./AuditoriaService";
-import { AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
-
+import { createClient, AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
 // Interfaz para credenciales
-import Joi from "joi";
-const PasswordSchema = Joi.object({
-  currentPassword: Joi.string().min(6).required(),
-  newPassword: Joi.string().min(6).required(),
-  token: Joi.string().min(6).required(),
-  refreshToken: Joi.string().min(6).required(),
-  confirmPassword: Joi.string().valid(Joi.ref("newPassword")).required(),
-});
+import Joi, { object } from "joi";
+import { EmailService } from "../../../core/services/EmailService";
 // Inicializar Supabase client
 const supabaseService = new SupabaseClientService();
 
@@ -23,7 +16,6 @@ export const AuthService = {
   async login(req: Request, res: Response) {
     const { email, password } = req.body;
     try {
-      // console.log('Intentando iniciar sesión con:', email);
       // Autenticar al usuario en Supabase Auth
       const { data: authData, error: authError } =
         await client.auth.signInWithPassword({
@@ -111,7 +103,13 @@ export const AuthService = {
 
     // Validación básica
     if (!email || !password) {
-      res.status(400).json({ message: "Email y contraseña son requeridos." });
+
+      throw new Error("Email y contraseña son requeridos❌");
+      // res.status(400).json({ message: "" });
+    }
+    if (password.length < 6) {
+      throw new Error("La contraseña deber tener 6 caracteres como minimo❌");
+      // res.status(400).json({ message: "" });
     }
 
     try {
@@ -121,7 +119,8 @@ export const AuthService = {
       });
 
       if (error) {
-        res.status(400).json({ message: error.message });
+        throw new Error(error.message);
+        // res.status(400).json({ message:  });
       }
 
       res.status(200).json({
@@ -139,85 +138,140 @@ export const AuthService = {
     }
   },
 
-  async changePassword(req: Request, res: Response) {
-    let responseSent = false; // Bandera para rastrear si se envió una respuesta
 
+  async solicitar_cambio_password(req: Request, res: Response) {
+    const email = req.body.email
+    console.log("ENtraaaaa =============>")
     try {
-      // Validar la estructura de la solicitud
-      const { error: validationError, value } = PasswordSchema.validate(
-        req.body
-      );
+      if (!email) throw new Error("email requerido");
+      console.log("EMail === >", email)
+      //Buscamos el usuario por el email para obtener el auth id
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+      const { data: usuario } = await admin.from("view_auth_users").select("*").eq("email", email).single();
+      console.log(usuario)
+      if (usuario === null) throw new Error("Usuario no registrado");
+      //guardamos la solicitud y la obtenemos para obtener el auth pass
+      const { data: solicitud, error: ErrorAlGuardarSolicitud } = await client.from("solicitudes_cambio_password").insert({
+        user_auth_id: usuario.id
+      }).select("*").single()
+      console.log(solicitud)
+      if (ErrorAlGuardarSolicitud) throw new Error(ErrorAlGuardarSolicitud.message);
+      const authPass = solicitud.authorization_pass
+      console.log(authPass)
 
-      if (validationError) {
-        res.status(400).json({ error: validationError.details[0].message });
-        responseSent = true; // Marcar respuesta como enviada
-      }
 
-      if (!responseSent) {
-        // Establecer la sesión con Supabase
-        const { error: setSessionError } = await client.auth.setSession({
-          access_token: value.token,
-          refresh_token: value.refreshToken,
-        });
+      const enviarEmail = new EmailService().enviarEmailRestorePassword(email, authPass)
+      // await enviarEmail()
+      //general
 
-        if (setSessionError) {
-          res.status(400).json({ error: setSessionError.message });
-          responseSent = true; // Marcar respuesta como enviada
-        }
 
-        if (!responseSent) {
-          // Cambiar la contraseña del usuario
-          const { data: updateData, error: passwordError } =
-            await client.auth.updateUser({
-              password: value.newPassword,
-            });
+      res.status(200).json({
+        message: "Solicitud enviada",
+        data: {},
+      });
+    } catch (error: any) {
+      console.error("Error inesperado:", error);
+      res.status(400).json({
+        message: error.message,
+        error: error,
+      });
+    }
+  },
 
-          if (passwordError) {
-            res.status(400).json({ error: passwordError.message });
-            responseSent = true; // Marcar respuesta como enviada
-          }
+  async RestorePassword(req: Request, res: Response) {
+    try {
+      const passwordSchema = Joi.object({
+        email: Joi.string().email().required(), // O usa email si lo prefieres
+        newPassword: Joi.string().min(6).required(),
+        pass: Joi.string().min(6).required(),
+      });
 
-          if (!responseSent) {
-            // Respuesta exitosa
-            res.status(200).json({
-              message: "Contraseña cambiada exitosamente.",
-              user: updateData,
-            });
-            responseSent = true; // Marcar respuesta como enviada
-          }
-        }
-      }
-    } catch (err) {
-      if (!responseSent) {
-        res.status(500).json({
-          error: "Error interno del servidor.",
-          details: (err as Error).message || "Ocurrió un error desconocido.",
-        });
-      }
+      //validar esquema
+      const { error, value } = passwordSchema.validate(req.body);
+      if (error) throw new Error(error.details[0].message);
+      const { email, newPassword, pass } = value;
+
+      //buscar el auth id por el email
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+      const { data: usuario } = await admin.from("view_auth_users").select("*").eq("email", email).single();
+      if (!usuario) throw new Error("Usuario no encontradoooo");
+
+      //Validar si codigo de autorizacion
+      const { data: solicitud, error: errorSoliitud } = await client.from("solicitudes_cambio_password").select("*").eq("user_auth_id", usuario?.id).eq("authorization_pass", pass).single()
+      if (errorSoliitud) throw new Error("codigo de autorizacion incorrecto");
+      if (!solicitud) throw new Error("No se ha generado ninguna solicitud");
+      if (solicitud?.used_pass) throw new Error("codigo de autorizacion ya fue usado");
+
+      const authPass = solicitud.authorization_pass;
+      if (authPass !== pass) throw new Error("codigo mal formado");
+      //si el codigo de autorizacion es correcto y no ha sido usado entonces deja pasar y marcamos como usado
+      await client.from("solicitudes_cambio_password").update({
+        used_pass: true
+      }).eq("user_auth_id", usuario?.id).eq("authorization_pass", pass)
+
+
+
+
+
+
+
+      const { data, error: updateError } = await admin.auth.admin.updateUserById(usuario.id, {
+        password: newPassword,
+      });
+      if (updateError) throw new Error(updateError.message);
+
+      res.status(200).json({
+        message: "Contraseña actualizada correctamente",
+        data: data,
+      });
+    } catch (err: any) {
+      console.error("Error inesperado:", err);
+      res.status(400).json({
+        message: "Error al actualizar la contraseña",
+        error: err.message || "Error interno del servidor",
+      });
     }
   },
   async updatePassword(req: Request, res: Response) {
     try {
-      const { userId, newPassword } = req.body;
-      if (!userId || !newPassword) {
-        throw new Error("userId y newPassword son requeridos");
+      const UUID = req?.user?.auth_id;
+      const EMAIL = req?.user?.email;
+      if (!UUID || !EMAIL) {
+        throw new Error('Usuario no autorizado');
+      };
+
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+
+      const passwordSchema = Joi.object({
+        newPassword: Joi.string().min(6).required(),
+        currentPassword: Joi.string().min(6).required(),
+      });
+
+      const { error: schemeError, value: body } = passwordSchema.validate(req.body);
+      const { newPassword, currentPassword } = body;
+
+      if (schemeError) {
+        console.log("error de esquema ====>", schemeError)
+        throw new Error(schemeError.details[0].message);
       }
-      const { data: usuarioData, error: userError } = await client
-        .from("usuarios")
-        .select("email, auth_id")
-        .eq("usuario_id", userId)
-        .single();
-      if (userError || !usuarioData) {
-        throw new Error(userError?.message || "No se pudo obtener el usuario");
+      // Intentar loguear al usuario con la contraseña actual
+      const { data: DataPassword, error: ErrorLoginWithPassword } = await admin.auth.signInWithPassword({
+        email: EMAIL,
+        password: currentPassword
+      });
+      //si no se puede loguear con la contraseña actual, lanzar error
+      if (ErrorLoginWithPassword) {
+        throw new Error("Contraseña incorrecta");
       }
-      const { data, error: updateError } = await client.rpc(
-        "cambiar_contrasena",
-        {
-          p_email: usuarioData.email,
-          p_nueva_contrasena: newPassword,
-        }
-      );
+
+      //si la contraseña actual es correcta, actualizar la contraseña
+
+      const { data, error: updateError } = await admin.auth.admin.updateUserById(UUID, {
+        password: newPassword,
+      });
+
       if (updateError) {
+        console.log("error en insertar nueva pass==>", updateError)
         throw new Error(updateError.message);
       }
       res.status(200).json({
@@ -232,4 +286,48 @@ export const AuthService = {
       });
     }
   },
+  async updatePassword_By_ClaveDinamica(req: Request, res: Response) {
+    try {
+
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+
+      const passwordSchema = Joi.object({
+        user_id: Joi.number().required(),
+        newPassword: Joi.string().min(6).required(),
+
+      });
+
+      const { error: schemeError, value: body } = passwordSchema.validate(req.body);
+      const { newPassword, user_id } = body;
+
+      if (schemeError) {
+        console.log("error de esquema ====>", schemeError)
+        throw new Error(schemeError.details[0].message);
+      }
+
+      const { data: user, error } = await client.from("usuarios").select("auth_id").eq("usuario_id", user_id).single()
+      if (!user) throw new Error("Usuario no existe");
+      //guardar contraseña directamente
+
+      const { data, error: updateError } = await admin.auth.admin.updateUserById(user?.auth_id, {
+        password: newPassword,
+      });
+
+      if (updateError) {
+        console.log("error en insertar nueva pass==>", updateError)
+        throw new Error(updateError.message);
+      }
+      res.status(200).json({
+        message: "Contraseña actualizada correctamente",
+        data: data,
+      });
+    } catch (err: any) {
+      console.error("Error inesperado:", err);
+      res.status(400).json({
+        message: "Error al actualizar la contraseña",
+        error: err.message || "Error interno del servidor",
+      });
+    }
+  },
+
 };

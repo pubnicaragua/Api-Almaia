@@ -32,7 +32,6 @@ export const UsuarioColegiosService = {
       const colegios_maping = await mapearColegios(usuariocolegios);
       res.json(colegios_maping);
     } catch (error) {
-      console.log(error);
 
       res.status(500).json(error);
     }

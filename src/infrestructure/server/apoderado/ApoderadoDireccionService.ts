@@ -7,9 +7,6 @@ const dataService:DataService<ApoderadoDireccion> = new DataService("alumnos_res
 export const ApoderadoDireccionService = {
     async obtener(req: Request, res: Response) {
         try {
-           /* const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
-            const apoderadoDireccion = await dataService.getAll(["*"],where);
-            res.json(apoderadoDireccion);*/
             const apoderados_direcciones = [
                 {
                   "apoderado_direccion_id": 1,

@@ -97,39 +97,6 @@ router.post('/registro', AuthService.register);
 
 /**
  * @swagger
- * /api/v1/auth/change-password:
- *   post:
- *     summary: Cambio de contraseña
- *     description: Permite a un usuario cambiar su contraseña
- *     tags:
- *       - Autenticación
- *     security:
- *       - sessionAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               currentPassword:
- *                 type: string
- *                 example: contraseñaActual123
- *               newPassword:
- *                 type: string
- *                 example: nuevaContraseña456
- *     responses:
- *       200:
- *         description: Contraseña cambiada exitosamente
- *       401:
- *         description: Contraseña actual incorrecta
- *       500:
- *         description: Error del servidor
- */
-router.post('/change-password', sessionAuth, AuthService.changePassword);
-
-/**
- * @swagger
  * /api/v1/auth/update-password:
  *   post:
  *     summary: Actualizacion de contraseña
@@ -145,7 +112,7 @@ router.post('/change-password', sessionAuth, AuthService.changePassword);
  *           schema:
  *             type: object
  *             properties:
- *               userId:
+ *               currentPassword:
  *                 type: number
  *                 example: 0
  *               newPassword:
@@ -157,7 +124,104 @@ router.post('/change-password', sessionAuth, AuthService.changePassword);
  *       500:
  *         description: Error del servidor
  */
+
 router.post('/update-password', sessionAuth, AuthService.updatePassword);
+
+/**
+ * @swagger
+ * /api/v1/auth/restore-password:
+ *   post:
+ *     summary: Actualizacion de contraseña
+ *     description: Permite actualizar la contraseña de un usuario
+ *     tags:
+ *       - Autenticación
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *               newPassword:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *               pass:
+ *                 type: string
+ *                 example: 123456
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada exitosamente
+ *       500:
+ *         description: Error del servidor
+ */
+
+router.post('/restore-password', AuthService.RestorePassword);
+
+/**
+ * @swagger
+ * /api/v1/auth/solicitar/cambio/password:
+ *   post:
+ *     summary: Actualizacion de contraseña
+ *     description: Permite actualizar la contraseña de un usuario
+ *     tags:
+ *       - Autenticación
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: number
+ *                 example: 0
+ *               newPassword:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada exitosamente
+ *       500:
+ *         description: Error del servidor
+ */
+router.post('/solicitar/cambio/password', AuthService.solicitar_cambio_password);
+/**
+ * @swagger
+ * /api/v1/auth/solicitar/cambio/password:
+ *   post:
+ *     summary: Actualizacion de contraseña
+ *     description: Permite actualizar la contraseña de un usuario
+ *     tags:
+ *       - Autenticación
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: number
+ *                 example: 0
+ *               newPassword:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada exitosamente
+ *       500:
+ *         description: Error del servidor
+ */
+router.put('/update-password/clave-dinamica', AuthService.updatePassword_By_ClaveDinamica);
 
 // Roles
 
@@ -183,7 +247,7 @@ router.post('/update-password', sessionAuth, AuthService.updatePassword);
  *       500:
  *         description: Error del servidor
  */
-router.get(ruta_roles+'/', sessionAuth, RolesService.obtener);
+router.get(ruta_roles + '/', sessionAuth, RolesService.obtener);
 
 /**
  * @swagger
@@ -213,7 +277,7 @@ router.get(ruta_roles+'/', sessionAuth, RolesService.obtener);
  *       500:
  *         description: Error del servidor
  */
-router.post(ruta_roles+'/', sessionAuth, RolesService.guardar);
+router.post(ruta_roles + '/', sessionAuth, RolesService.guardar);
 
 /**
  * @swagger
@@ -250,7 +314,7 @@ router.post(ruta_roles+'/', sessionAuth, RolesService.guardar);
  *       500:
  *         description: Error del servidor
  */
-router.put(ruta_roles+'/:id', sessionAuth, RolesService.actualizar);
+router.put(ruta_roles + '/:id', sessionAuth, RolesService.actualizar);
 
 /**
  * @swagger
@@ -277,7 +341,7 @@ router.put(ruta_roles+'/:id', sessionAuth, RolesService.actualizar);
  *       500:
  *         description: Error del servidor
  */
-router.delete(ruta_roles+'/:id', sessionAuth, RolesService.eliminar);
+router.delete(ruta_roles + '/:id', sessionAuth, RolesService.eliminar);
 
 // Funcionalidades
 
@@ -303,7 +367,7 @@ router.delete(ruta_roles+'/:id', sessionAuth, RolesService.eliminar);
  *       500:
  *         description: Error del servidor
  */
-router.get(ruta_funcionalidades+'/', sessionAuth, FuncionalidadesService.obtener);
+router.get(ruta_funcionalidades + '/', sessionAuth, FuncionalidadesService.obtener);
 
 /**
  * @swagger
@@ -333,7 +397,7 @@ router.get(ruta_funcionalidades+'/', sessionAuth, FuncionalidadesService.obtener
  *       500:
  *         description: Error del servidor
  */
-router.post(ruta_funcionalidades+'/', sessionAuth, FuncionalidadesService.guardar);
+router.post(ruta_funcionalidades + '/', sessionAuth, FuncionalidadesService.guardar);
 
 /**
  * @swagger
@@ -370,7 +434,7 @@ router.post(ruta_funcionalidades+'/', sessionAuth, FuncionalidadesService.guarda
  *       500:
  *         description: Error del servidor
  */
-router.put(ruta_funcionalidades+'/:id', sessionAuth, FuncionalidadesService.actualizar);
+router.put(ruta_funcionalidades + '/:id', sessionAuth, FuncionalidadesService.actualizar);
 
 /**
  * @swagger
@@ -397,7 +461,7 @@ router.put(ruta_funcionalidades+'/:id', sessionAuth, FuncionalidadesService.actu
  *       500:
  *         description: Error del servidor
  */
-router.delete(ruta_funcionalidades+'/:id', sessionAuth, FuncionalidadesService.eliminar);
+router.delete(ruta_funcionalidades + '/:id', sessionAuth, FuncionalidadesService.eliminar);
 
 // Funcionalidades-Roles
 
@@ -423,7 +487,7 @@ router.delete(ruta_funcionalidades+'/:id', sessionAuth, FuncionalidadesService.e
  *       500:
  *         description: Error del servidor
  */
-router.get(ruta_funcionalidades_roles+'/', sessionAuth, FuncionalidadRolService.obtener);
+router.get(ruta_funcionalidades_roles + '/', sessionAuth, FuncionalidadRolService.obtener);
 
 /**
  * @swagger
@@ -453,7 +517,7 @@ router.get(ruta_funcionalidades_roles+'/', sessionAuth, FuncionalidadRolService.
  *       500:
  *         description: Error del servidor
  */
-router.post(ruta_funcionalidades_roles+'/', sessionAuth, FuncionalidadRolService.guardar);
+router.post(ruta_funcionalidades_roles + '/', sessionAuth, FuncionalidadRolService.guardar);
 
 /**
  * @swagger
@@ -490,7 +554,7 @@ router.post(ruta_funcionalidades_roles+'/', sessionAuth, FuncionalidadRolService
  *       500:
  *         description: Error del servidor
  */
-router.put(ruta_funcionalidades_roles+'/:id', sessionAuth, FuncionalidadRolService.actualizar);
+router.put(ruta_funcionalidades_roles + '/:id', sessionAuth, FuncionalidadRolService.actualizar);
 
 /**
  * @swagger
@@ -517,7 +581,7 @@ router.put(ruta_funcionalidades_roles+'/:id', sessionAuth, FuncionalidadRolServi
  *       500:
  *         description: Error del servidor
  */
-router.delete(ruta_funcionalidades_roles+'/:id', sessionAuth, FuncionalidadRolService.eliminar);
+router.delete(ruta_funcionalidades_roles + '/:id', sessionAuth, FuncionalidadRolService.eliminar);
 
 /**
  * @swagger
@@ -612,7 +676,7 @@ router.delete(ruta_funcionalidades_roles+'/:id', sessionAuth, FuncionalidadRolSe
  *       500:
  *         description: Error interno del servidor
  */
-router.get(ruta_usuarios+'/', sessionAuth, UsuariosService.obtener);
+router.get(ruta_usuarios + '/', sessionAuth, UsuariosService.obtener);
 
 /**
  * @swagger
@@ -645,7 +709,7 @@ router.get(ruta_usuarios+'/', sessionAuth, UsuariosService.obtener);
  *       500:
  *         description: Error interno del servidor
  */
-router.post(ruta_usuarios+'/', sessionAuth, UsuariosService.guardar);
+router.post(ruta_usuarios + '/', sessionAuth, UsuariosService.guardar);
 
 /**
  * @swagger
@@ -685,7 +749,7 @@ router.post(ruta_usuarios+'/', sessionAuth, UsuariosService.guardar);
  *       500:
  *         description: Error interno del servidor
  */
-router.put(ruta_usuarios+'/:id', sessionAuth, UsuariosService.actualizar);
+router.put(ruta_usuarios + '/:id', sessionAuth, UsuariosService.actualizar);
 /**
  * @swagger
  * /api/v1/auth/usuarios/generar_clave/{id}:
@@ -757,7 +821,7 @@ router.put('/usuarios/generar_clave/:id', sessionAuth, UsuariosService.generar_c
  *       500:
  *         description: Error interno del servidor
  */
-router.get(ruta_auditorias+'/', sessionAuth, AuditoriaesService.obtener);
+router.get(ruta_auditorias + '/', sessionAuth, AuditoriaesService.obtener);
 
 /**
  * @swagger
@@ -795,7 +859,7 @@ router.get(ruta_auditorias+'/', sessionAuth, AuditoriaesService.obtener);
  *       500:
  *         description: Error interno del servidor
  */
-router.post(ruta_auditorias+'/', sessionAuth, AuditoriaesService.guardar);
+router.post(ruta_auditorias + '/', sessionAuth, AuditoriaesService.guardar);
 
 /**
  * @swagger
@@ -888,7 +952,7 @@ router.post(ruta_auditorias+'/', sessionAuth, AuditoriaesService.guardar);
  *       500:
  *         description: Error interno del servidor
  */
-router.delete(ruta_usuarios+'/:id', sessionAuth, UsuariosService.eliminar);
+router.delete(ruta_usuarios + '/:id', sessionAuth, UsuariosService.eliminar);
 
 /**
  * @swagger
@@ -913,7 +977,7 @@ router.delete(ruta_usuarios+'/:id', sessionAuth, UsuariosService.eliminar);
  *       500:
  *         description: Error interno del servidor
  */
-router.get(ruta_auditorias_permisos+'/', sessionAuth, AuditoriaPermisoesService.obtener);
+router.get(ruta_auditorias_permisos + '/', sessionAuth, AuditoriaPermisoesService.obtener);
 
 /**
  * @swagger
@@ -944,7 +1008,7 @@ router.get(ruta_auditorias_permisos+'/', sessionAuth, AuditoriaPermisoesService.
  *       500:
  *         description: Error interno del servidor
  */
-router.post(ruta_auditorias_permisos+'/', sessionAuth, RegistroInteraccionesService.guardar);
+router.post(ruta_auditorias_permisos + '/', sessionAuth, RegistroInteraccionesService.guardar);
 
 /**
  * @swagger
@@ -969,7 +1033,7 @@ router.post(ruta_auditorias_permisos+'/', sessionAuth, RegistroInteraccionesServ
  *       500:
  *         description: Error interno del servidor
  */
-router.get(ruta_registros_interacciones+'/', sessionAuth, RegistroInteraccionesService.obtener);
+router.get(ruta_registros_interacciones + '/', sessionAuth, RegistroInteraccionesService.obtener);
 
 /**
  * @swagger
@@ -1000,7 +1064,7 @@ router.get(ruta_registros_interacciones+'/', sessionAuth, RegistroInteraccionesS
  *       500:
  *         description: Error interno del servidor
  */
-router.post(ruta_registros_interacciones+'/', sessionAuth, RegistroInteraccionesService.guardar);
+router.post(ruta_registros_interacciones + '/', sessionAuth, RegistroInteraccionesService.guardar);
 
 /**
  * @swagger

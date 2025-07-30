@@ -146,12 +146,10 @@ export const PreguntaService = {
   },
   async motor_pregunta() {
     try {
-      console.log("Ejecutando motor de preguntas...");
       const { error } = await client.rpc('ejecutar_generacion_preguntas_por_colegios');
       if (error) {
         throw error;
       }
-      console.log("Finalizando motor de preguntas...");
     } catch (error: any) {
       console.error(error.message)
     }

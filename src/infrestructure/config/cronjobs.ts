@@ -15,12 +15,7 @@ cron.schedule("* * * * *", () => {
   }
 });
 cron.schedule("*/15 0-5 * * *", () => {
-  // const now = DateTime.now().setZone("America/Guayaquil");
 
   PreguntaService.motor_pregunta();
-  // MotorPreguntasService.ejecutar_motor(1);
-  // MotorPreguntasService.ejecutar_motor(2);
 
-  // Opcional: imprime la hora para depurar
-  // console.log("Ejecutado a:", now.toISO());
 });

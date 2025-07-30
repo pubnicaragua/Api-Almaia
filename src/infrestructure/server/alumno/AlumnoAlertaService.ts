@@ -101,7 +101,6 @@ export const AlumnoAlertaService = {
   async detalle(req: Request, res: Response) {
     try {
       const id = parseInt(req.params.id);
-      // console.log("AUI ID:", id);
       const where = { alumno_alerta_id: id }; // Convertir los parámetros de consulta en filtros
       const alumnoalertaAlerta_data = await dataService.getAll(
         [
@@ -116,9 +115,7 @@ export const AlumnoAlertaService = {
         ],
         where
       );
-      // console.log(alumnoalertaAlerta_data);
       const alumnoalertaAlerta = mapearAlertaDetalleV2(alumnoalertaAlerta_data);
-      // console.log(alumnoalertaAlerta);
 
       res.json(alumnoalertaAlerta[0]);
     } catch (error) {
@@ -240,7 +237,6 @@ export const AlumnoAlertaService = {
 
       if (!responseSent) {
         const savedAlumnoAlerta = await dataService.processData({ ...alumnoalerta, anonimo, alumno_id });
-        // console.log(destinatarios);
         const email = await emailService.enviarNotificacionAlerta(
           {
             tipo: dataAlertaTipo.nombre,
@@ -249,7 +245,6 @@ export const AlumnoAlertaService = {
           },
           destinatarios
         );
-        console.log(email);
 
         res.status(201).json(savedAlumnoAlerta);
       }
@@ -311,7 +306,6 @@ export const AlumnoAlertaService = {
           }
         }
 
-        // console.log("CUERPO DE JSON", alumnoalerta);
         if (alumnoalerta.alerta_regla_id) {
           const { data: dataAlertaRegla, error: errorAlertaRegla } = await client
             .from("alertas_reglas")

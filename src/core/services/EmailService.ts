@@ -134,6 +134,35 @@ export class EmailService {
 
     return this.enviarEmail([email], template, data);
   }
+  async enviarEmailRestorePassword(
+    email: string,
+    authPass: string
+    // datosUsuario: EmailData
+  ): Promise<boolean> {
+    const template: EmailTemplate = {
+      subject: "Bienvenido a Almaia - Restablecer tu contraseña",
+      html: `
+        <h2>¡Bienvenido a Almaia!</h2>
+        <p>Para restablecer tu contraseña copea el codigo de autorizacion y usalo en la app.</p>
+        <p>Datos de tu cuenta:</p>
+        <ul>
+          <li>Solicitado por: {{email}}</li>
+          <li>Fecha de solicitud: {{fecha}}</li>
+          <li>Esta es tu codigo de autorizacion: {{authPass}} <br/>  No compartas esta informacion con nadie ℹ</li> 
+          <link href="https://nextjs.org/"/>
+        </ul>
+      `,
+    };
+
+    const data = {
+      // ...datosUsuario,
+      email,
+      authPass,
+      fecha: new Date().toLocaleDateString(),
+    };
+
+    return this.enviarEmail([email], template, data);
+  }
 
   private procesarTemplate(template: string, data: EmailData): string {
     return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
