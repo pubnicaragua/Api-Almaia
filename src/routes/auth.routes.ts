@@ -676,6 +676,30 @@ router.delete(ruta_funcionalidades_roles + '/:id', sessionAuth, FuncionalidadRol
  *       500:
  *         description: Error interno del servidor
  */
+router.get(ruta_usuarios + '/bitacora', sessionAuth, UsuariosService.obtenerBitacora);
+/**
+ * @swagger
+ * /api/v1/auth/usuarios/bitacora:
+ *   get:
+ *     tags: [Usuarios]
+ *     summary: Obtener todos los usuarios
+ *     description: Retorna una lista de todos los usuarios registrados en el sistema
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/UsuarioResponse'
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       500:
+ *         description: Error interno del servidor
+ */
 router.get(ruta_usuarios + '/', sessionAuth, UsuariosService.obtener);
 
 /**
