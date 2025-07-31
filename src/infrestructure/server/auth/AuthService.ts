@@ -4,7 +4,7 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { AuditoriaesService } from "./AuditoriaService";
 import { createClient, AuthApiError, SupabaseClient } from "@supabase/supabase-js"; // Asegúrate de importar esto si no está
 // Interfaz para credenciales
-import Joi, { object } from "joi";
+import Joi from "joi";
 import { EmailService } from "../../../core/services/EmailService";
 // Inicializar Supabase client
 const supabaseService = new SupabaseClientService();
@@ -141,23 +141,18 @@ export const AuthService = {
 
   async solicitar_cambio_password(req: Request, res: Response) {
     const email = req.body.email
-    console.log("ENtraaaaa =============>")
     try {
       if (!email) throw new Error("email requerido");
-      console.log("EMail === >", email)
       //Buscamos el usuario por el email para obtener el auth id
       const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
       const { data: usuario } = await admin.from("view_auth_users").select("*").eq("email", email).single();
-      console.log(usuario)
       if (usuario === null) throw new Error("Usuario no registrado");
       //guardamos la solicitud y la obtenemos para obtener el auth pass
       const { data: solicitud, error: ErrorAlGuardarSolicitud } = await client.from("solicitudes_cambio_password").insert({
         user_auth_id: usuario.id
       }).select("*").single()
-      console.log(solicitud)
       if (ErrorAlGuardarSolicitud) throw new Error(ErrorAlGuardarSolicitud.message);
       const authPass = solicitud.authorization_pass
-      console.log(authPass)
 
 
       const enviarEmail = new EmailService().enviarEmailRestorePassword(email, authPass)
@@ -251,7 +246,6 @@ export const AuthService = {
       const { newPassword, currentPassword } = body;
 
       if (schemeError) {
-        console.log("error de esquema ====>", schemeError)
         throw new Error(schemeError.details[0].message);
       }
       // Intentar loguear al usuario con la contraseña actual
@@ -271,7 +265,6 @@ export const AuthService = {
       });
 
       if (updateError) {
-        console.log("error en insertar nueva pass==>", updateError)
         throw new Error(updateError.message);
       }
       res.status(200).json({
@@ -301,7 +294,6 @@ export const AuthService = {
       const { newPassword, user_id } = body;
 
       if (schemeError) {
-        console.log("error de esquema ====>", schemeError)
         throw new Error(schemeError.details[0].message);
       }
 
@@ -314,7 +306,6 @@ export const AuthService = {
       });
 
       if (updateError) {
-        console.log("error en insertar nueva pass==>", updateError)
         throw new Error(updateError.message);
       }
       res.status(200).json({

@@ -371,7 +371,6 @@ export const AlumnosService = {
             email: usuario?.email
           });
 
-          console.log(UserDataSession)
           if (updateAuthUserError) throw new Error(updateAuthUserError.message);
         }
 
@@ -403,7 +402,6 @@ export const AlumnosService = {
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error) {
-      console.log(error)
       res.status(500).json({ message: (error as Error).message });
     }
   },

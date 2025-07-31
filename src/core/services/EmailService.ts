@@ -35,7 +35,6 @@ export class EmailService {
 
     // Verificación de conexión al iniciar
     this.transporter.verify((error, success) => {
-      console.log(`SMTP: ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT}`);
       if (error) {
         console.error("Error al verificar el transporter:", error);
       } else {
