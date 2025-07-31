@@ -11,7 +11,7 @@ const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 
 const ContactoAlmaiachema = Joi.object({
-    nombre: Joi.string().max(50).required(),
+    nombre: Joi.string().max(100).required(),
     email: Joi.string().max(100).required(),
     telefono: Joi.string().max(50).required(),
 });
