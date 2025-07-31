@@ -20,7 +20,7 @@ export const CONTACTO_SERVICES = {
         try {
             const { value, error } = ContactoAlmaiachema.validate(req.body)
             if (error) {
-                throw new Error("Campos requeridos (nombre, telefono, correo)");
+                throw new Error("Campos requeridos (nombre, telefono, email)");
             }
             const { nombre, telefono, email } = req.body
             new EmailService().enviarEmail(["dxgabalt@gmail.com", "alexmedel@almaia.cl", "contacto@almaia.cl", "crivas@almaia.cl"], {
