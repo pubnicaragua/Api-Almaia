@@ -8,6 +8,7 @@ import { UsuariosService } from '../infrestructure/server/auth/UsuarioService';
 import { AuditoriaesService } from '../infrestructure/server/auth/AuditoriaService';
 import { AuditoriaPermisoesService } from '../infrestructure/server/auth/AuditoriaPermisoService';
 import { RegistroInteraccionesService } from '../infrestructure/server/auth/RegistroInteracccionService';
+import cors from 'cors';
 
 const router = express.Router();
 const ruta_roles = '/roles';
@@ -17,7 +18,6 @@ const ruta_funcionalidades_roles = '/funcionalidades_roles';
 const ruta_auditorias = '/auditorias';
 const ruta_auditorias_permisos = '/auditorias_permisos';
 const ruta_registros_interacciones = '/registros_interacciones';
-
 /**
  * @swagger
  * /api/v1/auth/login:
@@ -191,7 +191,7 @@ router.post('/restore-password', AuthService.RestorePassword);
  *       500:
  *         description: Error del servidor
  */
-router.post('/solicitar/cambio/password', AuthService.solicitar_cambio_password);
+router.post('/solicitar/cambio/password', cors(), AuthService.solicitar_cambio_password);
 /**
  * @swagger
  * /api/v1/auth/solicitar/cambio/password:
@@ -656,6 +656,30 @@ router.delete(ruta_funcionalidades_roles + '/:id', sessionAuth, FuncionalidadRol
 /**
  * @swagger
  * /api/v1/auth/usuarios/:
+ *   get:
+ *     tags: [Usuarios]
+ *     summary: Obtener todos los usuarios
+ *     description: Retorna una lista de todos los usuarios registrados en el sistema
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de usuarios obtenida exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/UsuarioResponse'
+ *       401:
+ *         description: No autorizado, token inválido o faltante
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get(ruta_usuarios + '/bitacora', sessionAuth, UsuariosService.obtenerBitacora);
+/**
+ * @swagger
+ * /api/v1/auth/usuarios/bitacora:
  *   get:
  *     tags: [Usuarios]
  *     summary: Obtener todos los usuarios

@@ -74,6 +74,23 @@ export const UsuariosService = {
       res.status(500).json(error);
     }
   },
+  async obtenerBitacora(req: Request, res: Response) {
+    try {
+      dataService.setClient(req.supabase)
+      const usuarios = await dataService.getAll(
+        [
+          "*",
+          "roles(rol_id,nombre)",
+          "personas(persona_id,nombres,apellidos)",
+          "idiomas(idioma_id,nombre)",
+        ],
+        { rol_id: [4, 5, 6] }
+      );
+      res.json(usuarios);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  },
 
   async guardar(req: Request, res: Response) {
     try {
@@ -177,14 +194,14 @@ export const UsuariosService = {
         const fileName = `${randomUUID()}.${extension}`;
         const client_file = req.supabase;
 
-        const {  error } = await client_file.storage
+        const { error } = await client_file.storage
           .from("user-profile")
           .upload(`private/${fileName}`, buffer, {
             contentType: mimeType,
             upsert: true,
           });
         if (error) throw error;
-        usuario.url_foto_perfil = getURL(client_file,'user-profile',`private/${fileName}` );
+        usuario.url_foto_perfil = getURL(client_file, 'user-profile', `private/${fileName}`);
       }
 
       const { data: dataPersona, error: errorPersona } = await client
@@ -196,7 +213,7 @@ export const UsuariosService = {
         throw new Error("La persona no existe");
       }
       Object.assign(persona, dataPersona);
-      
+
       persona.nombres = req.body.nombres;
       persona.apellidos = req.body.apellidos;
       persona.numero_documento = req.body.rut;
@@ -208,7 +225,7 @@ export const UsuariosService = {
         if (!validateDate(fecha_nacimiento)) {
           throw new Error("Fecha de nacimiento inválida");
         }
-      } 
+      }
 
       persona.fecha_nacimiento = new Date(fecha_nacimiento);
 
@@ -247,12 +264,12 @@ export const UsuariosService = {
           actualizado_por: req.actualizado_por,
           fecha_actualizacion: req.fecha_creacion
         }); // ACTUALIZA LA IMAGEN DE LOS ALUMNOS VINCULADOS CON persona_id
-        
+
         res.status(200).json(dataUsuarioUpdate);
       }
     } catch (error: any) {
 
-      res.status(500).json({ message: error.message || "Error inesperado"});
+      res.status(500).json({ message: error.message || "Error inesperado" });
     }
   },
 

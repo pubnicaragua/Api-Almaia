@@ -58,8 +58,8 @@ export const AlumnoApoderadoService = {
         const alumnoApoderado = await dataService.getAll(
           [
             "*",
-            "apoderados(apoderado_id,persona_id,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id))",
-            "alumnos(alumno_id,url_foto_perfil,consentimiento,personas(persona_id,nombres,apellidos))",
+            "apoderados(apoderado_id,persona_id,personas(persona_id,tipo_documento,numero_documento,nombres,apellidos,genero_id,estado_civil_id, usuarios(usuario_id)))",
+            "alumnos(alumno_id,url_foto_perfil,consentimiento,personas(persona_id,nombres,apellidos, usuarios(usuario_id)) )",
           ],
           where
         );

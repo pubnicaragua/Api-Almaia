@@ -35,7 +35,6 @@ export class EmailService {
 
     // Verificación de conexión al iniciar
     this.transporter.verify((error, success) => {
-      console.log(`SMTP: ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT}`);
       if (error) {
         console.error("Error al verificar el transporter:", error);
       } else {
@@ -140,15 +139,18 @@ export class EmailService {
     // datosUsuario: EmailData
   ): Promise<boolean> {
     const template: EmailTemplate = {
-      subject: "Bienvenido a Almaia - Restablecer tu contraseña",
+      subject: "Almaia - Restablecer tu contraseña",
       html: `
-        <h2>¡Bienvenido a Almaia!</h2>
-        <p>Para restablecer tu contraseña copea el codigo de autorizacion y usalo en la app.</p>
-        <p>Datos de tu cuenta:</p>
+        <h2>¡🔐 Bienvenido a ALMAIA!</h2>
+        <p>Has solicitado restablecer tu contraseña.
+Copia el siguiente código de autorización y úsalo en la app para continuar 🛠️</p>
+        <b>🧾 Datos de tu cuenta:</b>
         <ul>
-          <li>Solicitado por: {{email}}</li>
-          <li>Fecha de solicitud: {{fecha}}</li>
-          <li>Esta es tu codigo de autorizacion: {{authPass}} <br/>  No compartas esta informacion con nadie ℹ</li> 
+          <li>📧 Solicitado por: {{email}}</li>
+          <li>🗓️ Fecha de solicitud: {{fecha}}</li>
+          <li>🔑 Código de autorización: {{authPass}} <br/>  ⚠️ No compartas este código con nadie.
+                  Si no realizaste esta solicitud, puedes ignorar este mensaje. ATT ALMAIA.
+          </li> 
           <link href="https://nextjs.org/"/>
         </ul>
       `,
