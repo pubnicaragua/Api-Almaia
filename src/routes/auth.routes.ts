@@ -9,6 +9,8 @@ import { AuditoriaesService } from '../infrestructure/server/auth/AuditoriaServi
 import { AuditoriaPermisoesService } from '../infrestructure/server/auth/AuditoriaPermisoService';
 import { RegistroInteraccionesService } from '../infrestructure/server/auth/RegistroInteracccionService';
 import cors from 'cors';
+import multer from "multer";
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 const ruta_roles = '/roles';
@@ -94,6 +96,37 @@ router.post('/login', AuthService.login);
  *         description: Error del servidor
  */
 router.post('/registro', AuthService.register);
+
+/**
+ * @swagger
+ * /api/v1/auth/update-password:
+ *   post:
+ *     summary: Actualizacion de contraseña
+ *     description: Permite actualizar la contraseña de un usuario
+ *     tags:
+ *       - Autenticación
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: number
+ *                 example: 0
+ *               newPassword:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada exitosamente
+ *       500:
+ *         description: Error del servidor
+ */
+router.post('/registro/masivo', upload.single('file'), AuthService.registerMasivo);
 
 /**
  * @swagger

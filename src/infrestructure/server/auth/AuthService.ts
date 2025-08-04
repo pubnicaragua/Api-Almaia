@@ -7,7 +7,12 @@ import { createClient, AuthApiError, SupabaseClient } from "@supabase/supabase-j
 import Joi from "joi";
 import { EmailService } from "../../../core/services/EmailService";
 // Inicializar Supabase client
+// const multer = require('multer');
+import XLSX from 'xlsx';
+
+
 const supabaseService = new SupabaseClientService();
+
 
 
 const client: SupabaseClient = supabaseService.getClient();
@@ -136,6 +141,73 @@ export const AuthService = {
           : "Error interno del servidor";
       res.status(500).json({ message });
     }
+  },
+  async registerMasivo(req: Request, res: Response) {
+    function limpiarEmail(email: string) {
+      return email
+        .normalize('NFKC') // Normaliza caracteres Unicode
+        .replace(/[^\x00-\x7F]/g, '') // Elimina caracteres no ASCII
+        .replace(/[\u200B-\u200D\uFEFF]/g, '') // Zero-width spaces
+        .trim();
+    }
+    try {
+      const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+      if (!req.file) throw new Error("No se subió ningún archivo.")
+      const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      // Leer Excel desde el buffer
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const rows: any = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+      const resultados = [];
+      const resultadosFallidos = [];
+      let index: number = 0
+      let success: boolean = true
+      let StateMessage: string = ''
+      for (const row of rows) {
+        const { email, password } = row;
+
+        if (!email || !password) {
+          throw new Error("campos requeridos 'email', 'password' ")
+        }
+
+        // Crear usuario en Supabase Auth
+        await sleep(2000);
+        const cleanEmail = limpiarEmail(email)
+        const { data, error } = await admin.auth.signUp({
+          email: cleanEmail,
+          password
+        });
+
+
+        if (error) {
+          StateMessage = error.message
+          resultadosFallidos.push({ email, status: 'fallido', error: error.message });
+          success = false
+        } else {
+          StateMessage = 'Registrado ✅'
+          success = true
+
+          resultados.push({ email, status: 'creado', id: data.user?.id });
+        }
+        index = index + 1;
+
+        console.log(index, cleanEmail, success, StateMessage)
+
+        // break
+      }
+      console.log('🚀Actualizando usuarios🚀')
+      await sleep(2000);
+      await admin.rpc('actualizar_auth_id')
+
+      res.status(200).json({ total: resultados.length, fallidos: resultadosFallidos, success: resultados });
+
+    } catch (err: any) {
+      console.error(err);
+      res.status(400).json({ message: err.message });
+    }
+
+
   },
 
 
