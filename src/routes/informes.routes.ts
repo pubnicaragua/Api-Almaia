@@ -133,6 +133,8 @@ const ruta_informes_generales = '/generales';
  */
 router.get(ruta_alumnos_informes, sessionAuth, AlumnoInformeService.obtener);
 
+router.get(`${ruta_alumnos_informes}/generar`, sessionAuth, AlumnoInformeService.generarInformeManual);
+
 /**
  * @swagger
  * /api/v1/informes/alumnos:
@@ -235,6 +237,8 @@ router.put(ruta_alumnos_informes + '/:id', sessionAuth, AlumnoInformeService.act
  *         description: Error interno del servidor
  */
 router.get(ruta_informes_generales + '/', sessionAuth, InformeGeneralService.obtener);
+
+router.get(ruta_informes_generales + '/generar', sessionAuth, InformeGeneralService.generarInformeManual);
 
 /**
  * @swagger

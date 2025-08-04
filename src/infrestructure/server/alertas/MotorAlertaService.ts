@@ -84,7 +84,7 @@ export const MotorAlertasService = {
     }
   },
     async ejecutar_motor() {
-    const { error } = await client.rpc('generar_alertas_emocionales');
+    const { error } = await client.rpc('ejecutar_generacion_alertas_por_colegios');
     if(error){
       console.error(error.message)
     }
