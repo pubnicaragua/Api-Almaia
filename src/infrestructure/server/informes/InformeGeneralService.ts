@@ -5,6 +5,7 @@ import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import Joi from "joi";
 import { mapearInformesConNombres } from "../../../core/services/InformeServicioCasoUso";
+import { MotorInformeService } from "./MotorInformeService";
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
@@ -122,4 +123,14 @@ export const InformeGeneralService = {
       res.status(500).json({ message: "Error interno del servidor" });
     }
   },
+    async generarInformeManual (req: Request, res: Response) {
+      try {
+        // Aquí se puede implementar la lógica para generar el informe manualmente
+        await MotorInformeService.generarInformeGenerales();
+        res.status(200).json({ message: "Informe generado manualmente" });
+      } catch (error) {
+        console.error("Error al generar el informe manual:", error);
+        res.status(500).json({ message: "Error interno del servidor" });
+      }
+    },
 };
