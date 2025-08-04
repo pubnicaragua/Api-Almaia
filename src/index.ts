@@ -76,9 +76,9 @@ const corsOptions: CorsOptions = {
     // Lista de dominios permitidos (ajusta según tus necesidades)
     const allowedOrigins = process.env.ALLOWED_ORIGINS
       ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-      : [];
+      : ['*'];
 
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
       callback(null, true);
     } else {
       callback(new Error('Origen no permitido por CORS'));
