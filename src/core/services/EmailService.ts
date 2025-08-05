@@ -148,8 +148,9 @@ Copia el siguiente código de autorización y úsalo en la app para continuar �
         <ul>
           <li>📧 Solicitado por: {{email}}</li>
           <li>🗓️ Fecha de solicitud: {{fecha}}</li>
-          <li>🔑 Código de autorización: {{authPass}} <br/>  ⚠️ No compartas este código con nadie.
-                  Si no realizaste esta solicitud, puedes ignorar este mensaje. ATT ALMAIA.
+          <li>🔑 Código de autorización: <b> {{authPass}} </b> <br/>  ⚠️ No compartas este código con nadie.
+                  Si no realizaste esta solicitud, puedes ignorar este mensaje. 
+                  Saludos. Equipo de AlmaIA 👋🏻.
           </li> 
           <link href="https://nextjs.org/"/>
         </ul>
