@@ -62,12 +62,13 @@ export const UsuariosService = {
       dataService.setClient(req.supabase)
       const usuarios = await dataService.getAll(
         [
-          "*",
+          "usuario_id, nombre_social, email, encripted_password, rol_id, telefono_contacto, ultimo_inicio_sesion, estado_usuario, intentos_inicio_sesion, url_foto_perfil, persona_id, creado_por, actualizado_por, fecha_creacion, fecha_actualizacion, activo, idioma_id, auth_id",
           "roles(rol_id,nombre)",
           "personas(persona_id,nombres,apellidos)",
           "idiomas(idioma_id,nombre)",
         ],
-        req.query
+        {rol_id:[5,6,7]}
+        // req.query
       );
       res.json(usuarios);
     } catch (error) {
