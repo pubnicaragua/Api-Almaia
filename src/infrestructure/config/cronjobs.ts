@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import { PreguntaService } from "../server/preguntas/PreguntaService";
 import { MotorAlertasService } from "../server/alertas/MotorAlertaService";
-import { DateTime } from "luxon";
+// import { DateTime } from "luxon";
 import { MotorInformeService } from "../server/informes/MotorInformeService";
 // import { MotorPreguntasService } from "../server/alertas/MotorPreguntaService";
 
@@ -9,17 +9,22 @@ import { MotorInformeService } from "../server/informes/MotorInformeService";
 cron.schedule("0 0 * * *", () => {
   // PreguntaService.motor_pregunta(); // Tu lógica aquí (ej: limpieza, backups, etc.)
 });
-cron.schedule("* * * * *", () => {
-  const now = DateTime.now().setZone("America/Guayaquil");
-  if (now.hour === 22 && now.minute === 0) {
-    MotorAlertasService.ejecutar_motor();
-  }
+cron.schedule("0 2 * * 1-6", () => {
+  // const now = DateTime.now().setZone("America/Guayaquil");
+  // if (now.hour === 22 && now.minute === 0) {
+  // }
+  console.log('Ejecutando tarea programada a las 2 AM...');
+  MotorAlertasService.ejecutar_motor();
 });
 
-cron.schedule("*/15 0-5 * * *", () => {
-
+cron.schedule("0 4 * * 1-6", () => {
+  console.log('Ejecutando tarea programada de las 4:00 AM...');
   PreguntaService.motor_pregunta();
+});
 
+cron.schedule("30 12 * * 1-6", () => {
+  console.log('Ejecutando tarea programada de las 12:30 PM...');
+  PreguntaService.motor_pregunta();
 });
 
 // Programar la tarea
@@ -38,8 +43,10 @@ cron.schedule('0 0 5 * *', async () => {
     
     // Llama a la función principal para procesar y guardar la plantilla
     await MotorInformeService.generarInformeAlumnos();
+    // LLama a la función principal para procesar y guardar la plantilla
+    await MotorInformeService.generarInformeGenerales();
+    await MotorInformeService.generarInformeGenerales(3);
+    await MotorInformeService.generarInformeGenerales(4);
     
     console.log('--- Ejecución programada finalizada ---');
-}, {
-    timezone: "America/Managua" // Asegúrate de usar la zona horaria correcta
 });
