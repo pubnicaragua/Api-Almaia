@@ -40,6 +40,7 @@ export const AuditoriaesService = {
         responseSent = true;
         throw new Error(validationError.details[0].message);
       }
+      console.log("auditoria===>", auditoria)
       if (!responseSent) {
         const savedauditoria = await dataService.processData(auditoria);
         if (isSend) res.status(201).json(savedauditoria);
