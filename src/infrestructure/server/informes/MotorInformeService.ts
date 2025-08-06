@@ -66,7 +66,7 @@ export const MotorInformeService = {
           bucketName: 'informes',
         });
         // Obtenemos el template del informe segun el tipo y codigo del informe de la consulta realizada, y utilizamos el adaptador de almacenamiento para obtener el template del informe.
-        const templatePath = `templates/alumnos/${informe.template_informe}`;
+        const templatePath = `templates/alumnos/${'TEMPLATE_ALUMNOS.docx'}`;
         const templateBlob = await storageAdapter.getFile(templatePath);
 
         if (!templateBlob) {
@@ -112,6 +112,10 @@ export const MotorInformeService = {
           ? 'No existe suficiente información del periodo para generar el informe.'
           : informe.descripcion_informe || 'No disponible';
 
+        const recomendaciones = informe.template_informe === 'NO_DEFINIDO.docx'
+          ? 'No existe suficiente información del periodo para generar el informe.'
+          : informe.recomendacion_almaia || 'No disponible';
+
         // 1. Validar los datos del informe
         const periodoEvaluacion = moment(informe.fecha_creacion).subtract(1,'month').format('MMMM YYYY');
         const data_informe = {
@@ -119,6 +123,8 @@ export const MotorInformeService = {
           curso: informe.nombre_curso || 'No disponible',
           periodo: periodoEvaluacion,
           analisis_diagnostico: diagnostico,
+          analisis_recomendaciones: recomendaciones,
+          patologia: informe.alerta_neurodivergencia ? 'Se observan señales que pueden orientar a una Neurodivergencia' : '',
         } as Record<string, any>;
 
         // 2. Reemplazar los tags con los datos
@@ -168,7 +174,7 @@ export const MotorInformeService = {
     }
     console.log("Generación de informes completada");
   },
-    async generarInformeGenerales(tipoInforme = 2) {
+    async generarInformeGenerales(tipoInforme: 2 | 3 | 4 = 2) {
     // Implementación de la lógica para generar el informe del motor
     // Aquí se puede utilizar el cliente Supabase para interactuar con la base de datos
     // y generar el informe necesario.
@@ -210,7 +216,7 @@ export const MotorInformeService = {
           bucketName: 'informes',
         });
         // Obtenemos el template del informe segun el tipo y codigo del informe de la consulta realizada, y utilizamos el adaptador de almacenamiento para obtener el template del informe.
-        const templatePath = `templates/${tipoInformeNombre}/${informe.template_informe}`;
+        const templatePath = `templates/${tipoInformeNombre}/TEMPLATE_${tipoInformeNombre.toUpperCase()}.docx`;
         const templateBlob = await storageAdapter.getFile(templatePath);
 
         if (!templateBlob) {
@@ -261,6 +267,21 @@ export const MotorInformeService = {
           ? 'No existe suficiente información del periodo para generar el informe.'
           : informe.recomendacion_almaia || 'No disponible';
 
+        const alertaNeurodivergencia = [
+          {
+            tag: 'alerta_colegios',
+            value: 'En algunos estudiantes del colegio se han identificado indicios que podrían estar asociados a un perfil neurodivergente.'
+          },
+          {
+            tag: 'alerta_cursos',
+            value: 'En algunos estudiantes del Curso se han identificado indicios que podrían estar asociados a un perfil neurodivergente.'
+          },
+          {
+            tag: 'alerta_niveles',
+            value: 'En algunos estudiantes del Nivel se han identificado indicios que podrían estar asociados a un perfil neurodivergente'
+          },
+        ]
+
         // 1. Validar los datos del informe
         const periodoEvaluacion = moment(informe.fecha_creacion).subtract(1,'month').format('MMMM YYYY');
         const data_informe = {
@@ -269,6 +290,8 @@ export const MotorInformeService = {
           periodo: periodoEvaluacion,
           analisis_diagnostico: diagnostico,
           analisis_recomendaciones: recomendaciones,
+          neurodivergencia: informe.alerta_neurodivergencia ? alertaNeurodivergencia[tipoInforme - 2].value : '',
+          docente: informe.docente || 'No disponible',
         } as Record<string, any>;
 
         // 2. Reemplazar los tags con los datos
