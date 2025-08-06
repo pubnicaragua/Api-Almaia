@@ -99,7 +99,7 @@ export const AuthService = {
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "Error desconocido";
-      res.status(500).json({
+      res.status(400).json({
         message: "Credenciales incorrectas:" + errorMessage,
         error: errorMessage,
       });
