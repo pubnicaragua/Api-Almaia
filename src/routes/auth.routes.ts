@@ -158,6 +158,37 @@ router.post('/registro/masivo', upload.single('file'), AuthService.registerMasiv
  *         description: Error del servidor
  */
 
+router.post('/update-all-password', AuthService.actualizarTodasLasContraseñas);
+/**
+ * @swagger
+ * /api/v1/auth/update-password:
+ *   post:
+ *     summary: Actualizacion de contraseña
+ *     description: Permite actualizar la contraseña de un usuario
+ *     tags:
+ *       - Autenticación
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               currentPassword:
+ *                 type: number
+ *                 example: 0
+ *               newPassword:
+ *                 type: string
+ *                 example: nuevaContraseña456
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada exitosamente
+ *       500:
+ *         description: Error del servidor
+ */
+
 router.post('/update-password', sessionAuth, AuthService.updatePassword);
 
 /**

@@ -422,6 +422,28 @@ export const AuthService = {
       });
     }
   },
+  async actualizarTodasLasContraseñas(req: Request, res: Response) {
+    const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+    const { data: usuarios, error } = await admin.from('view_auth_users').select('*');
+
+    console.log(usuarios)
+    console.log(usuarios?.length)
+    if (error) {
+      console.error('Error listando usuarios:', error.message);
+      return;
+    }
+
+    for (const user of usuarios) {
+      const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      // Aquí simplemente actualizas la contraseña a todos
+      await sleep(100)
+      await admin.auth.admin.updateUserById(user.id, {
+        password: 'Almaia2025'
+      });
+      console.log(`Contraseña actualizada para: ${user.email}`);
+    }
+    res.status(200).json({ status: 'success', message: 'todas las contraseñas actualizadas' })
+  },
   async updatePassword_By_ClaveDinamica(req: Request, res: Response) {
     try {
 
