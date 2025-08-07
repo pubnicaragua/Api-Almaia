@@ -129,7 +129,9 @@ export const DashboardHomeService = {
   async getEmotionDataGeneral(req: Request, res: Response) {
     const { colegio_id, fecha_hasta } = req.query;
     let data;
+    console.log(colegio_id, fecha_hasta)
     if (colegio_id !== undefined) {
+      console.log("Entra ====>1")
       const { data: data_emociones, error } = await client.rpc(
         "obtener_cantidades_pregunta_3",
         {
@@ -137,15 +139,20 @@ export const DashboardHomeService = {
           p_fecha_hasta: fecha_hasta || undefined,
         }
       );
+      console.log(data_emociones)
       if (error) {
         console.error("Error al obtener cantidades:", error);
       } else {
         data = mapEmotions(data_emociones);
+        console.log(data)
       }
     } else {
+      console.log("Entra ====>")
+
       const { data: data_emociones, error } = await client.rpc(
         "obtener_cantidades_pregunta_3"
       );
+      console.log(data)
       if (error) {
         console.error("Error al obtener cantidades:", error);
       } else {
