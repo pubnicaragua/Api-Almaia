@@ -24,6 +24,7 @@ const dataService: DataService<CalendarioFechaImportante> = new DataService(
 export const DashboardHomeService = {
   async getStatsCards(req: Request, res: Response, next: NextFunction) {
     try {
+
       const { colegio_id: colegio_id_query } = req.query;
       let colegio_id = 0;
       const sevenDaysAgo = startOfDay(subDays(new Date(), 7)).toISOString();
@@ -31,6 +32,7 @@ export const DashboardHomeService = {
         colegio_id_query,
         req.user.usuario_id
       );
+
       const alumnoServicioCasoUso = new AlumnoServicioCasoUso(colegio_id);
       const calendario_escolar = obtenerCalendarioPorColegio(colegio_id);
       const alumnnos = await alumnoServicioCasoUso.obtenerAlumnosColegio();
@@ -80,6 +82,7 @@ export const DashboardHomeService = {
           naranjaStats.por_vencer +
           rojaStats.por_vencer,
       };
+
       const response = {
         alumnos: {
           activos: alumnosActivos ?? 0,
@@ -241,10 +244,10 @@ export const DashboardHomeService = {
 
   // Función para alertas recientes
   async getRecentAlerts(req: Request, res: Response) {
-  const {data, error } = await client.rpc('obtener_alertas_por_colegio',{
-      p_colegio_id:req.query.colegio_id
+    const { data, error } = await client.rpc('obtener_alertas_por_colegio', {
+      p_colegio_id: req.query.colegio_id
     });
-    if(error){
+    if (error) {
       console.error(error.message)
     }
     res.json(data);
