@@ -237,7 +237,7 @@ export async function contarAlertasPendientesPorColegio(
     const { count, error: errorAlertas } = await client
       .from("alumnos_alertas")
       .select("*", { count: "exact", head: true })
-      // .eq("estado", "pendiente")
+      .eq("estado", "pendiente")
       .in("alumno_id", alumnoIds);
 
     if (errorAlertas) throw errorAlertas;
