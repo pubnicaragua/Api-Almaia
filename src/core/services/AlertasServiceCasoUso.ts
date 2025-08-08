@@ -13,87 +13,87 @@ export class AlertasServicioCasoUso {
     this.supabaseService = new SupabaseClientService();
     this.client = this.supabaseService.getClient();
   }
- async getAlertStatsByType(
-  alertTypeId: number,
-  colegio_id: number = 0
-): Promise<AlertStats> {
-  try {
-    // Validar parámetros
-    if (!alertTypeId) {
-      throw new Error('Se requiere un ID de tipo de alerta válido');
+  async getAlertStatsByType(
+    alertTypeId: number,
+    colegio_id: number = 0
+  ): Promise<AlertStats> {
+    try {
+      // Validar parámetros
+      if (!alertTypeId) {
+        throw new Error('Se requiere un ID de tipo de alerta válido');
+      }
+
+      // Llamar a la función PostgreSQL
+      const { data, error } = await this.client.rpc('obtener_estadisticas_alertas', {
+        p_colegio_id: colegio_id !== 0 ? colegio_id : null,
+        p_alerta_tipo_id: alertTypeId
+      });
+
+      if (error) {
+        throw new Error(`Error al obtener estadísticas de alertas: ${error.message}`);
+      }
+
+      // La función RPC devuelve un array, tomamos el primer elemento
+      const stats = data?.[0] || {
+        totales: 0,
+        activos: 0,
+        vencidos: 0,
+        por_vencer: 0
+      };
+
+      return {
+        totales: Number(stats.totales) || 0,
+        activos: Number(stats.activos) || 0,
+        vencidos: Number(stats.vencidos) || 0,
+        por_vencer: Number(stats.por_vencer) || 0
+      };
+
+    } catch (error) {
+      console.error('Error en getAlertStatsByType:', error);
+      throw error;
+    }
+  }
+  async getAlertasDonutData(colegio_id: any = 0): Promise<DonutData[]> {
+    let data = null;
+
+    if (colegio_id !== 0) {
+      data = await obtenerRelacionados({
+        tableFilter: "alumnos",
+        filterField: "colegio_id",
+        filterValue: colegio_id,
+        idField: "alumno_id",
+        tableIn: "alumnos_alertas",
+        inField: "alumno_id",
+        selectFields: `estado`,
+      });
+    } else {
+      const { data: data_alertas, error } = await this.client
+        .from("alumnos_alertas")
+        .select("*");
+
+      if (error) throw error;
+      data = data_alertas;
     }
 
-    // Llamar a la función PostgreSQL
-    const { data, error } = await this.client.rpc('obtener_estadisticas_alertas', {
-      p_colegio_id: colegio_id !== 0 ? colegio_id : null,
-      p_alerta_tipo_id: alertTypeId
+    const counts: Record<string, number> = {};
+    data.forEach((item) => {
+      const estadoKey = getEstadoKeyFromLabel(item.estado || 'pendiente') || 'pendiente';
+      counts[estadoKey] = (counts[estadoKey] || 0) + 1;
     });
 
-    if (error) {
-      throw new Error(`Error al obtener estadísticas de alertas: ${error.message}`);
-    }
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
 
-    // La función RPC devuelve un array, tomamos el primer elemento
-    const stats = data?.[0] || {
-      totales: 0,
-      activos: 0,
-      vencidos: 0,
-      por_vencer: 0
-    };
+    const donutData: DonutData[] = Object.entries(counts).map(
+      ([estadoKey, value]) => ({
+        label: `${String(value).padStart(2, "0")} ${estadoLabels[estadoKey]}`,
+        value,
+        percentage: `${((value / total) * 100).toFixed(1)}%`,
+        color: colores[estadoKey] || "#000000",
+      })
+    );
 
-    return {
-      totales: Number(stats.totales) || 0,
-      activos: Number(stats.activos) || 0,
-      vencidos: Number(stats.vencidos) || 0,
-      por_vencer: Number(stats.por_vencer) || 0
-    };
-
-  } catch (error) {
-    console.error('Error en getAlertStatsByType:', error);
-    throw error;
+    return donutData;
   }
-}
- async getAlertasDonutData(colegio_id: any = 0): Promise<DonutData[]> {
-  let data = null;
-
-  if (colegio_id !== 0) {
-    data = await obtenerRelacionados({
-      tableFilter: "alumnos",
-      filterField: "colegio_id",
-      filterValue: colegio_id,
-      idField: "alumno_id",
-      tableIn: "alumnos_alertas",
-      inField: "alumno_id",
-      selectFields: `estado`,
-    });
-  } else {
-    const { data: data_alertas, error } = await this.client
-      .from("alumnos_alertas")
-      .select("*");
-
-    if (error) throw error;
-    data = data_alertas;
-  }
-
-  const counts: Record<string, number> = {};
-  data.forEach((item) => {
-    const estadoKey = getEstadoKeyFromLabel(item.estado || 'pendiente') || 'pendiente';
-    counts[estadoKey] = (counts[estadoKey] || 0) + 1;
-  });
-
-  const total = Object.values(counts).reduce((a, b) => a + b, 0);
-
-  const donutData: DonutData[] = Object.entries(counts).map(
-    ([estadoKey, value]) => ({
-      label: `${String(value).padStart(2, "0")} ${estadoLabels[estadoKey]}`,
-      value,
-      percentage: `${((value / total) * 100).toFixed(1)}%`,
-      color: colores[estadoKey] || "#000000",
-    })
-  );
-
-  return donutData;
-}
 
 }
 export function mapearAlertas(alertas: any[]): AlertaMapeada[] {
@@ -122,39 +122,38 @@ export function mapearAlertaDetalle(alertas: any[]): any[] {
         { hour: "2-digit", minute: "2-digit" }
       ),
       responsible: {
-        name: `${rest?.personas?.nombres || " "} ${
-          rest?.personas?.apellidos || " "
-        }`,
+        name: `${rest?.personas?.nombres || " "} ${rest?.personas?.apellidos || " "
+          }`,
         role: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
         image: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
       },
       isAnonymous: rest.anonimo, // Asumiendo que 1 significa anónimo
       regla: rest?.alertas_reglas?.nombre,
-      origen:rest?.alertas_origenes?.nombre,
+      origen: rest?.alertas_origenes?.nombre,
       tipo: rest?.alertas_tipos?.nombre,
-      prioridad:rest?.alertas_prioridades?.nombre,
-      prioridad_id:rest?.prioridad_id,
+      prioridad: rest?.alertas_prioridades?.nombre,
+      prioridad_id: rest?.prioridad_id,
       severidad: rest?.alertas_severidades?.nombre,
       severidad_id: rest?.severidad_id,
       description: rest?.mensaje,
       actions: rest.accion_tomada
         ? [
-            {
-              fecha: new Date(rest.fecha_actualizacion).toLocaleDateString(
-                "es-CL"
-              ),
-              hora: new Date(rest.fecha_actualizacion).toLocaleTimeString(
-                "es-CL",
-                { hour: "2-digit", minute: "2-digit", hour12: true }
-              ),
-              usuarioResponsable: `${rest.personas.nombres} ${rest.personas.apellidos}`,
-              accionRealizada: new Date(rest.accion_tomada).toLocaleDateString(
-                "es-CL"
-              ),
-              fechaCompromiso: rest.fecha_generada,
-              observaciones: "Acción registrada en el sistema",
-            },
-          ]
+          {
+            fecha: new Date(rest.fecha_actualizacion).toLocaleDateString(
+              "es-CL"
+            ),
+            hora: new Date(rest.fecha_actualizacion).toLocaleTimeString(
+              "es-CL",
+              { hour: "2-digit", minute: "2-digit", hour12: true }
+            ),
+            usuarioResponsable: `${rest.personas.nombres} ${rest.personas.apellidos}`,
+            accionRealizada: new Date(rest.accion_tomada).toLocaleDateString(
+              "es-CL"
+            ),
+            fechaCompromiso: rest.fecha_generada,
+            observaciones: "Acción registrada en el sistema",
+          },
+        ]
         : [],
     };
   });
@@ -170,46 +169,41 @@ export function mapearAlertaDetalleV2(alertas: any[]): any[] {
         cursos: rest.alumnos?.alumnos_cursos[0]?.cursos?.nombre_curso, // Este dato no está en la estructura original, se asume
         imagen: rest.alumnos.url_foto_perfil,
       } : null,
-      fecha_generada: new Date(rest.fecha_generada).toLocaleDateString("es-CL"),
+      fecha_generada: rest.fecha_generada,
       // fecha_generada: new Date(rest.fecha_generada).toLocaleTimeString(
       //   "es-CL",
       //   { hour: "2-digit", minute: "2-digit" }
       // ),
       responsable: {
-        nombre: `${rest?.personas?.nombres || " "} ${
-          rest?.personas?.apellidos || " "
-        }`,
+        nombre: `${rest?.personas?.nombres || " "} ${rest?.personas?.apellidos || " "
+          }`,
         rol: rest?.personas?.usuarios[0]?.roles?.nombre, // Este dato no está en la estructura original, se asume
         imagen: rest.personas?.usuarios[0]?.url_foto_perfil || " ", // Este dato no está en la estructura original, se asume
       },
       estado: rest.estado,
       anonimo: rest.anonimo, // Asumiendo que 1 significa anónimo
       regla: rest?.alertas_reglas?.nombre,
-      origen:rest?.alertas_origenes?.nombre,
+      origen: rest?.alertas_origenes?.nombre,
       tipo: rest?.alertas_tipos?.nombre,
-      prioridad:rest?.alertas_prioridades?.nombre,
+      prioridad: rest?.alertas_prioridades?.nombre,
       prioridad_id: rest?.prioridad_id,
       severidad: rest?.alertas_severidades?.nombre,
       severidad_id: rest?.severidad_id,
       descripcion: rest?.mensaje,
       accion_tomada: rest.accion_tomada
         ? [
-            {
-              fecha: new Date(rest.fecha_actualizacion).toLocaleDateString(
-                "es-CL"
-              ),
-              hora: new Date(rest.fecha_actualizacion).toLocaleTimeString(
-                "es-CL",
-                { hour: "2-digit", minute: "2-digit", hour12: true }
-              ),
-              usuario_responsable: `${rest.personas.nombres} ${rest.personas.apellidos}`,
-              accion_realizada: new Date(rest.accion_tomada).toLocaleDateString(
-                "es-CL"
-              ),
-              fecha_compromiso: rest.fecha_generada,
-              observaciones: "Acción registrada en el sistema",
-            },
-          ]
+          {
+            fecha: rest.fecha_actualizacion,
+            hora: new Date(rest.fecha_actualizacion).toLocaleTimeString(
+              "es-CL",
+              { hour: "2-digit", minute: "2-digit", hour12: true }
+            ),
+            usuario_responsable: `${rest.personas.nombres} ${rest.personas.apellidos}`,
+            accion_realizada: rest.accion_tomada,
+            fecha_compromiso: rest.fecha_generada,
+            observaciones: "Acción registrada en el sistema",
+          },
+        ]
         : [],
     };
   });
@@ -241,7 +235,7 @@ export async function contarAlertasPendientesPorColegio(
       .in("alumno_id", alumnoIds);
 
     if (errorAlertas) throw errorAlertas;
-    if(colegioId == undefined || 0 ){
+    if (colegioId == undefined || 0) {
       return 0;
     }
     return count || 0;
@@ -249,7 +243,7 @@ export async function contarAlertasPendientesPorColegio(
     console.error("Error en contarAlertasPendientesPorColegio:", error);
     throw new Error("No se pudo contar las alertas pendientes.");
   }
-}export async function contarAlertasPorColegio(
+} export async function contarAlertasPorColegio(
   client: SupabaseClient,
   colegioId: number
 ): Promise<number> {

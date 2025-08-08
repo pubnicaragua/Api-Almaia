@@ -91,6 +91,7 @@ export const AlumnoAlertaService = {
           ],
           where
         );
+
         res.json(mapearAlertas(alumnoalertaAlerta_data));
       }
     } catch (error) {
@@ -116,7 +117,6 @@ export const AlumnoAlertaService = {
         where
       );
       const alumnoalertaAlerta = mapearAlertaDetalleV2(alumnoalertaAlerta_data);
-
       res.json(alumnoalertaAlerta[0]);
     } catch (error) {
       console.error("Error al obtener la alerta del alumnoalerta:", error);
@@ -149,36 +149,36 @@ export const AlumnoAlertaService = {
         throw new Error("El alumno no existe");
       }
 
-        // Obtener información del colegio
-        let emailCorreo = "";
-        switch (bodyWithoutAnonimo.alertas_tipo_alerta_tipo_id) {
-          case 1: // SOS ALMA
-            emailCorreo = "correo_sos";
-            break;
+      // Obtener información del colegio
+      let emailCorreo = "";
+      switch (bodyWithoutAnonimo.alertas_tipo_alerta_tipo_id) {
+        case 1: // SOS ALMA
+          emailCorreo = "correo_sos";
+          break;
 
-          case 2: // Denuncia
-            emailCorreo = "correo_denuncia";
-            break;
+        case 2: // Denuncia
+          emailCorreo = "correo_denuncia";
+          break;
 
-          default:
-            emailCorreo = "correo_electronico";
-            break;
-        }
+        default:
+          emailCorreo = "correo_electronico";
+          break;
+      }
 
-        const { data: dataColegio, error: errorColegio } = await client
-          .from("colegios")
-          .select(emailCorreo)
-          .eq("colegio_id", data.colegio_id)
-          .single() as { data: any; error: PostgrestError | null };
+      const { data: dataColegio, error: errorColegio } = await client
+        .from("colegios")
+        .select(emailCorreo)
+        .eq("colegio_id", data.colegio_id)
+        .single() as { data: any; error: PostgrestError | null };
 
-          if (!errorColegio && dataColegio[emailCorreo]) {
-            // Procesar correos: dividir por comas, limpiar espacios y filtrar vacíos
-          destinatarios = dataColegio[emailCorreo]
-            .split(",")
-            .map((email: string) => email.trim())
-            .filter((email: string) => email.length > 0);
-        }
-      
+      if (!errorColegio && dataColegio[emailCorreo]) {
+        // Procesar correos: dividir por comas, limpiar espacios y filtrar vacíos
+        destinatarios = dataColegio[emailCorreo]
+          .split(",")
+          .map((email: string) => email.trim())
+          .filter((email: string) => email.length > 0);
+      }
+
 
       // Resto del código permanece igual
       if (alumnoalerta.alerta_regla_id !== undefined) {
@@ -381,7 +381,7 @@ export const AlumnoAlertaService = {
         if (!responseSent) {
           await dataService.updateById(id, rest);
 
-          
+
           res
             .status(200)
             .json({ message: "Alumno Alerta actualizado correctamente" });
