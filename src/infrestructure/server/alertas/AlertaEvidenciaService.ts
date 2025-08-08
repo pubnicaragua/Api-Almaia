@@ -9,10 +9,11 @@ const AlertaEvidenciaSchema = Joi.object({
   alumno_alerta_id: Joi.number().integer().required(),
   url_evidencia: Joi.string().max(255).required(),
 });
+
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
 const dataService: DataService<AlertaEvidencia> = new DataService(
-  "alumnos_alertas_evidencias","alumno_alerta_evidencia_id"
+  "alumnos_alertas_evidencias", "alumno_alerta_evidencia_id"
 );
 export const AlertaEvidenciasService = {
   async obtener(req: Request, res: Response) {

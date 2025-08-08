@@ -6,12 +6,12 @@ export class SupabaseClientService {
 
   constructor() {
   
-    const { SUPABASE_HOST, SUPABASE_PASSWORD } = process.env;
-    if (!SUPABASE_HOST || !SUPABASE_PASSWORD) {
+    const { SUPABASE_HOST, SUPABASE_PASSWORD_ADMIN } = process.env;
+    if (!SUPABASE_HOST || !SUPABASE_PASSWORD_ADMIN) {
       throw new Error("Faltan variables de entorno de Supabase");
     }
     const supabaseUrl = SUPABASE_HOST;
-    const supabaseKey = SUPABASE_PASSWORD;
+    const supabaseKey = SUPABASE_PASSWORD_ADMIN;
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Faltan variables de entorno de Supabase');
     }

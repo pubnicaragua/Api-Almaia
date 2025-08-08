@@ -54,7 +54,7 @@ export class AlumnoServicioCasoUso {
   }
 
   async obtenerAlumnosActivos(colegio_id: number) {
-
+    
     const { data, error } = await this.client.rpc('alumnos_activos', {
       p_colegio_id: colegio_id !== 0 ? colegio_id : null,
     });

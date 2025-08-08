@@ -8,6 +8,7 @@ import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegio
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
+
 const dataService: DataService<AlumnoNotificacion> = new DataService(
   "alumnos_notificaciones",
   "alumno_notificacion_id"

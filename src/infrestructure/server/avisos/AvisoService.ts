@@ -8,7 +8,9 @@ import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegio
 
 const supabaseService = new SupabaseClientService();
 const client: SupabaseClient = supabaseService.getClient();
+
 const dataService: DataService<Aviso> = new DataService("avisos", "aviso_id");
+
 const AvisoSchema = Joi.object({
   docente_id: Joi.number().integer().required(),
   mensaje: Joi.string().required(),
@@ -58,8 +60,7 @@ export const AvisosService = {
       aviso.actualizado_por = req.actualizado_por;
       let responseSent = false;
       const { error: validationError } = AvisoSchema.validate(req.body);
-      const { data, error } = await client
-        .from("docentes")
+      const { data, error } = await client.from("docentes")
         .select("*")
         .eq("docente_id", aviso.docente_id)
         .single();
