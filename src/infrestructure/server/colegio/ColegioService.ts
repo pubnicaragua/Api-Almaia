@@ -167,11 +167,8 @@ export const ColegiosService = {
 
   async obtener(req: Request, res: Response) {
     try {
-      console.log(req.user)
-      // dataService.setClient(req.user)
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const colegios = await dataService.getAll(["*"], where);
-      console.log(colegios)
       res.status(200).json(colegios);
     } catch (error) {
       console.error("Error al obtener el colegio:", error);

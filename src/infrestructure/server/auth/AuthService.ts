@@ -30,7 +30,6 @@ export const AuthService = {
           email,
           password,
         });
-      console.log(authData)
 
       if (authError || !authData.user) {
         req.body = {
@@ -261,11 +260,9 @@ export const AuthService = {
         }
         index = index + 1;
 
-        console.log(index, cleanEmail, success, StateMessage)
 
         // break
       }
-      console.log('🚀Actualizando usuarios🚀')
       await sleep(2000);
       await admin.rpc('actualizar_auth_id')
 
@@ -426,8 +423,6 @@ export const AuthService = {
     const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
     const { data: usuarios, error } = await admin.from('view_auth_users').select('*');
 
-    console.log(usuarios)
-    console.log(usuarios?.length)
     if (error) {
       console.error('Error listando usuarios:', error.message);
       return;
@@ -440,7 +435,6 @@ export const AuthService = {
       await admin.auth.admin.updateUserById(user.id, {
         password: 'Almaia2025'
       });
-      console.log(`Contraseña actualizada para: ${user.email}`);
     }
     res.status(200).json({ status: 'success', message: 'todas las contraseñas actualizadas' })
   },

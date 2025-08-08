@@ -10,7 +10,6 @@ export const sessionAuth = async (
 ): Promise<void> => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
-    console.log(token);
     if (!token) {
       throw new Error("No token provided");
     }
@@ -52,8 +51,6 @@ export const sessionAuth = async (
       .from("usuarios")
       .select()
       .eq("auth_id", data.user?.id);
-
-    console.log('Data user =====>', data_user)
 
     if (error_user || !data_user?.[0]) {
       throw new Error("Usuario no encontrado");

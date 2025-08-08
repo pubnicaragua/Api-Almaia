@@ -78,30 +78,3 @@ export async function mapearColegios(arrayOriginal: any): Promise<ColegioExtendi
   return resultados;
 }
 
-export async function mapearColegiosConCliente(arrayOriginal: any, client: SupabaseClient): Promise<ColegioExtendido[]> {
-  const resultados = await Promise.all(arrayOriginal.map(async (item:any) => {
-    return {
-      colegio_id: item.colegio_id,
-      nombre: item.colegios.nombre,
-      nombre_fantasia: item.colegios.nombre_fantasia || "",
-      tipo_colegio: item.colegios.tipo_colegio || "",
-      dependencia: item.colegios.dependencia || "",
-      sitio_web: item.colegios.sitio_web || "",
-      direccion: item.colegios.direccion || "",
-      telefono_contacto: item.colegios.telefono_contacto || "",
-      correo_electronico: item.colegios.correo_electronico || "",
-      creado_por: item.creado_por,
-      actualizado_por: item.actualizado_por,
-      fecha_creacion: item.fecha_creacion,
-      fecha_actualizacion: item.fecha_actualizacion,
-      activo: item.activo,
-      comuna_id: item.colegios.comuna_id || 0,
-      region_id: item.colegios.region_id || 0,
-      pais_id: item.colegios.pais_id || 0,
-      alerts: await contarAlertasPorColegio(client, item.colegio_id),
-      students: await contarAlumnosPorColegio(client, item.colegio_id)
-    };
-  }));
-  return resultados;
-}
-
