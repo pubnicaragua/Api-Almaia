@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response, NextFunction } from "express";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-const { SUPABASE_HOST, SUPABASE_PASSWORD, SUPABASE_PASSWORD_ADMIN } =
-  process.env;
+const { SUPABASE_HOST, SUPABASE_PASSWORD, SUPABASE_PASSWORD_ADMIN } = process.env;
 
 export const sessionAuth = async (
   req: Request,
