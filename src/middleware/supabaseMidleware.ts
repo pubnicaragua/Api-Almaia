@@ -15,7 +15,7 @@ export const sessionAuth = async (
     if (!token) {
       throw new Error("No token provided");
     }
-    if (!SUPABASE_HOST || !SUPABASE_PASSWORD || !SUPABASE_PASSWORD_ADMIN ) {
+    if (!SUPABASE_HOST || !SUPABASE_PASSWORD || !SUPABASE_PASSWORD_ADMIN) {
       throw new Error("Faltan variables de entorno de Supabase");
     }
     // 🔐 Crea cliente con token embebido
@@ -25,6 +25,7 @@ export const sessionAuth = async (
       {
         global: {
           headers: {
+            
             Authorization: `Bearer ${token}`,
           },
         },
@@ -36,6 +37,7 @@ export const sessionAuth = async (
       {
         global: {
           headers: {
+
             Authorization: `Bearer ${token}`,
           },
         },
