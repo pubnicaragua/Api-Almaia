@@ -30,7 +30,7 @@ export const AuthService = {
           email,
           password,
         });
-
+      console.log(authData)
 
       if (authError || !authData.user) {
         req.body = {
