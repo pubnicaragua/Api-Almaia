@@ -1,4 +1,4 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import { ISupabaseRepository } from "../../core/interface/ISupabaseRepository";
 import { SupabaseClientService } from "../../core/services/supabaseClient";
 //import { getSecret, loginToVault } from "../../core/services/valutClient";
@@ -54,7 +54,9 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     }
 
     const columnQuery = columns.join(",");
-    let query = this.client.from(this.table).select(columnQuery);
+    // this.client.auth
+    const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+    let query = admin.from(this.table).select(columnQuery);
     Object.keys(where).forEach((key) => {
       //si la query es un array, usar in
       if (Array.isArray(where[key])) {

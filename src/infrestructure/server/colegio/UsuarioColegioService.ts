@@ -39,7 +39,7 @@ export const UsuarioColegiosService = {
   // },
   async obtener(req: Request, res: Response) {
     try {
-      dataService.setClient(req.supabase);
+      // dataService.setClient(req.supabase);
       const usuariocolegios = await dataService.getAll(
         [
           "*",

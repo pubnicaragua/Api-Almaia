@@ -167,12 +167,15 @@ export const ColegiosService = {
 
   async obtener(req: Request, res: Response) {
     try {
+      console.log(req.user)
+      // dataService.setClient(req.user)
       const where = { ...req.query }; // Convertir los parámetros de consulta en filtros
       const colegios = await dataService.getAll(["*"], where);
-      res.json(colegios);
+      console.log(colegios)
+      res.status(200).json(colegios);
     } catch (error) {
       console.error("Error al obtener el colegio:", error);
-      res.status(500).json({ message: "Error interno del servidor" });
+      res.status(400).json({ message: "Error interno del servidor" });
     }
   },
   guardar: async (req: Request, res: Response) => {

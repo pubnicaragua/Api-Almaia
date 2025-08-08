@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response, NextFunction } from "express";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-
+import { DataService } from "../infrestructure/server/DataService";
+// import { DataService } from "../DataService";
 const { SUPABASE_HOST, SUPABASE_PASSWORD, SUPABASE_PASSWORD_ADMIN } =
   process.env;
 
@@ -26,7 +27,6 @@ export const sessionAuth = async (
       {
         global: {
           headers: {
-
             Authorization: `Bearer ${token}`,
           },
         },
@@ -62,12 +62,15 @@ export const sessionAuth = async (
       throw new Error("Usuario no encontrado");
     }
 
+    const dataService = new DataService('')
+    dataService.setClient(token)
     req.creado_por = data_user?.[0]?.usuario_id;
     req.actualizado_por = data_user?.[0]?.usuario_id;
     req.fecha_creacion = new Date().toUTCString();
     req.user = data_user?.[0];
     req.supabase = client;
     req.supabaseAdmin = admin;
+    // req.token = token
     next();
   } catch (error: any) {
     res.status(500).json({ error: error.message });
