@@ -54,7 +54,7 @@ export const CONTACTO_SERVICES = {
                 throw new Error("Campos requeridos (nombre, email, asunto, mensaje)");
             }
             console.log('entra ==============>', req.body)
-            const { nombre, email, asunto, mensaje, to } = req.body
+            const { nombre, email, asunto, mensaje } = req.body
             new EmailService().enviarEmail(
                 ["soporte@almaia.cl"],
                 {
