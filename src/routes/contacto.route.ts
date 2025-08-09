@@ -63,5 +63,6 @@ const router = express.Router();
  *         description: Error interno del servidor
  */
 router.post('/almaia', cors(), CONTACTO_SERVICES.contactoAlmaia);
+router.post('/almaia/soporte', cors(), CONTACTO_SERVICES.contactoAlmaiaSoporte);
 
 export default router;
