@@ -19,7 +19,7 @@ export const CONTACTO_SERVICES = {
             console.log('entra ==============>', req.body)
             const { nombre, telefono, email, to } = req.body
             new EmailService().enviarEmail(
-                to ? [to] : ["dxgabalt@gmail.com", "alexmedel@almaia.cl", "contacto@almaia.cl", "crivas@almaia.cl"],
+                to ? [to] : ["dxgabalt@gmail.com", "alexmedel@almaia.cl", "contacto@almaia.cl", "crivas@almaia.cl", "soporte@almaia.cl"],
                 {
                     subject: "Nuevo contacto desde el sitio web AlmaIA",
                     html: `
