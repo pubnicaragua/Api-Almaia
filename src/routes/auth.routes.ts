@@ -96,7 +96,6 @@ router.post('/login', AuthService.login);
  *         description: Error del servidor
  */
 router.post('/registro', AuthService.register);
-
 /**
  * @swagger
  * /api/v1/auth/update-password:

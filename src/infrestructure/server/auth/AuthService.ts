@@ -259,7 +259,7 @@ export const AuthService = {
           resultados.push({ email, status: 'creado', id: data.user?.id });
         }
         index = index + 1;
-
+        console.log(`${index} ${email} ${StateMessage} ${success} `)
 
         // break
       }
