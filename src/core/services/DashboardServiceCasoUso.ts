@@ -9,6 +9,7 @@ import { patologiaColors } from "../modelo/dashboard/PatologiaColors";
 export function mapEmotions(
   respuestas: { nombre: string; cantidad: number }[]
 ): Emotion[] {
+  
   return respuestas.map((r) => ({
     name: r.nombre,
     value: r.cantidad,

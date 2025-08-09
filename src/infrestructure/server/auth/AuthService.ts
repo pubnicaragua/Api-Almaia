@@ -211,6 +211,7 @@ export const AuthService = {
 
   // },
   async registerMasivo(req: Request, res: Response) {
+    
     function limpiarEmail(email: string) {
       return email
         .normalize('NFKC') // Normaliza caracteres Unicode
