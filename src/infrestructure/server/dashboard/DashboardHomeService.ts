@@ -34,8 +34,8 @@ export const DashboardHomeService = {
       );
 
       const alumnoServicioCasoUso = new AlumnoServicioCasoUso(colegio_id);
-      const calendario_escolar = obtenerCalendarioPorColegio(colegio_id);
-      const alumnnos = await alumnoServicioCasoUso.obtenerAlumnosColegio();
+      // const calendario_escolar = obtenerCalendarioPorColegio(colegio_id);
+      // const alumnnos = await alumnoServicioCasoUso.obtenerAlumnosColegio();
       const [totalAlumnos, alumnosActivos] = await Promise.all([
         alumnoServicioCasoUso.obtenerCantidadAlumnos(colegio_id),
         alumnoServicioCasoUso.obtenerAlumnosActivos(colegio_id)
@@ -45,6 +45,7 @@ export const DashboardHomeService = {
         sevenDaysAgo
       );
       const alertas_services_caso_uso = new AlertasServicioCasoUso();
+      
       const [sosStats, denunciaStats, amarillaStats, naranjaStats, rojaStats] =
         await Promise.all([
           alertas_services_caso_uso.getAlertStatsByType(
