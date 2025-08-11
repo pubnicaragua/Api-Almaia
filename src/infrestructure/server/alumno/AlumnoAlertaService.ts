@@ -241,7 +241,7 @@ export const AlumnoAlertaService = {
           {
             tipo: dataAlertaTipo.nombre,
             codigo: savedAlumnoAlerta.alumno_alerta_id,
-            enlace: "https://almacolegios.vercel.app/",
+            enlace: "https://www.almaiacolegios.app/",
           },
           destinatarios
         );

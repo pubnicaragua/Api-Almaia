@@ -59,16 +59,13 @@ const dataImageService: DataService<Partial<Alumno>> = new DataService(
 export const UsuariosService = {
   async obtener(req: Request, res: Response) {
     try {
-      dataService.setClient(req.supabase)
+      dataService.setClient(req.supabase);
       const usuarios = await dataService.getAll(
         [
-          "usuario_id, nombre_social, email, encripted_password, rol_id, telefono_contacto, ultimo_inicio_sesion, estado_usuario, intentos_inicio_sesion, url_foto_perfil, persona_id, creado_por, actualizado_por, fecha_creacion, fecha_actualizacion, activo, idioma_id, auth_id",
-          "roles(rol_id,nombre)",
+          "usuario_id, activo",
           "personas(persona_id,nombres,apellidos)",
-          "idiomas(idioma_id,nombre)",
         ],
         {rol_id:[5,6,7]}
-        // req.query
       );
       res.json(usuarios);
     } catch (error) {
