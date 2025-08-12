@@ -5,8 +5,8 @@ export class AlumnoAlerta extends BaseModel {
   alumno_id: number;
   alerta_regla_id?: number;
   mensaje: string;
-  fecha_generada: Date;
-  fecha_resolucion: Date;
+  fecha_generada: string;
+  // fecha_resolucion: Date;
   alerta_origen_id: number;
   prioridad_id: number;
   severidad_id: number;
@@ -20,8 +20,8 @@ export class AlumnoAlerta extends BaseModel {
     super();
     this.alumno_id = 0;
     this.mensaje ="";
-    this.fecha_generada = new Date();
-    this.fecha_resolucion = new Date();
+    this.fecha_generada = new Date().toISOString();
+    // this.fecha_resolucion = new Date();
     this.alerta_origen_id = 0;
     this.prioridad_id = 0;
     this.severidad_id = 0;

@@ -32,6 +32,7 @@ const AlumnoAlertaSchema = Joi.object({
   responsable_actual_id: Joi.number().integer().optional(),
   alertas_tipo_alerta_tipo_id: Joi.number().integer().required(),
 });
+
 const AlumnoAlertaUpdateSchema = Joi.object({
   alumno_id: Joi.number().integer().optional(),
   alerta_regla_id: Joi.number().integer().optional(),
@@ -128,11 +129,13 @@ export const AlumnoAlertaService = {
       let destinatarios = ["app@almaia.cl"]; // fallback por defecto
 
       const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
+      
       const { anonimo = false, alumno_id, ...bodyWithoutAnonimo } = req.body; // Establece false por defecto si es undefined
 
       Object.assign(alumnoalerta, bodyWithoutAnonimo);
 
       alumnoalerta.creado_por = req.creado_por;
+
       alumnoalerta.actualizado_por = req.actualizado_por;
 
       let responseSent = false;
@@ -236,7 +239,9 @@ export const AlumnoAlertaService = {
       }
 
       if (!responseSent) {
+        console.log(alumnoalerta)
         const savedAlumnoAlerta = await dataService.processData({ ...alumnoalerta, anonimo, alumno_id });
+
         const email = await emailService.enviarNotificacionAlerta(
           {
             tipo: dataAlertaTipo.nombre,
