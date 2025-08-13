@@ -28,7 +28,7 @@ export const UsuarioColegiosService = {
           "usuarios(usuario_id,nombre_social)",
           "roles(rol_id,nombre)",
         ],
-        req.query
+        { ...req.query, "colegios.activo": true}
       );
       const colegios_maping = await mapearColegios(usuariocolegios);
       res.status(200).json(colegios_maping);
