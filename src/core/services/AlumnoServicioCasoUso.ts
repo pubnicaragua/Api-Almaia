@@ -60,7 +60,6 @@ export class AlumnoServicioCasoUso {
     });
 
     // const { data, error } = await this.client.from('alumnos').select('*').eq('activo', true).eq('colegio_id', colegio_id)
-    console.log(data)
     if (error) {
       throw new Error(`Error al obtener estadísticas de alertas: ${error.message}`);
     }

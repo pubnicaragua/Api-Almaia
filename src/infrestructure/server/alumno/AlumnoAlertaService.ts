@@ -126,7 +126,6 @@ export const AlumnoAlertaService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
-      console.log("ENVIANDO ALERTA ====>")
       let destinatarios = ["app@almaia.cl"]; // fallback por defecto
 
       const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
@@ -240,7 +239,6 @@ export const AlumnoAlertaService = {
       }
 
       if (!responseSent) {
-        console.log(alumnoalerta)
         const savedAlumnoAlerta = await dataService.processData({ ...alumnoalerta, anonimo, alumno_id });
 
         const email = await emailService.enviarNotificacionAlerta(

@@ -21,7 +21,6 @@ export const UsuarioColegiosService = {
   async obtener(req: Request, res: Response) {
     try {
       dataService.setClient(req.supabase); // ← AGREGAR ESTA LÍNEA 
-      console.log('entra colegios===========>')
       const usuariocolegios = await dataService.getAll(
         [
           "*",
@@ -31,9 +30,7 @@ export const UsuarioColegiosService = {
         ],
         req.query
       );
-      console.log(usuariocolegios)
       const colegios_maping = await mapearColegios(usuariocolegios);
-      console.log(colegios_maping)
       res.status(200).json(colegios_maping);
     } catch (error) {
       res.status(500).json(error);

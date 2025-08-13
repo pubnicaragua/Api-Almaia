@@ -23,7 +23,6 @@ export const CONTACTO_SERVICES = {
             if (error) {
                 throw new Error("Campos requeridos (nombre, telefono, email)");
             }
-            console.log('entra ==============>', req.body)
             const { nombre, telefono, email, to } = req.body
             new EmailService().enviarEmail(
                 to ? [to] : ["dxgabalt@gmail.com", "alexmedel@almaia.cl", "contacto@almaia.cl", "crivas@almaia.cl", "soporte@almaia.cl"],
@@ -53,7 +52,6 @@ export const CONTACTO_SERVICES = {
             if (error) {
                 throw new Error("Campos requeridos (nombre, email, asunto, mensaje)");
             }
-            console.log('entra ==============>', req.body)
             const { nombre, email, asunto, mensaje } = req.body
             new EmailService().enviarEmail(
                 ["soporte@almaia.cl"],
