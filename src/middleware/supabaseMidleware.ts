@@ -17,17 +17,17 @@ export const sessionAuth = async (
       throw new Error("Faltan variables de entorno de Supabase");
     }
     // 🔐 Crea cliente con token embebido
-    const client: SupabaseClient = createClient(
-      SUPABASE_HOST,
-      SUPABASE_PASSWORD,
-      {
-        global: {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      }
-    );
+    // const client: SupabaseClient = createClient(
+    //   SUPABASE_HOST,
+    //   SUPABASE_PASSWORD,
+    //   {
+    //     global: {
+    //       headers: {
+    //         Authorization: `Bearer ${token}`,
+    //       },
+    //     },
+    //   }
+    // );
 
     const admin: SupabaseClient = createClient(
       SUPABASE_HOST,
@@ -42,12 +42,12 @@ export const sessionAuth = async (
       }
     );
 
-    const { data, error } = await client.auth.getUser();
+    const { data, error } = await admin.auth.getUser();
     if (error || !data?.user) {
       throw new Error("Invalid token");
     }
 
-    const { data: data_user, error: error_user } = await client
+    const { data: data_user, error: error_user } = await admin
       .from("usuarios")
       .select()
       .eq("auth_id", data.user?.id);
@@ -60,9 +60,11 @@ export const sessionAuth = async (
     req.actualizado_por = data_user?.[0]?.usuario_id;
     req.fecha_creacion = new Date().toUTCString();
     req.user = data_user?.[0];
-    req.supabase = client;
+    req.supabase = admin;
     req.supabaseAdmin = admin;
+
     next();
+    
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
