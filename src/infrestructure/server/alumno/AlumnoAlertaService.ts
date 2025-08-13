@@ -20,7 +20,7 @@ const AlumnoAlertaSchema = Joi.object({
   alumno_id: Joi.number().integer().allow(null).optional(),
   alerta_regla_id: Joi.number().integer().optional(),
   mensaje: Joi.string().max(100).required(),
-  fecha_generada: Joi.string().required(),
+  fecha_generada: Joi.string(),
   fecha_resolucion: Joi.string().optional(),
   alerta_origen_id: Joi.number().integer().required(),
   prioridad_id: Joi.number().integer().required(),
@@ -126,10 +126,11 @@ export const AlumnoAlertaService = {
   },
   guardar: async (req: Request, res: Response) => {
     try {
+      console.log("ENVIANDO ALERTA ====>")
       let destinatarios = ["app@almaia.cl"]; // fallback por defecto
 
       const alumnoalerta: AlumnoAlerta = new AlumnoAlerta();
-      
+
       const { anonimo = false, alumno_id, ...bodyWithoutAnonimo } = req.body; // Establece false por defecto si es undefined
 
       Object.assign(alumnoalerta, bodyWithoutAnonimo);
@@ -255,7 +256,7 @@ export const AlumnoAlertaService = {
       }
     } catch (err) {
       const error = err as Error;
-      console.error("Error al guardar el alumnoalerta:", error);
+      console.error("Error al guardar el alumnoalerta:", error.message);
       res.status(500).json({ message: error.message || "Error inesperado" });
     }
   },

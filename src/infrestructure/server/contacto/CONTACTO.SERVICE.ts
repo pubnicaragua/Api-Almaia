@@ -5,7 +5,7 @@ import { EmailService } from "../../../core/services/EmailService";
 
 const ContactoAlmaiachema = Joi.object({
     nombre: Joi.string().max(100).required(),
-    email: Joi.string().max(100).required(),
+    email: Joi.string().max(100),
     telefono: Joi.string().max(50).required(),
     to: Joi.string().max(100)
 });
