@@ -1967,7 +1967,7 @@ router.get(ruta_alumnos_alertas, sessionAuth, AlumnoAlertaService.obtener);
  *                   type: string
  *                   example: "Error al contar alertas pendientes"
  */
-router.get(ruta_alumnos_alertas + "/conteo", sessionAuth, AlumnoAlertaService.contarAlertasPendientes);
+router.get(ruta_alumnos_alertas + "/conteo", sessionAuth, AlumnoAlertaService.DistribucionAlertas);
 /**
  * @swagger
  * /api/v1/alumnos/buscar:

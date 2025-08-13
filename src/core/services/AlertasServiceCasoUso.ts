@@ -243,7 +243,8 @@ export async function contarAlertasPendientesPorColegio(
     console.error("Error en contarAlertasPendientesPorColegio:", error);
     throw new Error("No se pudo contar las alertas pendientes.");
   }
-} export async function contarAlertasPorColegio(
+}
+export async function contarAlertasPorColegio(
   client: SupabaseClient,
   colegioId: number
 ): Promise<number> {

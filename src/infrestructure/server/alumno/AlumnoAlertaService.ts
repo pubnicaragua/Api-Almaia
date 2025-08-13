@@ -437,4 +437,33 @@ export const AlumnoAlertaService = {
       res.status(500).json({ error: "Error al contar alertas" });
     }
   },
+  async DistribucionAlertas(req: Request, res: Response) {
+    try {
+      const { colegio_id } = req.query;
+
+      if (colegio_id) {
+        const colegioIdNumber = Number(colegio_id);
+        if (isNaN(colegioIdNumber)) {
+          throw new Error("colegio_id debe ser un número");
+        }
+
+        const { data, error } = await client.rpc('contar_alertas_por_estado', { p_colegio_id: colegio_id })
+        console.log(data)
+        res.json(data[0]);
+      } else {
+        // Sin filtro de colegio, contar todas las alertas pendientes
+        /*const { count, error } = await client
+          .from("alumnos_alertas")
+          .select("*", { count: "exact", head: true })
+          .eq("estado", "pendiente");
+
+        if (error) throw error;*/
+
+        res.json({ count: 0 });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: "Error al contar alertas" });
+    }
+  },
 };
