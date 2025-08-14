@@ -99,8 +99,8 @@ export const AuthService = {
       const errorMessage =
         err instanceof Error ? err.message : "Error desconocido";
       res.status(400).json({
-        message: "Credenciales incorrectas:" + errorMessage,
-        error: errorMessage,
+        message: "Credenciales incorrectas:",
+        error: 'error',
       });
     }
   },
@@ -108,12 +108,19 @@ export const AuthService = {
   async register(req: Request, res: Response) {
     const { email, password } = req.body;
 
-    // Validación básica
+    const registerSch = Joi.object({
+      email: Joi.string().email().required(), // O usa email si lo prefieres
+      password: Joi.string().min(6).required(),
+    });
     if (!email || !password) {
 
       throw new Error("Email y contraseña son requeridos❌");
       // res.status(400).json({ message: "" });
     }
+
+    const { error, value } = registerSch.validate(req.body)
+    if (error) throw new Error(error.message);;
+    // Validación básica
     if (password.length < 6) {
       throw new Error("La contraseña deber tener 6 caracteres como minimo❌");
       // res.status(400).json({ message: "" });
