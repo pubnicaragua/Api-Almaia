@@ -10,7 +10,30 @@ import { AuditoriaPermisoesService } from '../infrestructure/server/auth/Auditor
 import { RegistroInteraccionesService } from '../infrestructure/server/auth/RegistroInteracccionService';
 import cors from 'cors';
 import multer from "multer";
-const upload = multer({ storage: multer.memoryStorage() });
+import path from 'path';
+// const upload = multer({ storage: multer.memoryStorage() });
+
+function fileFilter(req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) {
+    const allowedMimes = [
+        'text/csv',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+
+    const allowedExtensions = ['.csv', '.xls', '.xlsx'];
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (!allowedMimes.includes(file.mimetype) || !allowedExtensions.includes(ext)) {
+        return cb(new Error('Tipo de archivo no permitido. Solo CSV o Excel.'));
+    }
+    cb(null, true);
+}
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    fileFilter,
+    limits: { fileSize: 2 * 1024 * 1024 } // 2 MB
+});
 
 const router = express.Router();
 const ruta_roles = '/roles';
