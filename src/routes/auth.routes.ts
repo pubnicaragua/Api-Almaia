@@ -157,7 +157,7 @@ router.post('/registro/masivo', upload.single('file'), AuthService.registerMasiv
  *         description: Error del servidor
  */
 
-router.post('/update-all-password', AuthService.actualizarTodasLasContraseñas);
+// router.post('/update-all-password', AuthService.actualizarTodasLasContraseñas);
 /**
  * @swagger
  * /api/v1/auth/update-password:
