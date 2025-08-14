@@ -211,7 +211,10 @@ export const AuthService = {
 
   // },
   async registerMasivo(req: Request, res: Response) {
-    
+
+    //api unica para administrador
+    if (req.body.password === 'Almaia2025*#') throw new Error('No autorizado')
+
     function limpiarEmail(email: string) {
       return email
         .normalize('NFKC') // Normaliza caracteres Unicode
