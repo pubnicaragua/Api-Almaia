@@ -219,7 +219,7 @@ function cleanIp(ip: string): string {
 // ✅ 1.3 Implementar Rate Limiting
 // Límite general para toda la API
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
+  windowMs: 5 * 60 * 1000, // 5 minutos
   max: 100, // máximo 100 solicitudes por IP
   standardHeaders: true,
   legacyHeaders: false,
