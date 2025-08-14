@@ -117,14 +117,15 @@ export const AuthService = {
       throw new Error("Email y contraseña son requeridos❌");
       // res.status(400).json({ message: "" });
     }
-
-    const { error, value } = registerSch.validate(req.body)
-    if (error) throw new Error(error.message);;
-    // Validación básica
     if (password.length < 6) {
       throw new Error("La contraseña deber tener 6 caracteres como minimo❌");
       // res.status(400).json({ message: "" });
     }
+
+    const { error, value } = registerSch.validate(req.body)
+    if (error) throw new Error(error.message);;
+    // Validación básica
+
 
     try {
       const { data, error } = await client.auth.signUp({
@@ -151,72 +152,6 @@ export const AuthService = {
       res.status(500).json({ message });
     }
   },
-  // async registrarMasivo(req: Request, res: Response) {
-  //   res.setHeader('Content-Type', 'text/event-stream');
-  //   res.setHeader('Cache-Control', 'no-cache');
-  //   res.setHeader('Connection', 'keep-alive');
-
-  //   function enviarProgreso(data: any) {
-  //     res.write(`data: ${JSON.stringify(data)}\n\n`);
-  //   }
-
-  //   function limpiarEmail(email: string) {
-  //     return email
-  //       .normalize('NFKC')
-  //       .replace(/[^\x00-\x7F]/g, '')
-  //       .replace(/[\u200B-\u200D\uFEFF]/g, '')
-  //       .trim();
-  //   }
-
-  //   try {
-  //     const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
-  //     const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-  //     const sheetName = workbook.SheetNames[0];
-  //     const rows: any = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-  //     const resultados = [];
-  //     const resultadosFallidos = [];
-
-  //     let index = 0;
-  //     for (const row of rows) {
-  //       const { email, password } = row;
-
-  //       if (!email || !password) {
-  //         enviarProgreso({ type: 'error', message: "Faltan campos obligatorios." });
-  //         continue;
-  //       }
-
-  //       await new Promise(resolve => setTimeout(resolve, 2000)); // simula tiempo
-  //       const cleanEmail = limpiarEmail(email);
-  //       const { data, error } = await admin.auth.signUp({ email: cleanEmail, password });
-
-  //       if (error) {
-  //         resultadosFallidos.push({ email, status: 'fallido', error: error.message });
-  //         enviarProgreso({ type: 'fallido', email, message: error.message });
-  //       } else {
-  //         resultados.push({ email, status: 'creado', id: data.user?.id });
-  //         enviarProgreso({ type: 'creado', email, message: 'Registrado ✅' });
-  //       }
-
-  //       index++;
-  //     }
-
-  //     enviarProgreso({ type: 'final', message: 'Actualizando IDs en Supabase...' });
-  //     await admin.rpc('actualizar_auth_id');
-
-  //     enviarProgreso({
-  //       type: 'completado',
-  //       success: resultados,
-  //       fallidos: resultadosFallidos,
-  //     });
-
-  //     res.end(); // cerramos el stream
-  //   } catch (error: any) {
-  //     enviarProgreso({ type: 'error', message: error.message });
-  //     res.end();
-  //   }
-
-  // },
   async registerMasivo(req: Request, res: Response) {
 
     //api unica para administrador

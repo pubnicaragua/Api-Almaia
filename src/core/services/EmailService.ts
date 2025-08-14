@@ -63,9 +63,6 @@ export class EmailService {
 
       const info = await this.transporter.sendMail(mailOptions);
 
-      console.log(
-        `Correo enviado:\nFrom: ${from}\nTo: ${to}\nSubject: ${subject}\nMessageID: ${info.accepted}`
-      );
       return true;
     } catch (error: any) {
       console.error("Error al enviar email:", error.message || error);
