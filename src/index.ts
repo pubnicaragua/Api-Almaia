@@ -237,7 +237,7 @@ const authLimiter = rateLimit({
 });
 
 // Habilitar la confianza en los proxies
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '30mb' }));
 app.use(helmet());
 app.use(express.urlencoded({ extended: true, limit: '30mb' }));
@@ -265,6 +265,7 @@ app.use(cors(corsOptions));
 app.use((req: Request, res: Response, next: NextFunction) => {
   const rawIp = req.ip || req.connection.remoteAddress || '';
   const clientIp = cleanIp(rawIp);
+  console.log(`Solicitud desde IP: ${clientIp}`); // Log de IP para depuración
   const customHeader = req.headers['x-almaia-access'];
 
   // Lista blanca de IPs
