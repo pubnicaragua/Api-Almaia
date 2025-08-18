@@ -21,6 +21,7 @@ export const UsuarioColegiosService = {
   async obtener(req: Request, res: Response) {
     try {
       dataService.setClient(req.supabase); // ← AGREGAR ESTA LÍNEA 
+
       const usuariocolegios = await dataService.getAll(
         [
           "*",

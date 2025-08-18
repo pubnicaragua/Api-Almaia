@@ -18,13 +18,13 @@ export class DataService<T> {
       this.repository.setClient(client);
     }
   }
- setClient(client: SupabaseClient) {
+  setClient(client: SupabaseClient) {
     this.client = client;
     this.repository.setClient(client);
   }
   async processData(entity: T): Promise<T> {
     const processedEntity = this.transformData(entity);
-     const result = await this.repository.saveData(processedEntity);
+    const result = await this.repository.saveData(processedEntity);
     return result;
   }
 
@@ -32,13 +32,13 @@ export class DataService<T> {
     return entity; // Puede ser sobrescrito en servicios específicos
   }
 
-async getAll(  
-  columns: string[],  
-  where: Record<string, any> = {},  
-  orderby?: string  
-): Promise<T[]> {  
-  return await this.repository.getAll(columns, where, orderby,false);  
-}
+  async getAll(
+    columns: string[],
+    where: Record<string, any> = {},
+    orderby?: string,
+  ): Promise<T[]> {
+    return await this.repository.getAll(columns, where, orderby, true);
+  }
 
   async getById(id: number): Promise<T> {
     return await this.repository.getData(id);

@@ -43,10 +43,11 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
     columns: string[],
     where: Record<string, any> = {},
     orderBy?: string, // columna opcional para ordenar  
-    ascending: boolean = true // dirección del ordenamiento, por defecto ascendente  
+    ascending: boolean = true, // dirección del ordenamiento, por defecto ascendente,
   ): Promise<T[]> {
     await this.ensureClientInitialized();
-
+    const limit = where?.limit;
+    delete where?.limit; // Eliminar el límite de la consulta
     if (!columns.length) {
       throw new Error(
         "Debes especificar al menos una columna para generar el reporte."
@@ -68,6 +69,13 @@ export class SupabaseRepository<T> implements ISupabaseRepository<T> {
 
     if (orderBy && orderBy !== "*") {
       query = query.order(orderBy, { ascending: ascending });
+    }
+    // Si se especifica un límite, aplicarlo a la consulta
+    //validar que limit sea un número y no sea NaN
+    if (limit && !isNaN(parseInt(limit))) {
+
+      query = query.limit(parseInt(limit));
+
     }
 
     const { data, error } = await query.returns<T[]>();
