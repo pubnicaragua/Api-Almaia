@@ -262,20 +262,20 @@ const corsOptions: CorsOptions = {
 app.use(cors(corsOptions));
 
 // ✅ 1.5 Eliminar bypass de IP
-app.use((req: Request, res: Response, next: NextFunction) => {
-  const rawIp = req.ip || req.connection.remoteAddress || '';
-  const clientIp = cleanIp(rawIp);
-  console.log(`Solicitud desde IP: ${clientIp}`); // Log de IP para depuración
-  const customHeader = req.headers['x-almaia-access'];
+// app.use((req: Request, res: Response, next: NextFunction) => {
+//   const rawIp = req.ip || req.connection.remoteAddress || '';
+//   const clientIp = cleanIp(rawIp);
+//   console.log(`Solicitud desde IP: ${clientIp}`); // Log de IP para depuración
+//   const customHeader = req.headers['x-almaia-access'];
 
-  // Lista blanca de IPs
-  const allowedIps = ['::1', '127.0.0.1'];
+//   // Lista blanca de IPs
+//   const allowedIps = ['::1', '127.0.0.1'];
 
-  if (allowedIps.includes(clientIp) || customHeader === 'x-almaia-access') {
-    return next();
-  }
-  res.status(403).json({ message: 'Acceso denegado' });
-});
+//   if (allowedIps.includes(clientIp) || customHeader === 'x-almaia-access') {
+//     return next();
+//   }
+//   res.status(403).json({ message: 'Acceso denegado' });
+// });
 
 app.get('/', (req: Request, res: Response) => {
   res.send('¡Hola mundo con CORS, seguridad y rate limiting!');
