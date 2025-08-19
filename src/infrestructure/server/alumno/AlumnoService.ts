@@ -95,22 +95,28 @@ export const AlumnosService = {
     }
   },
   async establecer_consentimiento(req: Request, res: Response) {
+
     try {
       const alumnoId = parseInt(req.params.id);
       const { consentimiento } = req.body;
       if (!consentimiento && consentimiento === false) {
         throw new Error("El consentimiento es requerido.");
-      }
-      const { error } = await client
+      };
+
+      const { data: alumnoData, error: errorAlumno } = await client
         .from("alumnos")
         .update({ consentimiento: consentimiento })
-        .eq("alumno_id", alumnoId);
+        .eq("alumno_id", alumnoId).select('*').single();
 
-      if (error) {
-        throw new Error(error.message);
+      if (errorAlumno) {
+        throw new Error(errorAlumno.message);
       }
 
-      res.status(200).json({ message: "Acepto consentimiento y asentamiento" });
+
+      const { data: userData, error: userError } = await client
+        .from("usuarios").select("clave_generada").eq("email", alumnoData.email);
+
+      res.status(200).json({ clave_generada: userData ? userData[0].clave_generada : '', message: "Acepto consentimiento y asentamiento" });
     } catch (err) {
       const error = err as Error;
       console.error("Error al guardar el motoralerta:", error);
