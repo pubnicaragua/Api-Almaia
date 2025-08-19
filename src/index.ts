@@ -81,6 +81,39 @@ const authLimiter = rateLimit({
   message: { message: 'Demasiados intentos de autenticación, inténtelo más tarde.' }
 });
 
+// Rate limiting granular para endpoints críticos
+const alertCreationLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minuto
+  max: 10, // máximo 10 alertas por minuto
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiadas alertas creadas, inténtelo más tarde.' }
+});
+
+const passwordResetLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 3, // máximo 3 intentos por ventana
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiados intentos de cambio de contraseña, inténtelo más tarde.' }
+});
+
+const bulkUserCreationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 5, // máximo 5 cargas masivas por hora
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiadas cargas masivas de usuarios, inténtelo más tarde.' }
+});
+
+const colegioModificationLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutos
+  max: 20, // máximo 20 modificaciones por ventana
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiadas modificaciones de colegios, inténtelo más tarde.' }
+});
+
 // Habilitar la confianza en los proxies
 app.set('trust proxy', 1);
 app.use(express.json({ limit: '30mb' }));
