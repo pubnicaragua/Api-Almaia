@@ -112,11 +112,7 @@ export const AlumnosService = {
         throw new Error(errorAlumno.message);
       }
 
-
-      const { data: userData, error: userError } = await client
-        .from("usuarios").select("clave_generada").eq("email", alumnoData.email);
-
-      res.status(200).json({ clave_generada: userData ? userData[0].clave_generada : '', message: "Acepto consentimiento y asentamiento" });
+      res.status(200).json({ message: "Acepto consentimiento y asentamiento" });
     } catch (err) {
       const error = err as Error;
       console.error("Error al guardar el motoralerta:", error);

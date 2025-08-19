@@ -390,19 +390,23 @@ export const AuthService = {
       const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
 
       const passwordSchema = Joi.object({
-        user_id: Joi.number().required(),
+        alumno_id: Joi.number().required(),
         newPassword: Joi.string().min(6).required(),
-
       });
 
       const { error: schemeError, value: body } = passwordSchema.validate(req.body);
-      const { newPassword, user_id } = body;
+      const { newPassword, alumno_id } = body;
 
       if (schemeError) {
         throw new Error(schemeError.details[0].message);
-      }
+      };
 
-      const { data: user, error } = await client.from("usuarios").select("auth_id").eq("usuario_id", user_id).single()
+      const { data: alumnoData, error: AlumnoError } = await client.from("alumnos").select("email").eq("alumno_id", alumno_id).single();
+
+      if (!alumnoData) throw new Error("Alumno no encontrado");
+
+      const { data: user, error } = await client.from("usuarios").select("auth_id").eq("email", alumnoData?.email).single();
+
       if (!user) throw new Error("Usuario no existe");
       //guardar contraseña directamente
 
