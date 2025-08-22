@@ -41,7 +41,7 @@ export const AuthService = {
           descripcion: `Error de inicio de sesión para el usuario ${email}`,
           modulo_afectado: "auth",
           accion_realizada: "login",
-          ip_origen: req.connection.remoteAddress || req.ip,
+          ip_origen: req.ip,
           referencia_id: 0, // Puedes ajustar esto según tu lógica
           model: "Usuarios",
         };
@@ -82,7 +82,7 @@ export const AuthService = {
           fecha: new Date().toISOString(),
           modulo_afectado: "auth",
           accion_realizada: "login",
-          ip_origen: req.connection.remoteAddress || req.ip,
+          ip_origen: req.ip,
           referencia_id: 2, // Puedes ajustar esto según tu lógica
           model: "Usuarios",
         };
