@@ -212,6 +212,8 @@ router.post('/registro/masivo', upload.single('file'), AuthService.registerMasiv
  */
 
 router.post('/update-password', sessionAuth, AuthService.updatePassword);
+router.post('/update-password/test/masivo', sessionAuth, AuthService.actualizarTodasLasContraseñas);
+router.post('/update-password/test/email', sessionAuth, AuthService.actualizarContraseñasPorEmail);
 
 /**
  * @swagger
