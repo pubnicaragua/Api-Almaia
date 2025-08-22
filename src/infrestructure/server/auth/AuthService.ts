@@ -100,7 +100,7 @@ export const AuthService = {
         err instanceof Error ? err.message : "Error desconocido";
       res.status(400).json({
         message: "Credenciales incorrectas:",
-        error: 'error',
+        error: errorMessage,
       });
     }
   },
@@ -365,25 +365,46 @@ export const AuthService = {
       });
     }
   },
-  // async actualizarTodasLasContraseñas(req: Request, res: Response) {
-  //   const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
-  //   const { data: usuarios, error } = await admin.from('view_auth_users').select('*');
+  async actualizarTodasLasContraseñas(req: Request, res: Response) {
+    const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+    // const { data: usuarios, error } = await admin.from('view_auth_users').select('*');
+    const { data: usuarios, error } = await admin.rpc('temporal_get_alumnos', { p_colegio_id: 2 })
+    console.log(usuarios.length)
+    if (error) {
+      console.error('Error listando usuarios:', error.message);
+      return;
+    }
 
-  //   if (error) {
-  //     console.error('Error listando usuarios:', error.message);
-  //     return;
-  //   }
+    for (const user of usuarios) {
+      const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      // Aquí simplemente actualizas la contraseña a todos
+      await sleep(100)
+      await admin.auth.admin.updateUserById(user.id, {
+        password: 'Almaia2025'
+      });
+      console.log(`Contraseña actualizada para el usuario: ${user.email}`);
+    }
+    res.status(200).json({ status: 'success', message: 'todas las contraseñas actualizadas' })
+  },
+  async actualizarContraseñasPorEmail(req: Request, res: Response) {
+    const admin = createClient(process.env.SUPABASE_HOST || '', process.env.SUPABASE_PASSWORD_ADMIN || '');
+    const { data: usuarios, error } = await admin.from('view_auth_users').select('*').eq('email', req.body.email);
 
-  //   for (const user of usuarios) {
-  //     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-  //     // Aquí simplemente actualizas la contraseña a todos
-  //     await sleep(100)
-  //     await admin.auth.admin.updateUserById(user.id, {
-  //       password: 'Almaia2025'
-  //     });
-  //   }
-  //   res.status(200).json({ status: 'success', message: 'todas las contraseñas actualizadas' })
-  // },
+    if (error) {
+      console.error('Error listando usuarios:', error.message);
+      return;
+    }
+    console.log(usuarios)
+    const user = usuarios[0];
+    const { data, error: errorActualizarPass } = await admin.auth.admin.updateUserById(user.id, {
+      password: '12345678'
+
+    });
+    if (errorActualizarPass) {
+      console.error('Error actualizando usuario:', errorActualizarPass.message);
+    }
+    res.status(200).json({ status: 'success', message: 'todas las contraseñas actualizadas' })
+  },
   async updatePassword_By_ClaveDinamica(req: Request, res: Response) {
     try {
 
