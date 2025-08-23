@@ -48,7 +48,7 @@ export const AlumnoTareasService = {
             "alumnos(alumno_id,url_foto_perfil,telefono_contacto1,telefono_contacto2,email,personas(persona_id,nombres,apellidos))",
             "materias(materia_id,nombre)",
           ],
-          where
+          { ...where, activo: true }
         );
         res.json(alumnotareas);
       }

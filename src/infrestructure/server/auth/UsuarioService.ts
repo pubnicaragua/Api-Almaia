@@ -65,7 +65,7 @@ export const UsuariosService = {
           "usuario_id, activo",
           "personas(persona_id,nombres,apellidos)",
         ],
-        {rol_id:[5,6,7]}
+        { rol_id: [5, 6, 7] }
       );
       res.json(usuarios);
     } catch (error) {
@@ -82,7 +82,7 @@ export const UsuariosService = {
           "personas(persona_id,nombres,apellidos)",
           "idiomas(idioma_id,nombre)",
         ],
-        { rol_id: [4, 5, 6] }
+        { rol_id: [5, 8, 9, 13] }
       );
       res.json(usuarios);
     } catch (error) {
