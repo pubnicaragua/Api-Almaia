@@ -32,7 +32,8 @@ jest.mock('@supabase/supabase-js', () => ({
 import { SupabaseRepository } from '../src/infrestructure/adapter/SupabaseRepository';
 
 describe('SupabaseRepository', () => {
-  let repository: SupabaseRepository<any>;
+  type TestEntity = { id?: number; name?: string; activo?: boolean };
+  let repository: SupabaseRepository<TestEntity>;
   const tableName = 'test_table';
   const pkName = 'test_id';
 
