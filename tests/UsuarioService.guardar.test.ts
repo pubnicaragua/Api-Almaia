@@ -7,7 +7,7 @@ const mockInsert = jest.fn().mockReturnThis();
 const mockFrom = jest.fn().mockReturnValue({
   select: mockSelect,
   insert: mockInsert,
-}));
+});
 
 const mockSignUp = jest.fn();
 const mockAuth = {
