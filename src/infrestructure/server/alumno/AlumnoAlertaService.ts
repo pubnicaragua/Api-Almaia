@@ -1,19 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Request, Response } from "express";
-import { DataService } from "../DataService";
-import { AlumnoAlerta } from "../../../core/modelo/alumno/AlumnoAlerta";
-import Joi from "joi";
-import { SupabaseClientService } from "../../../core/services/supabaseClient";
 import { type PostgrestError, SupabaseClient } from "@supabase/supabase-js";
+import { Request, Response } from "express";
+import Joi from "joi";
+import { AlumnoAlerta } from "../../../core/modelo/alumno/AlumnoAlerta";
 import {
   contarAlertasPendientesPorColegio,
-  mapearAlertaDetalle,
   mapearAlertaDetalleV2,
-  mapearAlertas,
+  mapearAlertas
 } from "../../../core/services/AlertasServiceCasoUso";
-import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
 import { EmailService } from "../../../core/services/EmailService";
+import { obtenerRelacionados } from "../../../core/services/ObtenerTablasColegioCasoUso";
+import { SupabaseClientService } from "../../../core/services/supabaseClient";
+import { DataService } from "../DataService";
 const emailService = new EmailService();
 
 const AlumnoAlertaSchema = Joi.object({
@@ -74,6 +73,8 @@ export const AlumnoAlertaService = {
             alertas_prioridades(alerta_prioridad_id,nombre),
             alertas_tipos(alerta_tipo_id,nombre),
             personas(persona_id,nombres,apellidos) `,
+          orderBy: { field: "fecha_generada", ascending: false },
+          includeInactive: true, // Aseguramos que se incluyan todos los registros
         });
         respuestaEnviada = true;
         res.json(mapearAlertas(alumnoalertaAlerta_data));
