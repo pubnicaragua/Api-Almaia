@@ -433,4 +433,27 @@ export const AlumnoAlertaService = {
       res.status(500).json({ error: "Error al contar alertas" });
     }
   },
+  async obtenerAlertasPorId(req: Request, res: Response) {
+    try {
+      const { colegio_id, ...where } = req.query;
+
+      let respuestaEnviada = false;
+      const { data: alumnoalertaAlerta_data, error } = await client
+        .from("alumnos_alertas")
+        .select(`*,
+          alertas_tipos(alerta_tipo_id, nombre)`
+        )
+        .eq("alertas_tipo_alerta_tipo_id", 4)
+        .eq("activo", true);
+
+      if (error) throw error;
+
+      respuestaEnviada = true;
+      res.json(mapearAlertas(alumnoalertaAlerta_data || []));
+
+    } catch (error) {
+      console.error("Error al obtener alertas:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
+    }
+  },
 };
