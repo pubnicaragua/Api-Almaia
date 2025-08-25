@@ -4754,4 +4754,110 @@ router.delete(ruta_alumnos_diarios + '/:id', sessionAuth, AlumnoDiarioService.el
  *         descripcion: "El alumno mostró mejoría en los ejercicios prácticos"
  *         fecha: "2023-05-15T10:30:00Z"
  */
+/**
+ * @swagger
+ * /api/v1/alumnos/obtenerAlertasPorId:
+ *   get:
+ *     summary: Obtener alertas de alumnos filtradas por colegio y tipo de alerta
+ *     description: |
+ *       Retorna alertas de alumnos filtradas por colegio_id y opcionalmente por alerta_tipo_id.
+ *       - Si solo se proporciona colegio_id: retorna todas las alertas del colegio
+ *       - Si se proporcionan ambos parámetros: retorna alertas del colegio con el tipo específico
+ *     tags: [Alertas]
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: colegio_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 2
+ *         description: ID del colegio para filtrar las alertas
+ *       - in: query
+ *         name: alerta_tipo_id
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           example: 5
+ *         description: ID del tipo de alerta para filtrar (opcional)
+ *     responses:
+ *       200:
+ *         description: Lista de alertas obtenida correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/AlertaAlumnoCompleta'
+ *             example:
+ *               - alumno_alerta_id: 1344
+ *                 alumno_id: 120
+ *                 alerta_regla_id: 1
+ *                 fecha_generada: "2025-08-23T14:52:00+00:00"
+ *                 fecha_resolucion: null
+ *                 alerta_origen_id: 1
+ *                 prioridad_id: 3
+ *                 severidad_id: 3
+ *                 accion_tomada: null
+ *                 leida: false
+ *                 responsable_actual_id: null
+ *                 estado: "Pendiente"
+ *                 creado_por: 742
+ *                 actualizado_por: 742
+ *                 fecha_creacion: "2025-08-23T21:36:09.267+00:00"
+ *                 fecha_actualizacion: "2025-08-23T21:36:09.267+00:00"
+ *                 activo: true
+ *                 alertas_tipo_alerta_tipo_id: 5
+ *                 mensaje: "El buto luis rendimiento en Ciencias sociales"
+ *                 anonimo: false
+ *                 tipo_concepto: null
+ *                 alumnos:
+ *                   activo: true
+ *                   personas:
+ *                     nombres: "Bastián Ignacio"
+ *                     apellidos: "Concha Paredes"
+ *                     persona_id: 187
+ *                   alumno_id: 120
+ *                   colegio_id: 2
+ *                   url_foto_perfil: "https://randomuser.me/api/portraits/men/46.jpg"
+ *                 alertas_reglas:
+ *                   nombre: "Regla Alegría Frecuente"
+ *                   alerta_regla_id: 1
+ *                 alertas_origenes:
+ *                   nombre: "Alumno"
+ *                   alerta_origen_id: 1
+ *                 alertas_severidades:
+ *                   nombre: "Alta"
+ *                   alerta_severidad_id: 3
+ *                 alertas_prioridades:
+ *                   nombre: "Alta"
+ *                   alerta_prioridad_id: 3
+ *                 alertas_tipos:
+ *                   nombre: "Roja"
+ *                   alerta_tipo_id: 5
+ *       400:
+ *         description: Parámetros de consulta inválidos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "colegio_id debe ser un número válido"
+ *       401:
+ *         description: No autorizado - Sesión no válida
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Error interno del servidor"
+ */
+router.get("/obtenerAlertasPorId", sessionAuth, AlumnoAlertaService.obtenerAlertasPorId);
 export default router;
