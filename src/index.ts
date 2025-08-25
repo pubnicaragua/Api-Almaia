@@ -162,7 +162,7 @@ app.get('/', (req: Request, res: Response) => {
 
 const specs = swaggerJsdoc(options);
 app.use("/documentacion", swaggerUi.serve, swaggerUi.setup(specs));
-app.use('/api/v1/auth', AuthRoutes); // 🔒 Rate limit especial en Auth
+app.use('/api/v1/auth', authLimiter, AuthRoutes); // 🔒 Rate limit especial en Auth
 app.use('/api/v1/avisos', AvisosRoutes);
 app.use('/api/v1/localidades', LocalidadesRoutes);
 app.use('/api/v1/comparativa', ComparativaRoutes);
