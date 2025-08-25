@@ -4754,4 +4754,5 @@ router.delete(ruta_alumnos_diarios + '/:id', sessionAuth, AlumnoDiarioService.el
  *         descripcion: "El alumno mostró mejoría en los ejercicios prácticos"
  *         fecha: "2023-05-15T10:30:00Z"
  */
+router.get("/obtenerAlertasPorId", sessionAuth, AlumnoAlertaService.obtenerAlertasPorId);
 export default router;

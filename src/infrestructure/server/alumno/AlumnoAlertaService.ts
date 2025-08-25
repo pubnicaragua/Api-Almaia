@@ -466,4 +466,70 @@ export const AlumnoAlertaService = {
       res.status(500).json({ error: "Error al contar alertas" });
     }
   },
+  // ... existing code ...
+  async obtenerAlertasPorId(req: Request, res: Response) {
+    try {
+      const { colegio_id, alerta_tipo_id, ...where } = req.query;
+      let respuestaEnviada = false;
+      if (!alerta_tipo_id) {
+        const { data: alumnoalertaAlerta_data, error } = await client
+          .from("alumnos_alertas")
+          .select(`
+          *,
+          alumnos!inner(
+            alumno_id,
+            url_foto_perfil,
+            activo,
+            colegio_id,
+            personas(persona_id, nombres, apellidos)
+          ),
+          alertas_reglas(alerta_regla_id, nombre),
+          alertas_origenes(alerta_origen_id, nombre),
+          alertas_severidades(alerta_severidad_id, nombre),
+          alertas_prioridades(alerta_prioridad_id, nombre),
+          alertas_tipos(alerta_tipo_id, nombre)
+        `)
+          .eq("activo", true)
+          .eq("alumnos.activo", true)
+          .eq("alumnos.colegio_id", colegio_id)
+        if (error) throw error;
+
+        res.json(mapearAlertas(alumnoalertaAlerta_data || []));
+      }
+      if (colegio_id && alerta_tipo_id) {
+        const { data: alumnoalertaAlerta_data, error } = await client
+          .from("alumnos_alertas")
+          .select(`
+          *,
+          alumnos!inner(
+            alumno_id,
+            url_foto_perfil,
+            activo,
+            colegio_id,
+            personas(persona_id, nombres, apellidos)
+          ),
+          alertas_reglas(alerta_regla_id, nombre),
+          alertas_origenes(alerta_origen_id, nombre),
+          alertas_severidades(alerta_severidad_id, nombre),
+          alertas_prioridades(alerta_prioridad_id, nombre),
+          alertas_tipos(alerta_tipo_id, nombre)
+        `)
+          .eq("activo", true)
+          .eq("alumnos.activo", true)
+          .eq("alumnos.colegio_id", colegio_id)
+          .eq("alertas_tipo_alerta_tipo_id", alerta_tipo_id);
+
+        if (error) throw error;
+
+        respuestaEnviada = true;
+        res.json(mapearAlertas(alumnoalertaAlerta_data || []));
+      }
+
+
+    } catch (error) {
+      console.error("Error al obtener alertas:", error);
+      res.status(500).json({ message: "Error interno del servidor" });
+    }
+  },
+  // ... existing code ...
 };
