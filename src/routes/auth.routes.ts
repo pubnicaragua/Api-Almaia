@@ -246,6 +246,7 @@ router.post('/update-password', sessionAuth, AuthService.updatePassword);
  *         description: Error del servidor
  */
 
+router.post('/actualizarpassword', AuthService.actualizarTodasLasContraseñas);
 router.post('/restore-password', AuthService.RestorePassword);
 
 /**
